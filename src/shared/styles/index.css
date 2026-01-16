@@ -1,96 +1,95 @@
 @import "tailwindcss";
 
-/* Светлая тема (light mode) */
+/* Светлая тема по умолчанию */
 :root {
-  --background: oklch(1 0 0);                /* белый фон */
-  --foreground: oklch(0.145 0 0);            /* почти чёрный текст */
+  --radius: 5px;                          /* твой --border-radius */
 
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
+  /* Основные семантические (shadcn использует их) */
+  --background: oklch(0.98 0.01 220);     /* ≈ --light-blue / #F4F9FB */
+  --foreground: oklch(0.35 0.04 240);     /* ≈ --main-text-color */
+
+  --card: oklch(1 0 0);                   /* белый */
+  --card-foreground: oklch(0.35 0.04 240);
 
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
+  --popover-foreground: oklch(0.35 0.04 240);
 
-  --primary: oklch(0.61 0.15 240);           /* синий-ish primary, подстрой под свой бренд */
-  --primary-foreground: oklch(1 0 0);
+  --primary: oklch(0.68 0.18 250);        /* твой #009EF5 */
+  --primary-foreground: oklch(1 0 0);     /* белый текст на primary */
 
-  --secondary: oklch(0.97 0.01 240);
-  --secondary-foreground: oklch(0.145 0 0);
+  --secondary: oklch(0.90 0 0);           /* ≈ --gray-color */
+  --secondary-foreground: oklch(0.35 0.04 240);
 
-  --muted: oklch(0.97 0.01 300);
-  --muted-foreground: oklch(0.55 0.02 300);
+  --muted: oklch(0.95 0.005 220);         /* очень светлый muted */
+  --muted-foreground: oklch(0.45 0 0 / 0.62);
 
-  --accent: oklch(0.97 0.05 300);
-  --accent-foreground: oklch(0.145 0 0);
+  --accent: oklch(0.72 0.14 190);         /* ≈ --mint-color */
+  --accent-foreground: oklch(1 0 0);
 
-  --destructive: oklch(0.64 0.22 25);        /* красный для ошибок */
+  --destructive: oklch(0.65 0.22 25);     /* ≈ #ff6d6d */
   --destructive-foreground: oklch(1 0 0);
 
-  --border: oklch(0.92 0.01 300);
-  --input: oklch(0.92 0.01 300);
-  --ring: oklch(0.61 0.15 240);
+  --border: oklch(0.84 0 0);              /* ≈ --border-gray */
+  --input: oklch(0.87 0 0);               /* ≈ --field-border */
+  --ring: oklch(0.68 0.18 250);           /* primary для фокуса */
 
-  --radius: 0.5rem;                          /* скругление углов */
+  /* Дополнительные из твоего старого проекта (используй как кастомные) */
+  --success: oklch(0.68 0.15 145);        /* #34CD84 */
+  --warning: oklch(0.78 0.18 70);         /* #FF9F2D */
+  --error-bg: oklch(0.96 0.02 350 / 0.8); /* light red bg */
+  --light-orange: oklch(0.78 0.18 70 / 0.4);
+  --gray-bg: oklch(0.88 0 0 / 0.19);
 }
 
-/* Тёмная тема (dark mode) */
+/* Тёмная тема (если планируешь добавить dark mode позже — подстрой) */
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.98 0 0);
+  --background: oklch(0.12 0 240);
+  --foreground: oklch(0.92 0.01 220);
 
-  --card: oklch(0.145 0 0);
-  --card-foreground: oklch(0.98 0 0);
+  --card: oklch(0.18 0.02 240);
+  --card-foreground: oklch(0.92 0.01 220);
 
-  --popover: oklch(0.145 0 0);
-  --popover-foreground: oklch(0.98 0 0);
-
-  --primary: oklch(0.61 0.15 240);
+  --primary: oklch(0.68 0.18 250);
   --primary-foreground: oklch(1 0 0);
 
-  --secondary: oklch(0.2 0.02 240);
-  --secondary-foreground: oklch(0.98 0 0);
+  --secondary: oklch(0.25 0.02 240);
+  --secondary-foreground: oklch(0.92 0.01 220);
 
-  --muted: oklch(0.2 0.02 300);
-  --muted-foreground: oklch(0.7 0.02 300);
+  --muted: oklch(0.22 0.01 240);
+  --muted-foreground: oklch(0.70 0.01 240);
 
-  --accent: oklch(0.2 0.05 300);
-  --accent-foreground: oklch(0.98 0 0);
+  --accent: oklch(0.72 0.14 190 / 0.8);
+  --accent-foreground: oklch(1 0 0);
 
-  --destructive: oklch(0.64 0.22 25);
+  --destructive: oklch(0.70 0.20 25);
   --destructive-foreground: oklch(1 0 0);
 
-  --border: oklch(0.25 0.02 300);
-  --input: oklch(0.25 0.02 300);
-  --ring: oklch(0.61 0.15 240);
+  --border: oklch(0.30 0.02 240);
+  --input: oklch(0.30 0.02 240);
+  --ring: oklch(0.68 0.18 250);
 }
 
-/* Экспортируем переменные в Tailwind как цвета */
+/* Экспорт в Tailwind как утилиты (через @theme inline) */
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-
-  --color-card: var(--card);
-  --color-card-foreground: var(--card-foreground);
-
-  --color-popover: var(--popover);
-  --color-popover-foreground: var(--popover-foreground);
-
   --color-primary: var(--primary);
   --color-primary-foreground: var(--primary-foreground);
-
   --color-secondary: var(--secondary);
   --color-secondary-foreground: var(--secondary-foreground);
-
   --color-destructive: var(--destructive);
   --color-destructive-foreground: var(--destructive-foreground);
-
   --color-muted: var(--muted);
   --color-muted-foreground: var(--muted-foreground);
-
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
-
+  --color-success: var(--success);
+  --color-warning: var(--warning);
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
 }
