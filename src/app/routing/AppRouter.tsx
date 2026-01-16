@@ -1,13 +1,13 @@
-// src/app/routing/AppRouter.tsx
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { routes } from '../../shared/lib/routes'
+import { AuthLayout } from '../../widgets/auth-layout'
 
 export function AppRouter() {
   return (
     <BrowserRouter>
       <Routes>
         {/* Публичные страницы */}
-        <Route path={routes.login()} element={<div>Login</div>} />
+        <Route path={routes.login()} element={<AuthLayout>Login</AuthLayout>} />
         <Route path={routes.register()} element={<div>Регистрация (добавь потом)</div>} />
 
         {/* Защищённые страницы (потом добавим ProtectedRoute) */}

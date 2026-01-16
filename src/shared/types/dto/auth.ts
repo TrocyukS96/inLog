@@ -1,6 +1,4 @@
-// src/shared/types/dto/auth.ts
-
-import type { IUser } from "../../../entities/user/model/types"
+import type { User } from "../../../entities/user/model/types"
 
 export type LoginRequest = {
   username?: string
@@ -11,7 +9,7 @@ export type LoginRequest = {
 export type LoginResponse = {
   access_token: string
   refresh_token: string
-  user: IUser
+  user: User
 }
 
 export type RegistrationRequest = {
@@ -34,7 +32,6 @@ export type PasswordResetConfirmRequest = {
 
 export type PasswordResetConfirmResponse = {
   detail?: string
-  // иногда backend возвращает user или token — уточни по swagger
 }
 
 export type ConfirmEmailChangeRequest = {
