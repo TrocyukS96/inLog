@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import { SignHeader } from '../../../features/auth/ui/SignHeader'
+import { SignHeader } from '../../../features/auth/ui/SignHeader';
 
 interface AuthLayoutProps {
   children: ReactNode
@@ -9,7 +9,7 @@ export function AuthLayout({ children }: AuthLayoutProps) {
   return (
     <div
       className="min-h-screen flex flex-col bg-cover bg-center bg-no-repeat"
-      style={{ backgroundImage: "url('/images/laboratory.jpg')" }} // положи картинку в public/images
+      style={{ backgroundImage: "url('/images/laboratory.jpg')" }}
     >
       <SignHeader />
 
