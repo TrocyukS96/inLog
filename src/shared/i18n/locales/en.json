@@ -13,6 +13,11 @@
         "check-email-please": "Check your email",
         "we-sent-you-email-with-confirmation": "We sent you an email with confirmation to",
         "your-email": "your email",
+        "reset-password": "Reset password",
+        "instruction-sent-to-address": "An instruction to reset your password has been sent to your email",
+        "send-instruction-one-more-time": "Send instruction one more time",
+
+        "password-recovery": "Password recovery",
 
         "policy-agree":{
             "agree":"I agree with",
@@ -53,7 +58,9 @@
     "notice-list": {
         "resend-letter-if-didnt-get-mail": "If the letter did not arrive, check the \"Spam\" folder or click the button below",
         "send-mail-repeatedly": "Send email again",
-        "mail-sent-successfully": "Email has been sent successfully"
+        "resend-email-if-didnt-get-mail": "If the letter did not arrive, check the \"Spam\" folder or request a resend",
+        "mail-sent-successfully": "Email has been sent successfully",
+        "sent-message-to-reset-password": "A message has been sent to reset your password"
     },
 
 

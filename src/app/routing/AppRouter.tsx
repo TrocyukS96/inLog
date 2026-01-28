@@ -3,6 +3,8 @@ import { routes } from '../../shared/lib/routes'
 import LoginPage from '../../pages/auth/login'
 import RegisterPage from '../../pages/auth/register'
 import CheckEmailPage from '../../pages/auth/check-email'
+import PasswordRecoveryPage from '../../pages/auth/password-recovery'
+import RecoveryMessagePage from '../../pages/auth/recovery-message'
 
 export function AppRouter() {
   return (
@@ -12,6 +14,8 @@ export function AppRouter() {
         <Route path={routes.login()} element={<LoginPage />} />
         <Route path={routes.register()} element={<RegisterPage />} />
         <Route path={routes.checkEmail()} element={<CheckEmailPage />} />
+        <Route path={routes.passwordRecovery()} element={<PasswordRecoveryPage />} />
+        <Route path={routes.recoveryMessage()} element={<RecoveryMessagePage />} />
 
         {/* Защищённые страницы (потом добавим ProtectedRoute) */}
         <Route path={routes.dashboard()} element={<div>Dashboard</div>} />

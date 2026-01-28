@@ -13,7 +13,11 @@
         "check-email-please": "Проверьте вашу электронную почту",
         "we-sent-you-email-with-confirmation": "Мы отправили вам электронное письмо с подтверждением на",
         "your-email": "вашу электронную почту",
-        
+        "password-recovery": "Восстановление пароля",
+        "reset-password": "Сброс пароля",
+        "instruction-sent-to-address": "Инструкция по сбросу пароля отправлена на адрес",
+        "send-instruction-one-more-time": "Отправить инструкцию еще раз",
+
         "policy-agree": {
             "agree": "Согласен с",
             "terms": "Правилами",
@@ -51,8 +55,10 @@
 
     "notice-list": {
         "resend-letter-if-didnt-get-mail": "Если письмо не пришло, проверьте папку \"Спам\" или нажмите кнопку ниже",
+        "resend-email-if-didnt-get-mail": "Если письмо не пришло, проверьте папку \"Спам\" или запросите повторную отправку",
         "send-mail-repeatedly": "Отправить письмо повторно",
-        "mail-sent-successfully": "Электронное письмо успешно отправлено"
+        "mail-sent-successfully": "Электронное письмо успешно отправлено",
+        "sent-message-to-reset-password": "Отправлено электронное письмо для сброса пароля"
     },
 
 
