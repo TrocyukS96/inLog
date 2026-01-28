@@ -18,14 +18,29 @@ export const routes = {
   
     // защищённые
     dashboard: () => '/',
+
+    organizations: {
+      new: () => '/new-organization',
+      list: () => '/organizations',
+      detail: (id: string | number) => `/organizations/${id}`,
+    },
+
     projects: {
+      new: () => '/new-project',
       list: () => '/projects',
       detail: (id: string | number) => `/projects/${id}`,
       settings: (id: string | number) => `/projects/${id}/settings`,
     },
-    tasks: () => '/tasks',
+
     profile: () => '/profile',
-  
+    settings: () => '/settings',
+    scheduler: {
+      list: () => '/scheduler',
+      tasks: () => '/scheduler/tasks',
+      statuses: () => '/scheduler/statuses',
+      roadmap: () => '/scheduler/roadmap',
+    },
+
     // 404
     notFound: () => '*',
   } as const;

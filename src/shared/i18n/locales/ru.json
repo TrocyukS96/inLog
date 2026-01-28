@@ -17,7 +17,6 @@
         "reset-password": "Сброс пароля",
         "instruction-sent-to-address": "Инструкция по сбросу пароля отправлена на адрес",
         "send-instruction-one-more-time": "Отправить инструкцию еще раз",
-
         "policy-agree": {
             "agree": "Согласен с",
             "terms": "Правилами",
@@ -50,23 +49,40 @@
         "show-password": "Показать пароль",
         "forgot-password": "Забыли пароль?"
     },
-
-
-
     "notice-list": {
         "resend-letter-if-didnt-get-mail": "Если письмо не пришло, проверьте папку \"Спам\" или нажмите кнопку ниже",
         "resend-email-if-didnt-get-mail": "Если письмо не пришло, проверьте папку \"Спам\" или запросите повторную отправку",
         "send-mail-repeatedly": "Отправить письмо повторно",
         "mail-sent-successfully": "Электронное письмо успешно отправлено",
-        "sent-message-to-reset-password": "Отправлено электронное письмо для сброса пароля"
+        "sent-message-to-reset-password": "Отправлено электронное письмо для сброса пароля",
+        "log-out-success": "Вы успешно вышли из системы"
     },
-
-
     "errors": {
-        "email-not-found": "Email не найден"
+        "email-not-found": "Email не найден",
+        "error-logout": "Произошла ошибка при выходе"
+    },
+    "sidebar": {
+        "dashboard": "Главная",
+        "scheduler": "Планировщик",
+        "settings": "Настройки",
+        "tasks": "Задачи",
+        "statuses": "Статусы",
+        "roadmap": "Дорожная карта",
+        "light-mode": "Светлый режим",
+        "dark-mode": "Темный режим",
+        "system-mode": "Системный режим",
+        "log-out": "Выйти"
     },
 
 
+    "header": {
+        "dashboard": "Главная",
+        "scheduler": "Планировщик",
+        "settings": "Настройки",
+        "profile": "Профиль",
+        "user-menu": "Меню пользователя",
+        "logout": "Выйти"
+    },
 
 
     "activity": "Активность",

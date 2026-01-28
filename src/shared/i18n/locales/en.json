@@ -60,13 +60,39 @@
         "send-mail-repeatedly": "Send email again",
         "resend-email-if-didnt-get-mail": "If the letter did not arrive, check the \"Spam\" folder or request a resend",
         "mail-sent-successfully": "Email has been sent successfully",
-        "sent-message-to-reset-password": "A message has been sent to reset your password"
+        "sent-message-to-reset-password": "A message has been sent to reset your password",
+        "log-out-success": "You have been logged out successfully"
     },
 
 
     "errors": {
-        "email-not-found": "Email not found"
+        "email-not-found": "Email not found",
+        "error-logout": "An error occurred while logging out"
     },
+
+    "sidebar": {
+        "dashboard": "Dashboard",
+        "scheduler": "Scheduler",
+        "settings": "Settings",
+        "tasks": "Tasks",
+        "statuses": "Statuses",
+        "roadmap": "Roadmap",
+        "light-mode": "Light mode",
+        "dark-mode": "Dark mode",
+        "system-mode": "System mode",
+        "log-out": "Log out"
+    },
+
+
+    "header": {
+        "dashboard": "Dashboard",
+        "scheduler": "Scheduler",
+        "settings": "Settings",
+        "profile": "Profile",
+        "user-menu": "User menu",
+        "logout": "Logout"
+    },
+
 
 
 

@@ -2,10 +2,12 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { Eye, EyeOff, Loader2, Lock, Mail } from 'lucide-react'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
-import { Trans, useTranslation } from 'react-i18next'
+import { useTranslation } from 'react-i18next'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import * as z from 'zod'
 
+import { errorsHandler } from '../../../shared/lib/errors-handler'
+import { routes } from '../../../shared/lib/routes'
 import { Button } from '../../../shared/ui/button'
 import { Checkbox } from '../../../shared/ui/checkbox'
 import {
@@ -23,10 +25,8 @@ import {
     FormMessage,
 } from '../../../shared/ui/form'
 import { Input } from '../../../shared/ui/input'
-import { routes } from '../../../shared/lib/routes'
-import { errorsHandler } from '../../../shared/lib/errors-handler'
-import { TermsAndPolicy } from './TermsAndPolicy'
 import { useRegisterMutation } from '../api/authApi'
+import { TermsAndPolicy } from './TermsAndPolicy'
 
 interface RegisterFormProps {
     onSuccess?: () => void

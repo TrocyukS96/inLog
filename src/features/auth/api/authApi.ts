@@ -75,6 +75,7 @@ export const authApi = createApi({
       query: () => ({
         url: 'auth/logout/',
         method: 'POST',
+        signal: AbortSignal.timeout(10000),
       }),
       async onQueryStarted(_, { queryFulfilled }) {
         try {

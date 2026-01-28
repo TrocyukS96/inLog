@@ -1,3 +1,2 @@
-import { AuthLayout } from './ui/AuthLayout'
-
+import { AuthLayout } from './ui/AuthLayout';
 export { AuthLayout }
