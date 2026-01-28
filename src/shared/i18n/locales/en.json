@@ -10,6 +10,9 @@
         "login": "Login",
         "registration": "Registration",
         "laboratory-information-system": "Laboratory information system",
+        "check-email-please": "Check your email",
+        "we-sent-you-email-with-confirmation": "We sent you an email with confirmation to",
+        "your-email": "your email",
 
         "policy-agree":{
             "agree":"I agree with",
@@ -45,6 +48,17 @@
         "hide-password": "Hide password",
         "show-password": "Show password",
         "forgot-password": "Forgot password?"
+    },
+
+    "notice-list": {
+        "resend-letter-if-didnt-get-mail": "If the letter did not arrive, check the \"Spam\" folder or click the button below",
+        "send-mail-repeatedly": "Send email again",
+        "mail-sent-successfully": "Email has been sent successfully"
+    },
+
+
+    "errors": {
+        "email-not-found": "Email not found"
     },
 
 
