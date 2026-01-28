@@ -25,7 +25,7 @@ import {
     FormMessage,
 } from '../../../shared/ui/form'
 import { Input } from '../../../shared/ui/input'
-import { useRegisterMutation } from '../api/authApi'
+import { useRegisterMutation } from '../model/authSlice'
 import { TermsAndPolicy } from './TermsAndPolicy'
 
 interface RegisterFormProps {

@@ -15,7 +15,7 @@ import {
 } from '../../../shared/ui/form'
 import { Input } from '../../../shared/ui/input'
 
-import { useLoginMutation } from '../../../features/auth/api/authApi'
+import { useLoginMutation } from '../model/authSlice'
 import { routes } from '../../../shared/lib/routes'
 import { errorsHandler } from '../../../shared/lib/errors-handler'
 import { useState } from 'react'

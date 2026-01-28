@@ -15,7 +15,7 @@ import {
 } from '../../../shared/ui/form'
 import { Input } from '../../../shared/ui/input'
 
-import { usePasswordResetMutation } from '../api/authApi'
+import { usePasswordResetMutation } from '../model/authSlice'
 import { routes } from '../../../shared/lib/routes'
 import { errorsHandler } from '../../../shared/lib/errors-handler'
 import { toast } from 'sonner'

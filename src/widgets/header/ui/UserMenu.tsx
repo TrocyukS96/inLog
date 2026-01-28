@@ -9,7 +9,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '../../../shared/ui/dropdown-menu'
-import { useLogoutMutation } from '../../../features/auth/api/authApi'
+import { useLogoutMutation } from '../../../features/auth/model/authSlice'
 import { routes } from '../../../shared/lib/routes'
 import { toast } from 'sonner'
 import { useTranslation } from 'react-i18next'

@@ -8,6 +8,7 @@ import RecoveryMessagePage from '../../pages/auth/recovery-message'
 import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { RootLayout } from '../../widgets/root-layout'
+import DashboardPage from '../../pages/dashboard'
 
 export function AppRouter() {
   return (
@@ -23,7 +24,7 @@ export function AppRouter() {
 
         <Route element={<ProtectedRoute />}>
           <Route path={routes.dashboard()} element={<RootLayout />} >
-            <Route index element={<div>Dashboard</div>} />
+            <Route index element={<DashboardPage />} />
             <Route path={routes.scheduler.list()} element={<div>Scheduler</div>} >
               <Route index path={routes.scheduler.tasks()} element={<div>Tasks</div>} />
               <Route path={routes.scheduler.statuses()} element={<div>Statuses</div>} />

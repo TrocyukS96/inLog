@@ -13,7 +13,6 @@ import { NavLink, useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
 import { routes } from '../../shared/lib/routes'
 import { cn } from '../../shared/lib/utils'
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../../shared/ui/accordion'
 import { Button } from '../../shared/ui/button'
 import {
   DropdownMenu,
@@ -21,6 +20,12 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '../../shared/ui/dropdown-menu'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '../../shared/ui/tooltip'
 
 export function Sidebar() {
   const { t } = useTranslation()
@@ -29,7 +34,6 @@ export function Sidebar() {
 
   const handleLogout = async () => {
     try {
-      // await logout().unwrap()
       sessionStorage.clear()
       toast.success(t('notice-list.log-out-success'))
       navigate(routes.login())
@@ -39,146 +43,116 @@ export function Sidebar() {
   }
 
   return (
-    <aside className="w-64 bg-background border-r border-border flex flex-col h-screen sticky top-0">
-      <div className="p-4 border-b border-border">
-        <h1 className="text-2xl font-bold text-primary">InLog</h1>
-      </div>
+    <TooltipProvider>
+      <aside className="w-16 bg-background border-r border-border flex flex-col h-screen sticky top-0 overflow-hidden">
+        <div className="p-4 border-b border-border flex justify-center">
+          <h1 className="text-xl font-bold text-primary">IL</h1>
+        </div>
 
-      <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
-        <NavLink
-          to={routes.dashboard()}
-          className={({ isActive }) =>
-            cn(
-              "flex items-center gap-3 px-4 py-3 rounded-lg transition-colors",
-              isActive
-                ? "bg-primary/10 text-primary font-medium"
-                : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
-            )
-          }
-        >
-          <LayoutDashboard className="h-5 w-5" />
-          {t('sidebar.dashboard')}
-        </NavLink>
-        
-        <Accordion type="single" collapsible className="w-full">
-          <AccordionItem value="scheduler" className="border-none">
-            <AccordionTrigger className={cn(
-              "p-3 rounded-lg transition-colors w-full flex justify-start gap-3",
-              location.pathname.includes('/scheduler')
-                ? "bg-primary/10 text-primary"
-                : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
-            )}>
-              <FolderKanban className="h-5 w-5" />
-              {t('sidebar.scheduler')}
-            </AccordionTrigger>
-
-            <AccordionContent className=" pb-0 pt-2 flex flex-col items-center space-y-2">
+        <nav className="flex-1 flex flex-col items-center py-6 space-y-6">
+          <Tooltip>
+            <TooltipTrigger asChild>
               <NavLink
-                to={routes.scheduler.tasks()}
+                to={routes.dashboard()}
                 className={({ isActive }) =>
                   cn(
-                    " p-2 px-6 rounded-lg transition-colors",
+                    "p-2 h-7 w-7 flex items-center justify-center rounded-lg transition-colors",
                     isActive
                       ? "bg-primary/10 text-primary"
                       : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
                   )
                 }
               >
-                {t('sidebar.tasks')}
+                <LayoutDashboard className="h-5 w-5" />
               </NavLink>
+            </TooltipTrigger>
+            <TooltipContent side="right">{t('sidebar.dashboard')}</TooltipContent>
+          </Tooltip>
 
+          <Tooltip>
+            <TooltipTrigger asChild>
               <NavLink
-                to={routes.scheduler.statuses()}
+                to={routes.scheduler.list()}
                 className={({ isActive }) =>
                   cn(
-                    "p-2 px-6 rounded-lg transition-colors",
+                    "p-2 h-7 w-7 flex items-center justify-center rounded-lg transition-colors",
                     isActive
                       ? "bg-primary/10 text-primary"
                       : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
                   )
                 }
               >
-                {t('sidebar.statuses')}
+                <FolderKanban className="h-5 w-5" />
               </NavLink>
+            </TooltipTrigger>
+            <TooltipContent side="right">{t('sidebar.scheduler')}</TooltipContent>
+          </Tooltip>
 
+          <Tooltip>
+            <TooltipTrigger asChild>
               <NavLink
-                to={routes.scheduler.roadmap()}
+                to={routes.settings()}
                 className={({ isActive }) =>
                   cn(
-                    "p-2 px-6 rounded-lg transition-colors",
+                    "p-2 h-7 w-7 flex items-center justify-center rounded-lg transition-colors",
                     isActive
                       ? "bg-primary/10 text-primary"
                       : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
                   )
                 }
               >
-                {t('sidebar.roadmap')}
+                <Settings className="h-5 w-5" />
               </NavLink>
-            </AccordionContent>
-          </AccordionItem>
-        </Accordion>
+            </TooltipTrigger>
+            <TooltipContent side="right">{t('sidebar.settings')}</TooltipContent>
+          </Tooltip>
+        </nav>
 
-        <NavLink
-          to={routes.settings()}
-          className={({ isActive }) =>
-            cn(
-              "flex items-center gap-3 px-4 py-3 rounded-lg transition-colors",
-              isActive
-                ? "bg-primary/10 text-primary font-medium"
-                : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
-            )
-          }
-        >
-          <Settings className="h-5 w-5" />
-          {t('sidebar.settings')}
-        </NavLink>
+        <div className="p-4 border-t border-border flex flex-col items-center gap-4">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon" className="cursor-pointer p-2 h-7 w-7 flex items-center justify-center rounded-lg">
+                {theme === 'dark' ? (
+                  <Moon className="h-5 w-5" />
+                ) : theme === 'light' ? (
+                  <Sun className="h-5 w-5" />
+                ) : (
+                  <Monitor className="h-5 w-5" />
+                )}
+              </Button>
+            </DropdownMenuTrigger>
 
-      </nav>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => setTheme('light')}>
+                <Sun className="h-4 w-4 mr-2" />
+                {t('sidebar.light-mode')}
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setTheme('dark')}>
+                <Moon className="h-4 w-4 mr-2" />
+                {t('sidebar.dark-mode')}
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setTheme('system')}>
+                <Monitor className="h-4 w-4 mr-2" />
+                {t('sidebar.system-mode')}
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
 
-      <div className="p-4 border-t border-border space-y-2">
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" className="w-full justify-start gap-3">
-              {theme === 'dark' ? (
-                <Moon className="h-5 w-5" />
-              ) : theme === 'light' ? (
-                <Sun className="h-5 w-5" />
-              ) : (
-                <Monitor className="h-5 w-5" />
-              )}
-              {theme === 'dark'
-                ? t('sidebar.dark-mode')
-                : theme === 'light'
-                  ? t('sidebar.light-mode')
-                  : t('sidebar.system-mode')}
-            </Button>
-          </DropdownMenuTrigger>
-
-          <DropdownMenuContent align="end" className="w-48">
-            <DropdownMenuItem onClick={() => setTheme('light')}>
-              <Sun className="h-4 w-4 mr-2" />
-              {t('sidebar.light-mode')}
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => setTheme('dark')}>
-              <Moon className="h-4 w-4 mr-2" />
-              {t('sidebar.dark-mode')}
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => setTheme('system')}>
-              <Monitor className="h-4 w-4 mr-2" />
-              {t('sidebar.system-mode')}
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-
-        <Button
-          variant="ghost"
-          className="w-full justify-start gap-3 text-destructive hover:text-destructive hover:bg-destructive/10"
-          onClick={handleLogout}
-        >
-          <LogOut className="h-5 w-5" />
-          {t('sidebar.log-out')}
-        </Button>
-      </div>
-    </aside>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="text-destructive hover:text-destructive hover:bg-destructive/10 rounded-lg cursor-pointer p-2 h-7 w-7 flex items-center justify-center"
+                onClick={handleLogout}
+              >
+                <LogOut className="h-5 w-5" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side="right">{t('sidebar.log-out')}</TooltipContent>
+          </Tooltip>
+        </div>
+      </aside>
+    </TooltipProvider>
   )
 }

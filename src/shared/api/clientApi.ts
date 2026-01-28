@@ -1,18 +1,19 @@
 import { fetchBaseQuery } from "@reduxjs/toolkit/query"
+import { ACCESS_TOKEN } from "../config/constants"
 
 export const baseQuery = fetchBaseQuery({
     baseUrl: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/',
     credentials: 'include',
     prepareHeaders: (headers) => {
-      const tokenRaw = sessionStorage.getItem('ACCESS_TOKEN')
+      const tokenRaw = sessionStorage.getItem(ACCESS_TOKEN)
       const token = tokenRaw ? JSON.parse(tokenRaw) : null
+
+      console.log(token, 'token')
   
       if (token) {
         headers.set('Authorization', `Bearer ${token}`)
       }
-  
-      headers.set('Content-Type', 'application/json')
-  
+
       return headers
     },
   })

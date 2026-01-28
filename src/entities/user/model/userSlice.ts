@@ -1,6 +1,6 @@
 import { createApi } from '@reduxjs/toolkit/query/react'
 import type { User, UserFile, UserSettings } from './types'
-import type { SocialName } from '../../../shared/types/dto/enums'
+import type { SocialName } from '../../../shared/types/enums'
 import { baseQuery } from '../../../shared/api/clientApi'
 
 export const userApi = createApi({
@@ -8,14 +8,11 @@ export const userApi = createApi({
   baseQuery,
   tagTypes: ['User', 'UserSettings', 'UserDocuments'], // для инвалидации кэша
   endpoints: (builder) => ({
-
-    // 1. Получить текущего пользователя
     getMe: builder.query<User, void>({
       query: () => 'users/me/',
-      providesTags: ['User'],
+      providesTags: ['User']
     }),
 
-    // 2. Обновить пользователя
     updateMe: builder.mutation<User, Partial<User>>({
       query: (data) => ({
         url: 'users/me/',
@@ -25,7 +22,6 @@ export const userApi = createApi({
       invalidatesTags: ['User'],
     }),
 
-    // 3. Получить настройки пользователя
     getUserSettings: builder.query<UserSettings, void>({
       query: () => 'users/me/settings/',
       providesTags: ['UserSettings'],

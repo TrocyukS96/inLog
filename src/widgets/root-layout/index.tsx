@@ -1,14 +1,21 @@
-import { useEffect } from 'react'
+import { useCallback, useEffect } from 'react'
 import { Outlet, useNavigate } from 'react-router-dom'
 
 import { toast } from 'sonner'
-import { useVerifyTokenMutation } from '../../features/auth/api/authApi'
+import { useVerifyTokenMutation } from '../../features/auth/model/authSlice'
 import { ACCESS_TOKEN } from '../../shared/config/constants'
 import { routes } from '../../shared/lib/routes'
 import { Header } from '../header'
 import { Sidebar } from '../sidebar'
+import { isAuthenticated } from '../../features/auth/model/selectors'
+import { useGetMeQuery } from '../../entities/user/model/userSlice'
+import { useGetOrganizationsQuery } from '../../entities/organization/model/organizationSlice'
+import { useGetProjectsQuery } from '../../entities/project/model/projectSlice'
+import { useTranslation } from 'react-i18next'
+import { Loader2 } from 'lucide-react'
 
 export function RootLayout() {
+  const { i18n } = useTranslation()
   const navigate = useNavigate()
   const [verifyToken] = useVerifyTokenMutation()
 
@@ -22,24 +29,23 @@ export function RootLayout() {
     }
   }
 
-  // const isAuthenticated = useSelector(selectIsAuthenticated)
-
   // RTK Query: получаем текущего пользователя
-  // const { data: user, isLoading: isUserLoading, error: userError } = useGetMeQuery(undefined, {
-  //   skip: !isAuthenticated,
-  // })
+  const { data: user, isLoading: isUserLoading, error: userError} = useGetMeQuery(undefined, {
+    skip: !isAuthenticated,
+  })
 
   // // RTK Query: организации
-  // const { data: organizations, isLoading: isOrgsLoading } = useGetOrganizationsQuery(undefined, {
-  //   skip: !isAuthenticated || !user,
-  // })
+  const { data: organizations, isLoading: isOrgsLoading } = useGetOrganizationsQuery(undefined, {
+    skip: !isAuthenticated || !user,
+  })
 
   // // RTK Query: проекты первой организации
-  // const firstOrgId = organizations?.[0]?.id
-  // const { data: projects, isLoading: isProjectsLoading } = useGetProjectsQuery(
-  //   { organization: firstOrgId! },
-  //   { skip: !isAuthenticated || !firstOrgId }
-  // )
+  const firstOrgId = organizations?.[0]?.id
+
+  const { data: projects, isLoading: isProjectsLoading } = useGetProjectsQuery(
+    { organization: firstOrgId! },
+    { skip: !isAuthenticated || !firstOrgId }
+  )
 
   // Проверка авторизации и загрузка данных
   useEffect(() => {
@@ -54,48 +60,48 @@ export function RootLayout() {
   }, [navigate])
 
   // Обновление пользователя и языка
-  // useEffect(() => {
-  //   if (user) {
-  //     dispatch(userActions.setUser({ user }))
-  //     i18n.changeLanguage(user.settings.language || 'ru')
-  //   }
-  // }, [user, dispatch, i18n])
+  useEffect(() => {
+    if (user) {
+      // dispatch(setUser({ user }))
+      i18n.changeLanguage(user.settings.language || 'ru')
+    }
+  }, [user, i18n])
 
   // Логика редиректа после загрузки данных
-  // const verifyAndRedirect = useCallback(() => {
-  //   if (isUserLoading || isOrgsLoading || isProjectsLoading) return
+  const verifyAndRedirect = useCallback(() => {
+    if (isUserLoading || isOrgsLoading || isProjectsLoading) return
 
-  //   if (userError) {
-  //     toast.error('Ошибка загрузки пользователя')
-  //     navigate(routes.login())
-  //     return
-  //   }
+    if (userError) {
+      toast.error('Ошибка загрузки пользователя')
+      navigate(routes.login())
+      return
+    }
 
-  //   if (!organizations?.length) {
-  //     navigate(routes.organizations.new())
-  //     return
-  //   }
+    if (!organizations?.length) {
+      navigate(routes.organizations.new())
+      return
+    }
 
-  //   if (!projects?.length) {
-  //     navigate(routes.projects.new())
-  //     return
-  //   }
+    if (!projects?.length) {
+      navigate(routes.projects.new())
+      return
+    }
 
-  //   // Если всё ок — остаёмся на текущей странице
-  // }, [isUserLoading, isOrgsLoading, isProjectsLoading, userError, organizations, projects, navigate])
+    // Если всё ок — остаёмся на текущей странице
+  }, [isUserLoading, isOrgsLoading, isProjectsLoading, userError, organizations, projects, navigate])
 
-  // useEffect(() => {
-  //   verifyAndRedirect()
-  // }, [verifyAndRedirect])
+  useEffect(() => {
+    verifyAndRedirect()
+  }, [verifyAndRedirect])
 
   // Пока идёт загрузка — показываем лоадер
-  // if (isUserLoading || isOrgsLoading || isProjectsLoading) {
-  //   return (
-  //     <div className="min-h-screen flex items-center justify-center bg-background">
-  //       <Loader2 className="h-12 w-12 animate-spin text-primary" />
-  //     </div>
-  //   )
-  // }
+  if (isUserLoading || isOrgsLoading || isProjectsLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <Loader2 className="h-12 w-12 animate-spin text-primary" />
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen flex bg-background text-foreground">

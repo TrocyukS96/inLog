@@ -7,7 +7,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '../../../shared/ui/dropdown-menu'
-import type { LanguageType } from '../../../shared/types/dto/enums'
+import type { LanguageType } from '../../../shared/types/enums'
 
 export function AuthLangPanel() {
   const { i18n } = useTranslation()

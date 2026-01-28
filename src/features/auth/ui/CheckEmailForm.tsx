@@ -5,7 +5,7 @@ import { MailCheck, Loader2 } from 'lucide-react'
 import { Button } from '../../../shared/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../../shared/ui/card'
 
-import { useResendEmailMutation } from '../api/authApi'
+import { useResendEmailMutation } from '../model/authSlice'
 import { routes } from '../../../shared/lib/routes'
 import { toast } from 'sonner'
 import { errorsHandler } from '../../../shared/lib/errors-handler'

@@ -1,6 +1,6 @@
 import { createSelector } from "@reduxjs/toolkit"
 import type { RootState } from "../../../app/store/store"
-import { authApi } from "../api/authApi"
+import { authApi } from "./authSlice"
 import type { User } from "../../../entities/user/model/types"
 
 const selectAuthApiSlice = (state: RootState) => state[authApi.reducerPath]
@@ -19,3 +19,10 @@ export const selectAuthError = createSelector(
     selectAuthApiSlice,
     (slice) => slice.queries?.['getMe(undefined)']?.error as Error | undefined
 )
+
+export const isAuthenticated = createSelector(
+    selectAuth,
+    (user) => !!user
+)
+
+
