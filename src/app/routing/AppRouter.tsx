@@ -1,14 +1,15 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { routes } from '../../shared/lib/routes'
-import { AuthLayout } from '../../widgets/auth-layout'
+import LoginPage from '../../pages/auth/login'
+import RegisterPage from '../../pages/auth/register'
 
 export function AppRouter() {
   return (
     <BrowserRouter>
       <Routes>
         {/* Публичные страницы */}
-        <Route path={routes.login()} element={<AuthLayout>Login</AuthLayout>} />
-        <Route path={routes.register()} element={<div>Регистрация (добавь потом)</div>} />
+        <Route path={routes.login()} element={<LoginPage />} />
+        <Route path={routes.register()} element={<RegisterPage />} />
 
         {/* Защищённые страницы (потом добавим ProtectedRoute) */}
         <Route path={routes.dashboard()} element={<div>Dashboard</div>} />

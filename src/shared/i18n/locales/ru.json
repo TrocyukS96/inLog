@@ -1,4 +1,53 @@
 {
+
+    "auth": {
+        "sign-in": "Войти",
+        "sign-up": "Зарегистрироваться",
+        "sign-out": "Выйти",
+        "sign-in-with-email": "Войти с email",
+        "sign-in-with-google": "Войти с Google",
+        "sign-in-with-facebook": "Войти с Facebook",
+        "sign-in-with-apple": "Войти с Apple",
+        "login": "Логин",
+        "registration": "Регистрация",
+        "laboratory-information-system": "Система информации о лаборатории",
+
+        "policy-agree":{
+            "agree":"Согласен с",
+            "terms":"Правилами",
+            "and":"и",
+            "policy":"Политикой",
+            "rules-of-use":"Правилами пользования",
+            "privacy-policy":"Политикой конфиденциальности"
+        },
+        "agree-to-recieve-news-and-updates": "Я согласен получать новости и обновления"
+    },
+
+    "validation": {
+        "required": "Обязательное поле",
+        "email": "Введите корректный email",
+        "password": "Пароль должен содержать минимум 8 символов",
+        "password-not-match": "Пароли не совпадают",
+        "required-to-agree": "Вы должны согласиться с правилами и политикой"
+    },
+
+    "fields": {
+        "email": "Email",
+        "password": "Пароль",
+        "confirm-password": "Подтвердите пароль",
+        "name": "Имя",
+        "surname": "Фамилия",
+        "patronymic": "Отчество",
+        "phone": "Телефон",
+        "address": "Адрес",
+        "city": "Город",
+        "country": "Страна",
+        "hide-password": "Скрыть пароль",
+        "show-password": "Показать пароль",
+        "forgot-password": "Забыли пароль?"
+    },
+
+
     "activity": "Активность",
     "add": "Добавить",
     "add-first-core": "Добавьте первое ядро",

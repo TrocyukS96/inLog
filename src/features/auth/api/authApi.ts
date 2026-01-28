@@ -11,6 +11,7 @@ import type {
   // ... остальные типы — если они пока только для auth, можно держать здесь
   // или вынести в src/shared/types/response.ts / request.ts
 } from '../../../shared/types/dto/auth'   // ← подкорректируй путь, если типы уже в shared
+import { ACCESS_TOKEN, REFRESH_TOKEN } from '../../../shared/config/constants'
 
 // или если типы пока в старом месте
 // from '@/features/auth/model/types'
@@ -59,7 +60,10 @@ export const authApi = createApi({
           const { data } = await queryFulfilled
           // предполагаем, что в ответе есть access_token или token
           if (data?.access_token) {
-            sessionStorage.setItem('ACCESS_TOKEN', JSON.stringify(data.access_token))
+            sessionStorage.setItem(ACCESS_TOKEN, JSON.stringify(data.access_token))
+          }
+          if (data?.refresh_token) {
+            sessionStorage.setItem(REFRESH_TOKEN, JSON.stringify(data.refresh_token))
           }
           // можно добавить: dispatch(setUser(data.user)) если есть user в ответе
         } catch {}

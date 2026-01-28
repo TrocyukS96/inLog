@@ -1,60 +1,44 @@
-import { ChevronDown, Globe, Loader2 } from 'lucide-react'
-import { useState } from 'react'
+import { ChevronDown, Globe } from 'lucide-react'
+import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { toast } from 'sonner'
-import { useUpdateUserSettingsMutation } from '../../../entities/user/model/userSlice'
-import { errorsHandler } from '../../../shared/lib/errors-handler'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '../../../shared/ui/dropdown-menu'
-
-type Lang = 'ru' | 'en'
+import type { LanguageType } from '../../../shared/types/dto/enums'
 
 export function AuthLangPanel() {
-  const { i18n, t } = useTranslation()
-
-  const [updateUserSettings, { isLoading }] = useUpdateUserSettingsMutation()
+  const { i18n } = useTranslation()
 
   const [open, setOpen] = useState(false)
-  const currentLang = i18n.language as Lang
+  const currentLang = i18n.language as LanguageType
 
-  const changeLanguage = async (lang: Lang) => {
-      try {
-        const formData = new FormData()
-        formData.append('language', lang)
-        await updateUserSettings(formData).unwrap()
-        i18n.changeLanguage(lang)
-        toast.success(t('language-changed'))
-      } catch (err) {
-        errorsHandler(err, t)
-      } finally {
-        setOpen(false)
-      }
+  const changeLanguage = async (lang: LanguageType) => {
+    i18n.changeLanguage(lang)
+    setOpen(false)
   }
+
+  useEffect(() => {
+    document.documentElement.lang = i18n.language
+  }, [i18n.language])
 
   return (
     <DropdownMenu open={open} onOpenChange={setOpen}>
       <DropdownMenuTrigger
-        className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-white hover:bg-white/10 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-        disabled={isLoading}
+        className="cursor-pointer flex items-center gap-1.5 px-3 py-1.5 rounded-md text-white hover:bg-white/10 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
       >
         <Globe className="h-4 w-4" />
         <span className="font-medium">{currentLang.toUpperCase()}</span>
 
-        {isLoading ? (
-          <Loader2 className="h-4 w-4 animate-spin" />
-        ) : (
-          <ChevronDown className="h-4 w-4" />
-        )}
+        <ChevronDown className="h-4 w-4" />
+
       </DropdownMenuTrigger>
 
       <DropdownMenuContent align="end" className="min-w-[120px]">
         <DropdownMenuItem
           onClick={() => changeLanguage('ru')}
-          disabled={isLoading}
           className={currentLang === 'ru' ? 'bg-accent' : ''}
         >
           Русский
@@ -62,7 +46,6 @@ export function AuthLangPanel() {
 
         <DropdownMenuItem
           onClick={() => changeLanguage('en')}
-          disabled={isLoading}
           className={currentLang === 'en' ? 'bg-accent' : ''}
         >
           English

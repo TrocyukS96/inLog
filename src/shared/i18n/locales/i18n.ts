@@ -1,25 +1,31 @@
-// src/app/providers/i18n.ts
-import i18n from 'i18next';
-import { initReactI18next } from 'react-i18next';
-import LanguageDetector from 'i18next-browser-languagedetector';
+import i18n from 'i18next'
+import { initReactI18next } from 'react-i18next'
+import LanguageDetector from 'i18next-browser-languagedetector'
 
-import ru from './ru.json';
-import en from './en.json';
+import ru from './ru.json'
+import en from './en.json'
 
 i18n
-  .use(initReactI18next)          // подключаем react-i18next
-  .use(LanguageDetector)          // автоматически определяет язык браузера
+  .use(initReactI18next)
+  .use(LanguageDetector)
   .init({
     resources: {
-      ru: { translation: ru,},
-      en: { translation: en },
+      ru: {
+        translation: ru, // ← оставляем, но...
+      },
+      en: {
+        translation: en,
+      },
     },
-    fallbackLng: 'ru',              // если язык не найден — русский
-    supportedLngs: ['ru'],          // пока только русский
-    debug: import.meta.env.DEV,     // в dev-режиме показывает предупреждения
+    // ↓ Самое важное
+    ns: ['translation'],           // явно говорим, что основной namespace — translation
+    defaultNS: 'translation',      // и он используется по умолчанию
+    fallbackLng: 'ru',
+    supportedLngs: ['ru', 'en'],   // добавляем en, если хочешь потом включить
+    debug: import.meta.env.DEV,
     interpolation: {
-      escapeValue: false,           // React уже экранирует
+      escapeValue: false,
     },
-  });
+  })
 
-export default i18n;
+export default i18n
