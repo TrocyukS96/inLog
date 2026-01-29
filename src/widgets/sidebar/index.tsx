@@ -49,6 +49,9 @@ export function Sidebar() {
     if (path.includes(routes.settings.list())) {
       return location.pathname.includes(routes.settings.list())
     }
+    if (path.includes(routes.scheduler.list())) {
+      return location.pathname.includes(routes.scheduler.list())
+    }
     return location.pathname === path
   }
 

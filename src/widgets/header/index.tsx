@@ -1,29 +1,22 @@
 import { useTranslation } from 'react-i18next'
-import { UserMenu } from './ui/UserMenu'
-import { DropdownMenuContent, DropdownMenu, DropdownMenuTrigger, DropdownMenuItem } from '../../shared/ui/dropdown-menu'
 import { Button } from '../../shared/ui/button'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../../shared/ui/dropdown-menu'
+import { UserMenu } from './ui/UserMenu'
 
 export function Header() {
   const { t } = useTranslation()
 
   const getPageTitle = () => {
     const pathname = window.location.pathname
-    const pathSegments = pathname.split('/')
-    const pageTitle = pathSegments[pathSegments.length - 1]
 
-    console.log('pageTitle', pageTitle)
-
-    switch (pageTitle) {
-      case 'scheduler':
-        case 'tasks':
-        case 'statuses':
-        case 'roadmap':
-        return t('header.scheduler')
-      case 'settings':
-        return t('header.settings')
-      default:
-        return t('header.dashboard')
+    if (pathname.includes('scheduler')) {
+      return t('scheduler-page.title')
     }
+    if (pathname.includes('settings')) {
+      return t('settings-page.title')
+    }
+    return t('header.dashboard')
+   
   }
 
   return (

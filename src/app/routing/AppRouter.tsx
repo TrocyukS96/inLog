@@ -11,6 +11,7 @@ import { routes } from '../../shared/lib/routes'
 import { RootLayout } from '../../widgets/root-layout'
 import SettingsPage from '../../pages/dashboard/settings'
 import ProfilePage from '../../pages/dashboard/settings/profile'
+import SchedulerPage from '../../pages/dashboard/scheduler'
 
 export function AppRouter() {
   return (
@@ -27,15 +28,17 @@ export function AppRouter() {
         <Route element={<ProtectedRoute />}>
           <Route path={routes.dashboard()} element={<RootLayout />} >
             <Route index element={<DashboardPage />} />
-            <Route path={routes.scheduler.list()} element={<div>Scheduler</div>} >
-              <Route index path={routes.scheduler.tasks()} element={<div>Tasks</div>} />
+            <Route path={routes.scheduler.list()} element={<SchedulerPage />} >
+              <Route index element={<Navigate to={routes.scheduler.tasks()} replace />} />
+              <Route path={routes.scheduler.tasks()} element={<div>Tasks</div>} />
+              <Route path={routes.scheduler.tasksTemplate()} element={<div>Tasks Template</div>} />
               <Route path={routes.scheduler.statuses()} element={<div>Statuses</div>} />
               <Route path={routes.scheduler.roadmap()} element={<div>Roadmap</div>} />
             </Route>
             <Route path={routes.settings.list()} element={<SettingsPage />}  >
               <Route index element={<Navigate to={routes.settings.profile()} replace />} />
-              <Route index path={routes.settings.profile()} element={<ProfilePage />} />
-              <Route  path={routes.settings.organizationsAndProjects()} element={<OrganizationsAndProjectsPage />} />
+              <Route path={routes.settings.profile()} element={<ProfilePage />} />
+              <Route path={routes.settings.organizationsAndProjects()} element={<OrganizationsAndProjectsPage />} />
             </Route>
 
           </Route>

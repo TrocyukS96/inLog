@@ -72,7 +72,7 @@ export default function DashboardPage() {
               icon={<FolderKanban className="h-6 w-6" />}
               title={t('projects')}
               description="Управление проектами и кустами"
-              to={routes.projects.list()}
+              to={routes.settings.organizationsAndProjects()}
             />
             <QuickLinkCard
               icon={<ListTodo className="h-6 w-6" />}

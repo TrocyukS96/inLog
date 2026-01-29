@@ -1,5 +1,6 @@
 import { Link, useLocation } from "react-router-dom"
 import { cn } from "../../shared/lib/utils"
+import { OrgProjectSelector } from "../../features/auth/org-project-selector"
 
 interface NavItem {
   label: string
@@ -19,6 +20,10 @@ const RootPageLayout = ({ children, navItems }: { children: React.ReactNode, nav
   return (
     <div className="flex flex-row h-full">
       <nav className="w-1/4 h-[calc(100vh-64px)] p-4 border-r border-gray-200">
+        <div className="mb-4">
+        <OrgProjectSelector />
+        </div>
+        
         {navItems.map((item) => (
           <Link key={item.label} to={item.href ?? ''} onClick={item.onClick} className={cn("flex items-center gap-2 p-2 rounded-lg w-full transition-all duration-300", isActive(item.href ?? '') && 'bg-accent text-white')} >
             {item.icon && <span className={cn('w-4 h-4')} >{item.icon}</span>}

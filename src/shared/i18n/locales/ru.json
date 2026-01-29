@@ -47,7 +47,14 @@
         "country": "Страна",
         "hide-password": "Скрыть пароль",
         "show-password": "Показать пароль",
-        "forgot-password": "Забыли пароль?"
+        "forgot-password": "Забыли пароль?",
+        "full-name": "Полное название",
+        "short-name": "Краткое название",
+        "project-name": "Название проекта",
+        "enter-full-name": "Введите полное название",
+        "enter-short-name": "Введите краткое название",
+        "enter-address": "Введите адрес",
+        "enter-project-name": "Введите название проекта"
     },
     "notice-list": {
         "resend-letter-if-didnt-get-mail": "Если письмо не пришло, проверьте папку \"Спам\" или нажмите кнопку ниже",
@@ -61,13 +68,21 @@
         "error-deleting-organization": "Произошла ошибка при удалении организации",
         "error-deleting-project": "Произошла ошибка при удалении проекта",
         "confirm-delete-organization": "Вы уверены, что хотите удалить эту организацию?",
-        "confirm-delete-project": "Вы уверены, что хотите удалить этот проект?"
+        "confirm-delete-project": "Вы уверены, что хотите удалить этот проект?",
+        "organization-created": "Организация успешно создана",
+        "project-created": "Проект успешно создан"
     },
     "errors": {
         "email-not-found": "Email не найден",
         "error-logout": "Произошла ошибка при выходе",
         "error-deleting-organization": "Произошла ошибка при удалении организации",
-        "error-deleting-project": "Произошла ошибка при удалении проекта"
+        "error-deleting-project": "Произошла ошибка при удалении проекта",
+        "error-creating-organization": "Произошла ошибка при создании организации",
+        "error-creating-project": "Произошла ошибка при создании проекта",
+        "enter-full-name": "Введите полное название",
+        "enter-short-name": "Введите краткое название",
+        "enter-address": "Введите адрес",
+        "enter-project-name": "Введите название проекта"
     },
     "sidebar": {
         "dashboard": "Главная",
@@ -92,19 +107,30 @@
         "logout": "Выйти"
     },
 
-    "settings-page": {
-        "title": "Настройки",
-        "organizations-and-projects": "Организации и проекты",
-        "profile": "Профиль",
-        "organizations": "Организации",
+    "scheduler-page": {
+        "title": "Планировщик",
+        "tasks": "Задачи",
+        "tasks-template": "Шаблоны задач",
+        "tasks-statuses": "Статусы задач",
+        "roadmap": "Дорожная карта",
         "organization": "Организация",
         "projects": "Проекты",
         "new-organization": "Новая организация",
         "new-project": "Новый проект",
         "no-organizations-yet": "Нет организаций",
         "create-first-organization": "Создать первую организацию",
+        "select-organization-first": "Выберите организацию",
+        "create-organization": "Создать организацию",
+        "create-project": "Создать проект",
+        "organizations": "Организации",
         "no-projects-in-organization": "Нет проектов в организации",
-        "select-organization-first": "Выберите организацию"
+        "select-project-first": "Выберите проект"
+    },
+
+    "settings-page": {
+        "title": "Настройки",
+        "organizations-and-projects": "Организации и проекты",
+        "profile": "Профиль"
     },
 
 

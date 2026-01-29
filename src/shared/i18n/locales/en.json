@@ -52,7 +52,14 @@
         "country": "Country",
         "hide-password": "Hide password",
         "show-password": "Show password",
-        "forgot-password": "Forgot password?"
+        "forgot-password": "Forgot password?",
+        "full-name": "Full name",
+        "short-name": "Short name",
+        "project-name": "Project name",
+        "enter-full-name": "Enter full name",
+        "enter-short-name": "Enter short name",
+        "enter-address": "Enter address",
+        "enter-project-name": "Enter project name"
     },
 
     "notice-list": {
@@ -65,7 +72,9 @@
         "organization-deleted": "Organization has been deleted successfully",
         "project-deleted": "Project has been deleted successfully",
         "confirm-delete-organization": "Are you sure you want to delete the organization?",
-        "confirm-delete-project": "Are you sure you want to delete the project?"
+        "confirm-delete-project": "Are you sure you want to delete the project?",
+        "organization-created": "Organization has been created successfully",
+        "project-created": "Project has been created successfully"
     },
 
 
@@ -73,7 +82,13 @@
         "email-not-found": "Email not found",
         "error-logout": "An error occurred while logging out",
         "error-deleting-organization": "An error occurred while deleting the organization",
-        "error-deleting-project": "An error occurred while deleting the project"
+        "error-deleting-project": "An error occurred while deleting the project",
+        "error-creating-organization": "An error occurred while creating the organization",
+        "error-creating-project": "An error occurred while creating the project",
+        "enter-full-name": "Enter full name",
+        "enter-short-name": "Enter short name",
+        "enter-address": "Enter address",
+        "enter-project-name": "Enter project name"
     },
 
     "sidebar": {
@@ -81,6 +96,8 @@
         "scheduler": "Scheduler",
         "settings": "Settings",
         "tasks": "Tasks",
+        "tasks-template": "Tasks template",
+        "tasks-statuses": "Tasks statuses",
         "statuses": "Statuses",
         "roadmap": "Roadmap",
         "light-mode": "Light mode",
@@ -99,19 +116,31 @@
         "logout": "Logout"
     },
 
-    "settings-page": {
-        "title": "Settings",
-        "organizations-and-projects": "Organizations and projects",
-        "profile": "Profile",
+    "scheduler-page": {
+        "title": "Scheduler",
+        "tasks": "Tasks",
+        "tasks-template": "Tasks template",
+        "tasks-statuses": "Tasks statuses",
+        "roadmap": "Roadmap",
         "organization": "Organization",
-        "organizations": "Organizations",
         "projects": "Projects",
         "new-organization": "New organization",
         "new-project": "New project",
         "no-organizations-yet": "No organizations yet",
         "create-first-organization": "Create first organization",
+        "select-organization-first": "Select organization first",
+        "create-organization": "Create organization",
+        "create-project": "Create project",
+        "organizations": "Organizations",
         "no-projects-in-organization": "No projects in organization",
-        "select-organization-first": "Select organization first"
+        "select-project-first": "Select project first"
+    },
+
+    "settings-page": {
+        "title": "Settings",
+        "organizations-and-projects": "Organizations and projects",
+        "profile": "Profile"
+
     },
 
 

@@ -33,6 +33,7 @@ export const routes = {
     scheduler: {
       list: () => '/scheduler',
       tasks: () => '/scheduler/tasks',
+      tasksTemplate: () => '/scheduler/tasks-template',
       statuses: () => '/scheduler/statuses',
       roadmap: () => '/scheduler/roadmap',
     },
