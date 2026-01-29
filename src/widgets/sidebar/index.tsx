@@ -9,7 +9,7 @@ import {
 } from 'lucide-react'
 import { useTheme } from 'next-themes'
 import { useTranslation } from 'react-i18next'
-import { NavLink, useNavigate } from 'react-router-dom'
+import { NavLink, useLocation, useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
 import { routes } from '../../shared/lib/routes'
 import { cn } from '../../shared/lib/utils'
@@ -25,12 +25,15 @@ import {
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from '../../shared/ui/tooltip'
+} from '../../shared/ui/tooltip';
+import { LogoIcon } from '../../shared/ui/icons/LogoIcon'
+
 
 export function Sidebar() {
   const { t } = useTranslation()
   const { theme, setTheme } = useTheme()
   const navigate = useNavigate()
+  const location = useLocation()
 
   const handleLogout = async () => {
     try {
@@ -42,11 +45,24 @@ export function Sidebar() {
     }
   }
 
+  const getIsActive = (path: string) => {
+    if (path.includes(routes.settings.list())) {
+      return location.pathname.includes(routes.settings.list())
+    }
+    return location.pathname === path
+  }
+
+  const getLinkClassName = (path: string) => {
+    return cn(`p-2 h-9 w-9 flex items-center justify-center rounded-lg transition-colors hover:bg-accent hover:text-accent-foreground ${getIsActive(path) ? 'bg-accent' : ''}`)
+  }
+
   return (
     <TooltipProvider>
-      <aside className="w-16 bg-background border-r border-border flex flex-col h-screen sticky top-0 overflow-hidden">
-        <div className="p-4 border-b border-border flex justify-center">
-          <h1 className="text-xl font-bold text-primary">IL</h1>
+      <aside className="w-16 bg-[#364f6b] border-r border-border flex flex-col h-screen sticky top-0 overflow-hidden">
+        <div className="p-2 border-b border-border flex justify-center">
+          <h1 className="text-xl font-bold text-primary">
+            <LogoIcon className="text-white"  />
+          </h1>
         </div>
 
         <nav className="flex-1 flex flex-col items-center py-6 space-y-6">
@@ -54,16 +70,9 @@ export function Sidebar() {
             <TooltipTrigger asChild>
               <NavLink
                 to={routes.dashboard()}
-                className={({ isActive }) =>
-                  cn(
-                    "p-2 h-7 w-7 flex items-center justify-center rounded-lg transition-colors",
-                    isActive
-                      ? "bg-primary/10 text-primary"
-                      : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
-                  )
-                }
+                className={getLinkClassName(routes.dashboard())}
               >
-                <LayoutDashboard className="h-5 w-5" />
+                <LayoutDashboard className={`h-7 w-7 text-white`} />
               </NavLink>
             </TooltipTrigger>
             <TooltipContent side="right">{t('sidebar.dashboard')}</TooltipContent>
@@ -73,16 +82,9 @@ export function Sidebar() {
             <TooltipTrigger asChild>
               <NavLink
                 to={routes.scheduler.list()}
-                className={({ isActive }) =>
-                  cn(
-                    "p-2 h-7 w-7 flex items-center justify-center rounded-lg transition-colors",
-                    isActive
-                      ? "bg-primary/10 text-primary"
-                      : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
-                  )
-                }
+                className={getLinkClassName(routes.scheduler.list())}
               >
-                <FolderKanban className="h-5 w-5" />
+                <FolderKanban className="h-7 w-7 text-white" />
               </NavLink>
             </TooltipTrigger>
             <TooltipContent side="right">{t('sidebar.scheduler')}</TooltipContent>
@@ -91,17 +93,10 @@ export function Sidebar() {
           <Tooltip>
             <TooltipTrigger asChild>
               <NavLink
-                to={routes.settings()}
-                className={({ isActive }) =>
-                  cn(
-                    "p-2 h-7 w-7 flex items-center justify-center rounded-lg transition-colors",
-                    isActive
-                      ? "bg-primary/10 text-primary"
-                      : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
-                  )
-                }
+                to={routes.settings.list()}
+                className={getLinkClassName(routes.settings.list())}
               >
-                <Settings className="h-5 w-5" />
+                <Settings className="h-9 w-9 text-white" />
               </NavLink>
             </TooltipTrigger>
             <TooltipContent side="right">{t('sidebar.settings')}</TooltipContent>
@@ -111,28 +106,28 @@ export function Sidebar() {
         <div className="p-4 border-t border-border flex flex-col items-center gap-4">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="cursor-pointer p-2 h-7 w-7 flex items-center justify-center rounded-lg">
+              <Button variant="ghost" size="icon" className="cursor-pointer p-2 h-9 w-9 flex items-center justify-center rounded-lg">
                 {theme === 'dark' ? (
-                  <Moon className="h-5 w-5" />
+                  <Moon className="h-7 w-7 text-white" />
                 ) : theme === 'light' ? (
-                  <Sun className="h-5 w-5" />
+                  <Sun className="h-7 w-7 text-white" />
                 ) : (
-                  <Monitor className="h-5 w-5" />
+                  <Monitor className="h-7 w-7" />
                 )}
               </Button>
             </DropdownMenuTrigger>
 
             <DropdownMenuContent align="end">
               <DropdownMenuItem onClick={() => setTheme('light')}>
-                <Sun className="h-4 w-4 mr-2" />
+                <Sun className="h-4 w-4 mr-2 text-white" />
                 {t('sidebar.light-mode')}
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => setTheme('dark')}>
-                <Moon className="h-4 w-4 mr-2" />
+                <Moon className="h-4 w-4 mr-2 text-white" />
                 {t('sidebar.dark-mode')}
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => setTheme('system')}>
-                <Monitor className="h-4 w-4 mr-2" />
+                <Monitor className="h-4 w-4 mr-2 text-white" />
                 {t('sidebar.system-mode')}
               </DropdownMenuItem>
             </DropdownMenuContent>
@@ -143,10 +138,10 @@ export function Sidebar() {
               <Button
                 variant="ghost"
                 size="icon"
-                className="text-destructive hover:text-destructive hover:bg-destructive/10 rounded-lg cursor-pointer p-2 h-7 w-7 flex items-center justify-center"
+                className="text-destructive hover:text-destructive hover:bg-accent rounded-lg cursor-pointer p-2 h-7 w-7 flex items-center justify-center"
                 onClick={handleLogout}
               >
-                <LogOut className="h-5 w-5" />
+                <LogOut className="h-7 w-7 text-white" />
               </Button>
             </TooltipTrigger>
             <TooltipContent side="right">{t('sidebar.log-out')}</TooltipContent>

@@ -55,11 +55,19 @@
         "send-mail-repeatedly": "Отправить письмо повторно",
         "mail-sent-successfully": "Электронное письмо успешно отправлено",
         "sent-message-to-reset-password": "Отправлено электронное письмо для сброса пароля",
-        "log-out-success": "Вы успешно вышли из системы"
+        "log-out-success": "Вы успешно вышли из системы",
+        "organization-deleted": "Организация успешно удалена",
+        "project-deleted": "Проект успешно удален",
+        "error-deleting-organization": "Произошла ошибка при удалении организации",
+        "error-deleting-project": "Произошла ошибка при удалении проекта",
+        "confirm-delete-organization": "Вы уверены, что хотите удалить эту организацию?",
+        "confirm-delete-project": "Вы уверены, что хотите удалить этот проект?"
     },
     "errors": {
         "email-not-found": "Email не найден",
-        "error-logout": "Произошла ошибка при выходе"
+        "error-logout": "Произошла ошибка при выходе",
+        "error-deleting-organization": "Произошла ошибка при удалении организации",
+        "error-deleting-project": "Произошла ошибка при удалении проекта"
     },
     "sidebar": {
         "dashboard": "Главная",
@@ -82,6 +90,21 @@
         "profile": "Профиль",
         "user-menu": "Меню пользователя",
         "logout": "Выйти"
+    },
+
+    "settings-page": {
+        "title": "Настройки",
+        "organizations-and-projects": "Организации и проекты",
+        "profile": "Профиль",
+        "organizations": "Организации",
+        "organization": "Организация",
+        "projects": "Проекты",
+        "new-organization": "Новая организация",
+        "new-project": "Новый проект",
+        "no-organizations-yet": "Нет организаций",
+        "create-first-organization": "Создать первую организацию",
+        "no-projects-in-organization": "Нет проектов в организации",
+        "select-organization-first": "Выберите организацию"
     },
 
 

@@ -51,13 +51,13 @@ export function UserMenu() {
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuItem asChild>
-          <Link to={routes.profile()} className="flex items-center gap-2">
+          <Link to={routes.settings.profile()} className="flex items-center gap-2">
             <User className="h-4 w-4" />
             {t('header.profile')}
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
-          <Link to={routes.settings()} className="flex items-center gap-2">
+          <Link to={routes.settings.list()} className="flex items-center gap-2">
             <Settings className="h-4 w-4" />
             {t('header.settings')}
           </Link>

@@ -28,17 +28,19 @@ export const routes = {
     projects: {
       new: () => '/new-project',
       list: () => '/projects',
-      detail: (id: string | number) => `/projects/${id}`,
-      settings: (id: string | number) => `/projects/${id}/settings`,
     },
 
-    profile: () => '/profile',
-    settings: () => '/settings',
     scheduler: {
       list: () => '/scheduler',
       tasks: () => '/scheduler/tasks',
       statuses: () => '/scheduler/statuses',
       roadmap: () => '/scheduler/roadmap',
+    },
+
+    settings: {
+      list: () => '/settings',
+      profile: () => '/settings/profile',
+      organizationsAndProjects: () => '/settings/organizations-and-projects',
     },
 
     // 404

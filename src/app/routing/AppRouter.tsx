@@ -1,14 +1,16 @@
-import { BrowserRouter, Routes, Route, Outlet } from 'react-router-dom'
-import { routes } from '../../shared/lib/routes'
-import LoginPage from '../../pages/auth/login'
-import RegisterPage from '../../pages/auth/register'
+import { useEffect } from 'react'
+import { BrowserRouter, Navigate, Outlet, Route, Routes, useNavigate } from 'react-router-dom'
 import CheckEmailPage from '../../pages/auth/check-email'
+import LoginPage from '../../pages/auth/login'
 import PasswordRecoveryPage from '../../pages/auth/password-recovery'
 import RecoveryMessagePage from '../../pages/auth/recovery-message'
-import { useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { RootLayout } from '../../widgets/root-layout'
+import RegisterPage from '../../pages/auth/register'
 import DashboardPage from '../../pages/dashboard'
+import OrganizationsAndProjectsPage from '../../pages/dashboard/settings/ogranizations-and-projects'
+import { routes } from '../../shared/lib/routes'
+import { RootLayout } from '../../widgets/root-layout'
+import SettingsPage from '../../pages/dashboard/settings'
+import ProfilePage from '../../pages/dashboard/settings/profile'
 
 export function AppRouter() {
   return (
@@ -20,7 +22,7 @@ export function AppRouter() {
         <Route path={routes.checkEmail()} element={<CheckEmailPage />} />
         <Route path={routes.passwordRecovery()} element={<PasswordRecoveryPage />} />
         <Route path={routes.recoveryMessage()} element={<RecoveryMessagePage />} />
-    
+
 
         <Route element={<ProtectedRoute />}>
           <Route path={routes.dashboard()} element={<RootLayout />} >
@@ -30,7 +32,11 @@ export function AppRouter() {
               <Route path={routes.scheduler.statuses()} element={<div>Statuses</div>} />
               <Route path={routes.scheduler.roadmap()} element={<div>Roadmap</div>} />
             </Route>
-            <Route path={routes.settings()} element={<div>Settings</div>} />
+            <Route path={routes.settings.list()} element={<SettingsPage />}  >
+              <Route index element={<Navigate to={routes.settings.profile()} replace />} />
+              <Route index path={routes.settings.profile()} element={<ProfilePage />} />
+              <Route  path={routes.settings.organizationsAndProjects()} element={<OrganizationsAndProjectsPage />} />
+            </Route>
 
           </Route>
         </Route>

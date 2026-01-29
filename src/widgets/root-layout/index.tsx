@@ -107,10 +107,10 @@ export function RootLayout() {
     <div className="min-h-screen flex bg-background text-foreground">
       <Sidebar />
 
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col h-full">
         <Header />
 
-        <main className="flex-1 overflow-auto p-6">
+        <main className="flex-1 h-full">
           <Outlet />
         </main>
       </div>
