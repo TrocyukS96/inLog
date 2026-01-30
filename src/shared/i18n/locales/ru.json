@@ -32,7 +32,8 @@
         "email": "Введите корректный email",
         "password": "Пароль должен содержать минимум 8 символов",
         "password-not-match": "Пароли не совпадают",
-        "required-to-agree": "Вы должны согласиться с правилами и политикой"
+        "required-to-agree": "Вы должны согласиться с правилами и политикой",
+        "enter-name": "Введите название"
     },
     "fields": {
         "email": "Email",
@@ -54,7 +55,17 @@
         "enter-full-name": "Введите полное название",
         "enter-short-name": "Введите краткое название",
         "enter-address": "Введите адрес",
-        "enter-project-name": "Введите название проекта"
+        "enter-project-name": "Введите название проекта",
+        "enter-task-name": "Введите название задачи",
+        "enter-template-name": "Введите название шаблона",
+        "task-name": "Название задачи",
+        "priority": "Приоритет",
+        "low": "Низкий",
+        "medium": "Средний",
+        "important": "Важный",
+        "critical": "Критический",
+        "select-priority": "Выберите приоритет",
+        "create": "Создать"
     },
     "notice-list": {
         "resend-letter-if-didnt-get-mail": "Если письмо не пришло, проверьте папку \"Спам\" или нажмите кнопку ниже",
@@ -70,7 +81,10 @@
         "confirm-delete-organization": "Вы уверены, что хотите удалить эту организацию?",
         "confirm-delete-project": "Вы уверены, что хотите удалить этот проект?",
         "organization-created": "Организация успешно создана",
-        "project-created": "Проект успешно создан"
+        "project-created": "Проект успешно создан",
+        "task-created": "Задача успешно создана",
+        "task-deleted": "Задача успешно удалена",
+        "template-created-from-task": "Шаблон успешно создан из задачи"
     },
     "errors": {
         "email-not-found": "Email не найден",
@@ -82,7 +96,10 @@
         "enter-full-name": "Введите полное название",
         "enter-short-name": "Введите краткое название",
         "enter-address": "Введите адрес",
-        "enter-project-name": "Введите название проекта"
+        "enter-project-name": "Введите название проекта",
+        "select-project-first": "Сначала выберите проект",
+        "error-creating-task": "Произошла ошибка при создании задачи",
+        "error-deleting-task": "Произошла ошибка при удалении задачи"
     },
     "sidebar": {
         "dashboard": "Главная",
@@ -131,6 +148,21 @@
         "title": "Настройки",
         "organizations-and-projects": "Организации и проекты",
         "profile": "Профиль"
+    },
+
+    "tasks-page": {
+        "title": "Задачи",
+        "create-task": "Создать задачу",
+        "filters": "Фильтры",
+        "delete-task": "Удалить задачу",
+        "create-template": "Создать шаблон",
+        "edit-task": "Редактировать задачу",
+        "edit-template": "Редактировать шаблон",
+        "tasks-absent-message": "Задачи не найдены"
+    },
+
+    "common": {
+        "load-more": "Загрузить больше"
     },
 
 

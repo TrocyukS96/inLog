@@ -7,13 +7,13 @@ import { useSearchParams } from 'react-router-dom'
 import { toast } from 'sonner'
 import * as z from 'zod'
 
-import { useGetOrganizationsQuery } from '../../../../entities/organization/model/organizationSlice'
-import { useGetProjectsQuery } from '../../../../entities/project/model/projectSlice'
-import { Button } from '../../../../shared/ui/button'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '../../../../shared/ui/dialog'
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '../../../../shared/ui/form'
-import { Input } from '../../../../shared/ui/input'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../../../shared/ui/select'
+import { useGetOrganizationsQuery } from '../../../entities/organization/model/organizationSlice'
+import { useGetProjectsQuery } from '../../../entities/project/model/projectSlice'
+import { Button } from '../../../shared/ui/button'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '../../../shared/ui/dialog'
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '../../../shared/ui/form'
+import { Input } from '../../../shared/ui/input'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../../shared/ui/select'
 
 export default function OrgProjectSelector() {
     const { t } = useTranslation()

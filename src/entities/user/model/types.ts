@@ -119,9 +119,7 @@ export interface Avatar {
     avatar?: Avatar
   }
   
-  /**
-   * Файл пользователя (документы, сканы и т.д.)
-   */
+
   export interface UserFile {
     id: number
     name: string

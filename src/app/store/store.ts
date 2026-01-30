@@ -4,6 +4,7 @@ import { authApi } from '../../features/auth/model/authSlice'
 import { userApi } from '../../entities/user/model/userSlice'
 import { organizationApi } from '../../entities/organization/model/organizationSlice'
 import { projectApi } from '../../entities/project/model/projectSlice'
+import { taskApi } from '../../entities/task/model/taskSlice'
 
 export const store = configureStore({
   reducer: {
@@ -11,6 +12,7 @@ export const store = configureStore({
     [userApi.reducerPath]: userApi.reducer,
     [organizationApi.reducerPath]: organizationApi.reducer,
     [projectApi.reducerPath]: projectApi.reducer,
+    [taskApi.reducerPath]: taskApi.reducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware().concat(
@@ -18,6 +20,7 @@ export const store = configureStore({
       userApi.middleware,
       organizationApi.middleware,
       projectApi.middleware,
+      taskApi.middleware,
     ),
 })
 

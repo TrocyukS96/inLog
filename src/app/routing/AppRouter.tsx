@@ -12,6 +12,7 @@ import { RootLayout } from '../../widgets/root-layout'
 import SettingsPage from '../../pages/dashboard/settings'
 import ProfilePage from '../../pages/dashboard/settings/profile'
 import SchedulerPage from '../../pages/dashboard/scheduler'
+import TaskPage from '../../pages/dashboard/scheduler/tasks'
 
 export function AppRouter() {
   return (
@@ -30,7 +31,7 @@ export function AppRouter() {
             <Route index element={<DashboardPage />} />
             <Route path={routes.scheduler.list()} element={<SchedulerPage />} >
               <Route index element={<Navigate to={routes.scheduler.tasks()} replace />} />
-              <Route path={routes.scheduler.tasks()} element={<div>Tasks</div>} />
+              <Route path={routes.scheduler.tasks()} element={<TaskPage />} />
               <Route path={routes.scheduler.tasksTemplate()} element={<div>Tasks Template</div>} />
               <Route path={routes.scheduler.statuses()} element={<div>Statuses</div>} />
               <Route path={routes.scheduler.roadmap()} element={<div>Roadmap</div>} />

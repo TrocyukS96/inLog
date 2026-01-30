@@ -35,7 +35,8 @@
         "email": "Enter a valid email",
         "password": "Password must be at least 8 characters long",
         "password-not-match": "Passwords do not match",
-        "required-to-agree": "You must agree to the terms and privacy policy"
+        "required-to-agree": "You must agree to the terms and privacy policy",
+        "enter-name": "Enter name"
         
     },
 
@@ -59,7 +60,17 @@
         "enter-full-name": "Enter full name",
         "enter-short-name": "Enter short name",
         "enter-address": "Enter address",
-        "enter-project-name": "Enter project name"
+        "enter-project-name": "Enter project name",
+        "enter-task-name": "Enter task name",
+        "enter-template-name": "Enter template name",
+        "task-name": "Task name",
+        "priority": "Priority",
+        "low": "Low",
+        "medium": "Medium",
+        "important": "Important",
+        "critical": "Critical",
+        "select-priority": "Select priority",
+        "create": "Create"
     },
 
     "notice-list": {
@@ -74,7 +85,10 @@
         "confirm-delete-organization": "Are you sure you want to delete the organization?",
         "confirm-delete-project": "Are you sure you want to delete the project?",
         "organization-created": "Organization has been created successfully",
-        "project-created": "Project has been created successfully"
+        "project-created": "Project has been created successfully",
+        "task-created": "Task has been created successfully",
+        "task-deleted": "Task has been deleted successfully",
+        "template-created-from-task": "Template has been created from task"
     },
 
 
@@ -88,7 +102,10 @@
         "enter-full-name": "Enter full name",
         "enter-short-name": "Enter short name",
         "enter-address": "Enter address",
-        "enter-project-name": "Enter project name"
+        "enter-project-name": "Enter project name",
+        "select-project-first": "Select project first",
+        "error-creating-task": "An error occurred while creating the task",
+        "error-deleting-task": "An error occurred while deleting the task"
     },
 
     "sidebar": {
@@ -140,9 +157,23 @@
         "title": "Settings",
         "organizations-and-projects": "Organizations and projects",
         "profile": "Profile"
-
     },
 
+    "tasks-page": {
+        "title": "Tasks",
+        "create-task": "Create task",
+        "delete-task": "Delete task",
+        "create-template": "Create template",
+        "edit-task": "Edit task",
+        "edit-template": "Edit template",
+        "filters": "Filters",
+        "tasks-absent-message": "Tasks not found"
+    },
+
+
+    "common": {
+        "load-more": "Load more"
+    },
 
 
     "activity":"Activity",

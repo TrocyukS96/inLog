@@ -1,6 +1,6 @@
 import { Link, useLocation } from "react-router-dom"
 import { cn } from "../../shared/lib/utils"
-import { OrgProjectSelector } from "../../features/auth/org-project-selector"
+import { OrgProjectSelector } from "../../features/org-project-selector"
 
 interface NavItem {
   label: string
