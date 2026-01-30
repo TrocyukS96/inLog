@@ -155,7 +155,7 @@ export function RegisterForm({ onSuccess }: RegisterFormProps = {}) {
                                                 disabled={isLoading}
                                                 aria-label={showPassword1 ? t('fields.hide-password') : t('fields.show-password')}
                                             >
-                                                {showPassword1 ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                                                {showPassword1 ? <Eye className="h-5 w-5" /> : <EyeOff className="h-5 w-5" />}
                                             </button>
                                         </div>
                                     </FormControl>
@@ -188,7 +188,7 @@ export function RegisterForm({ onSuccess }: RegisterFormProps = {}) {
                                                 disabled={isLoading}
                                                 aria-label={showPassword2 ? t('fields.hide-password') : t('fields.show-password')}
                                             >
-                                                {showPassword2 ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                                                {showPassword2 ? <Eye className="h-5 w-5" /> : <EyeOff className="h-5 w-5" />}
                                             </button>
                                         </div>
                                     </FormControl>
