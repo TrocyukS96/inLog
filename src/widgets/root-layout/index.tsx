@@ -1,6 +1,5 @@
 import { useCallback, useEffect } from 'react'
 import { Outlet, useNavigate } from 'react-router-dom'
-
 import { toast } from 'sonner'
 import { useVerifyTokenMutation } from '../../features/auth/model/authSlice'
 import { ACCESS_TOKEN } from '../../shared/config/constants'
@@ -15,7 +14,7 @@ import { useTranslation } from 'react-i18next'
 import { Loader2 } from 'lucide-react'
 
 export function RootLayout() {
-  const { i18n } = useTranslation()
+  const { i18n, t} = useTranslation()
   const navigate = useNavigate()
   const [verifyToken] = useVerifyTokenMutation()
 
@@ -23,23 +22,20 @@ export function RootLayout() {
     try {
        await verifyToken({ token }).unwrap()
     } catch (error) {
-        toast.error('Ошибка при проверке токена')
+        toast.error(t('errors.error-loading-token'))
         sessionStorage.removeItem(ACCESS_TOKEN)
         navigate(routes.login())
     }
   }
 
-  // RTK Query: получаем текущего пользователя
   const { data: user, isLoading: isUserLoading, error: userError} = useGetMeQuery(undefined, {
     skip: !isAuthenticated,
   })
 
-  // // RTK Query: организации
   const { data: organizations, isLoading: isOrgsLoading } = useGetOrganizationsQuery(undefined, {
     skip: !isAuthenticated || !user,
   })
 
-  // // RTK Query: проекты первой организации
   const firstOrgId = organizations?.[0]?.id
 
   const { data: projects, isLoading: isProjectsLoading } = useGetProjectsQuery(
@@ -47,7 +43,6 @@ export function RootLayout() {
     { skip: !isAuthenticated || !firstOrgId }
   )
 
-  // Проверка авторизации и загрузка данных
   useEffect(() => {
     const token = sessionStorage.getItem(ACCESS_TOKEN)
 
@@ -57,22 +52,19 @@ export function RootLayout() {
     }
     fetchVerifyToken(JSON.parse(token))
     
-  }, [navigate])
+  }, [])
 
-  // Обновление пользователя и языка
   useEffect(() => {
     if (user) {
-      // dispatch(setUser({ user }))
       i18n.changeLanguage(user.settings.language || 'ru')
     }
   }, [user, i18n])
 
-  // Логика редиректа после загрузки данных
   const verifyAndRedirect = useCallback(() => {
     if (isUserLoading || isOrgsLoading || isProjectsLoading) return
 
     if (userError) {
-      toast.error('Ошибка загрузки пользователя')
+      toast.error(t('errors.error-loading-user'))
       navigate(routes.login())
       return
     }
@@ -87,14 +79,12 @@ export function RootLayout() {
       return
     }
 
-    // Если всё ок — остаёмся на текущей странице
   }, [isUserLoading, isOrgsLoading, isProjectsLoading, userError, organizations, projects, navigate])
 
   useEffect(() => {
     verifyAndRedirect()
   }, [verifyAndRedirect])
 
-  // Пока идёт загрузка — показываем лоадер
   if (isUserLoading || isOrgsLoading || isProjectsLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">

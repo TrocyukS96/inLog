@@ -105,7 +105,11 @@
         "enter-project-name": "Enter project name",
         "select-project-first": "Select project first",
         "error-creating-task": "An error occurred while creating the task",
-        "error-deleting-task": "An error occurred while deleting the task"
+        "error-deleting-task": "An error occurred while deleting the task",
+        "error-loading-user": "An error occurred while loading the user",
+        "error-loading-organizations": "An error occurred while loading the organizations",
+        "error-loading-projects": "An error occurred while loading the projects",
+        "error-loading-token": "An error occurred while loading the token"
     },
 
     "sidebar": {

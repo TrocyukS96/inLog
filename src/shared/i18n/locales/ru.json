@@ -99,7 +99,10 @@
         "enter-project-name": "Введите название проекта",
         "select-project-first": "Сначала выберите проект",
         "error-creating-task": "Произошла ошибка при создании задачи",
-        "error-deleting-task": "Произошла ошибка при удалении задачи"
+        "error-deleting-task": "Произошла ошибка при удалении задачи",
+        "error-loading-user": "Произошла ошибка при загрузке пользователя",
+        "error-loading-organizations": "Произошла ошибка при загрузке организаций",
+        "error-loading-projects": "Произошла ошибка при загрузке проектов"
     },
     "sidebar": {
         "dashboard": "Главная",
