@@ -31,7 +31,7 @@ import { LogoIcon } from '../../shared/ui/icons/LogoIcon'
 
 
 export function Sidebar() {
-  const { t, i18n } = useTranslation()
+  const { t } = useTranslation()
   const { theme, setTheme } = useTheme()
   const navigate = useNavigate()
   const location = useLocation()
