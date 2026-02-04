@@ -5,7 +5,8 @@ import {
   Monitor,
   Moon,
   Settings,
-  Sun
+  Sun,
+  TowerControl
 } from 'lucide-react'
 import { useTheme } from 'next-themes'
 import { useTranslation } from 'react-i18next'
@@ -30,7 +31,7 @@ import { LogoIcon } from '../../shared/ui/icons/LogoIcon'
 
 
 export function Sidebar() {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const { theme, setTheme } = useTheme()
   const navigate = useNavigate()
   const location = useLocation()
@@ -64,7 +65,7 @@ export function Sidebar() {
       <aside className="w-16 bg-[#364f6b] border-r border-border flex flex-col h-screen sticky top-0 overflow-hidden">
         <div className="p-2 border-b border-border flex justify-center">
           <h1 className="text-xl font-bold text-primary">
-            <LogoIcon className="text-white"  />
+            <LogoIcon className="text-white" />
           </h1>
         </div>
 
@@ -103,6 +104,17 @@ export function Sidebar() {
               </NavLink>
             </TooltipTrigger>
             <TooltipContent side="right">{t('sidebar.settings')}</TooltipContent>
+          </Tooltip>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <NavLink
+                to={routes.geoMechanics.list()}
+                className={getLinkClassName(routes.geoMechanics.list())}
+              >
+                <TowerControl className="h-9 w-9 text-white" />
+              </NavLink>
+            </TooltipTrigger>
+            <TooltipContent side="right">{t('sidebar.geo-mechanics')}</TooltipContent>
           </Tooltip>
         </nav>
 

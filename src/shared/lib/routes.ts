@@ -45,6 +45,10 @@ export const routes = {
       organizationsAndProjects: () => '/settings/organizations-and-projects',
     },
 
+    geoMechanics: {
+      list: () => '/geo-mechanics',
+    },
+
     // 404
     notFound: () => '*',
   } as const;

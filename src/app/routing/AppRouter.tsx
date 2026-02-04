@@ -13,6 +13,7 @@ import SettingsPage from '../../pages/dashboard/settings'
 import ProfilePage from '../../pages/dashboard/settings/profile'
 import SchedulerPage from '../../pages/dashboard/scheduler'
 import TaskPage from '../../pages/dashboard/scheduler/tasks'
+import GeoMechanicsPage from '../../pages/dashboard/geo-mechanics'
 
 export function AppRouter() {
   return (
@@ -41,7 +42,7 @@ export function AppRouter() {
               <Route path={routes.settings.profile()} element={<ProfilePage />} />
               <Route path={routes.settings.organizationsAndProjects()} element={<OrganizationsAndProjectsPage />} />
             </Route>
-
+            <Route path={routes.geoMechanics.list()} element={<GeoMechanicsPage />} />  
           </Route>
         </Route>
 
