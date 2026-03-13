@@ -8,17 +8,19 @@ import { Input } from '../../../shared/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../../shared/ui/select'
 import { Button } from '../../../shared/ui/button'
 import type { Task } from '../../../entities/task/model/types'
+import { priorityTypes } from '../../../shared/config/constants'
 
 interface Props {
+  isTemplates: boolean
   onCreate: (name: string, priority: Task['priority']) => void
 }
 
-const CreateTaskForm = ({ onCreate }: Props) => {
+const CreateTaskForm = ({ onCreate, isTemplates }: Props) => {
   const { t } = useTranslation()
 
   const schema = z.object({
     name: z.string().min(1, t('validation.enter-name')),
-    priority: z.enum(['low', 'medium', 'important', 'critical']),
+    priority: z.enum(Object.values(priorityTypes)),
   })
 
   const form = useForm<z.infer<typeof schema>>({
@@ -39,9 +41,9 @@ const CreateTaskForm = ({ onCreate }: Props) => {
           name="name"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>{t('fields.task-name')}</FormLabel>
+              <FormLabel>{isTemplates ? t('fields.template-name') : t('fields.task-name')}</FormLabel>
               <FormControl>
-                <Input {...field} placeholder={t('fields.enter-task-name')} />
+                <Input {...field} placeholder={isTemplates ? t('fields.enter-template-name') : t('fields.enter-task-name')} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -61,10 +63,9 @@ const CreateTaskForm = ({ onCreate }: Props) => {
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  <SelectItem value="low">{t('fields.low')}</SelectItem>
-                  <SelectItem value="medium">{t('fields.medium')}</SelectItem>
-                  <SelectItem value="important">{t('fields.important')}</SelectItem>
-                  <SelectItem value="critical">{t('fields.critical')}</SelectItem>
+                  {Object.values(priorityTypes).map((priority) => (
+                    <SelectItem key={priority} value={priority}>{t(`fields.priority-types.${priority}`)}</SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
               <FormMessage />

@@ -8,12 +8,12 @@ import { useState } from "react"
 import { toast } from "react-hot-toast"
 import { useDeleteOrganizationMutation, useGetOrganizationsQuery } from "../../../../entities/organization/model/organizationSlice"
 import { useDeleteProjectMutation, useGetProjectsQuery } from "../../../../entities/project/model/projectSlice"
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "../../../../shared/ui/alert-dialog"
 
 const OrganizationsAndProjectsPage = () => {
     const { t } = useTranslation()
 
     const { data: organizations = [], isLoading: orgsLoading } = useGetOrganizationsQuery()
-    const [deleteOrg] = useDeleteOrganizationMutation()
 
     const [selectedOrgId, setSelectedOrgId] = useState<number | null>(null)
 
@@ -22,22 +22,25 @@ const OrganizationsAndProjectsPage = () => {
         { skip: !selectedOrgId }
     )
     const [deleteProject] = useDeleteProjectMutation()
+    const [deleteOrganization] = useDeleteOrganizationMutation()
 
-    const onDeleteOrg = async (id: number) => {
-        if (!confirm(t('notice-list.confirm-delete-organization'))) return
+    const onDeleteOrganization = async (id: number) => {
+        let toastId: string | undefined
         try {
-            await deleteOrg(id).unwrap()
+            toastId = toast.loading(t('notice-list.deleting-organization'))
+            await deleteOrganization(id).unwrap()
             toast.success(t('notice-list.organization-deleted'))
             if (selectedOrgId === id) setSelectedOrgId(null)
         } catch {
             toast.error(t('errors.error-deleting-organization'))
+        } finally {
+            toast.dismiss(toastId)
         }
     }
 
 
     // Удалить проект
     const onDeleteProject = async (id: number) => {
-        if (!confirm(t('notice-list.confirm-delete-project'))) return
         try {
             await deleteProject(id).unwrap()
             toast.success(t('notice-list.project-deleted'))
@@ -91,17 +94,28 @@ const OrganizationsAndProjectsPage = () => {
                                             <p className="font-medium">{org.fullName}</p>
                                             <p className="text-sm text-muted-foreground">{org.shortName} • {org.address}</p>
                                         </div>
-                                        <Button
-                                            variant="ghost"
-                                            size="icon"
-                                            className="text-destructive hover:text-destructive hover:bg-destructive/10"
-                                            onClick={(e) => {
-                                                e.stopPropagation()
-                                                onDeleteOrg(org.id)
-                                            }}
-                                        >
-                                            <Trash2 className="h-4 w-4" />
-                                        </Button>
+                                        <AlertDialog>
+                                            <AlertDialogTrigger asChild>
+                                                <Button variant="outline">
+                                                    <Trash2 className="h-4 w-4" />
+                                                </Button>
+                                            </AlertDialogTrigger>
+                                            <AlertDialogContent>
+                                                <AlertDialogHeader>
+                                                    <AlertDialogTitle>{t('notice-list.confirm-delete-organization')}</AlertDialogTitle>
+                                                    <AlertDialogDescription>
+                                                        {t('notice-list.confirm-delete-organization-description')}
+                                                    </AlertDialogDescription>
+                                                </AlertDialogHeader>
+                                                <AlertDialogFooter>
+                                                    <AlertDialogCancel onClick={e => e.stopPropagation()}>{t('buttons.cancel')}</AlertDialogCancel>
+                                                    <AlertDialogAction onClick={(e) => {
+                                                        e.stopPropagation()
+                                                        onDeleteOrganization(org.id)
+                                                    }}>{t('buttons.continue')}</AlertDialogAction>
+                                                </AlertDialogFooter>
+                                            </AlertDialogContent>
+                                        </AlertDialog>
                                     </div>
                                 ))
                             )}

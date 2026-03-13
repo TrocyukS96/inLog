@@ -1,44 +1,63 @@
-import { Loader2, Plus } from 'lucide-react'
-import { useState } from 'react'
+import { Loader2, Plus, Search, SortAsc, SortDesc, X } from 'lucide-react'
+import { Suspense, useEffect, useState } from 'react'
+import { ErrorBoundary } from "react-error-boundary"
 import { useTranslation } from 'react-i18next'
-import { useNavigate, useSearchParams } from 'react-router-dom'
+import { useSearchParams } from 'react-router-dom'
 import { toast } from 'sonner'
 
 import { Button } from '../../../shared/ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '../../../shared/ui/dialog'
+import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '../../../shared/ui/resizable'
 
-import { useCreateTaskMutation, useDeleteTaskMutation, useGetTasksQuery } from '../../../entities/task/model/taskSlice'
+import { useCreateTaskMutation, useDeleteTaskMutation, useGetStatusesQuery, useGetTaskQuery, useGetTasksQuery, useGetTaskTagsQuery } from '../../../entities/task/model/taskSlice'
 
+import { format } from 'date-fns'
+import type { DateRange } from 'react-day-picker'
+import { useGetProjectMembersQuery } from '../../../entities/project/model/projectSlice'
 import type { Task, TasksFilterParams } from '../../../entities/task/model/types'
-import TasksFilter from '../../../features/tasks/ui/TasksFilter'
-import { routes } from '../../../shared/lib/routes'
+import { TaskDetails } from '../../../features/task-details'
+import { DATE_REQUEST_FORMAT, DEBOUNCE_DELAY } from '../../../shared/config/constants'
+import useDebounce from '../../../shared/lib/hooks/use-deboucne'
+import { Input } from '../../../shared/ui/input'
+import { RangePicker } from '../../../shared/ui/range-picker'
 import CreateTaskForm from './CreateTaskForm'
 import TasksList from './TasksList'
 
-export default function Tasks() {
+export default function Tasks({ type = 'tasks-page' }: { type?: 'tasks-page' | 'templates-page' }) {
     const { t } = useTranslation()
-    const [searchParams] = useSearchParams()
-    const navigate = useNavigate()
+    const [searchParams, setSearchParams] = useSearchParams()
+
+    const isTemplates = type === 'templates-page'
 
     const projectId = searchParams.get('project')
+    const selectedTaskSlug = searchParams.get('task')
 
     const [createModalOpen, setCreateModalOpen] = useState(false)
+    const [filterParams, setFilterParams] = useState<Partial<TasksFilterParams>>({
+        limit: 10,
+        offset: 0
+    })
+    const [searchValue, setSearchValue] = useState('')
+    const debouncedSearchValue = useDebounce<string>(searchValue, DEBOUNCE_DELAY)
 
-    const [filterParams, setFilterParams] = useState<Partial<TasksFilterParams>>({ limit: 10, offset: 0 })
+    const { data: statuses } = useGetStatusesQuery({ projectId: Number(projectId) }, { skip: !projectId })
+    const { data: members } = useGetProjectMembersQuery(Number(projectId), { skip: !projectId })
+    const { data: tagsResponse } = useGetTaskTagsQuery({ projectId: Number(projectId), limit: 9999, is_orphan: false }, { skip: !projectId })
 
-    // Запрос задач
     const { data: tasksData, isLoading: tasksLoading } = useGetTasksQuery({
         projectId: Number(projectId),
-        params: filterParams ?? {},
+        params: {...(filterParams ?? {}), ...{ is_template: isTemplates ? true : false }},
+
     }, { skip: !projectId })
 
-    console.log(tasksData, 'tasksData')
+    const { data: taskData, isFetching: taskFetching } = useGetTaskQuery({
+        projectId: Number(projectId),
+        taskSlug: selectedTaskSlug || '',
+    }, { skip: !projectId || !selectedTaskSlug })
 
     const [deleteTask] = useDeleteTaskMutation()
-
     const [createTask] = useCreateTaskMutation()
 
-    // Создание задачи
     const handleAddTask = async (name: string, priority: Task['priority']) => {
         if (!Number(projectId)) {
             toast.error(t('errors.select-project-first'))
@@ -46,36 +65,52 @@ export default function Tasks() {
         }
 
         try {
-            await createTask({
+            const newTask = await createTask({
                 projectId: Number(projectId),
                 data: {
                     name: name.trim(),
                     priority,
+                    is_template: isTemplates,
                 },
             }).unwrap()
-            toast.success(t('notice-list.task-created'))
+
+            toast.success(isTemplates ? t('notice-list.template-created') : t('notice-list.task-created'))
             setCreateModalOpen(false)
+
+            handleSelectTask(newTask)
         } catch {
-            toast.error(t('errors.error-creating-task'))
+            toast.error(isTemplates ? t('errors.error-creating-template') : t('errors.error-creating-task'))
         }
     }
 
-    const navigateToTask = (task: Task) => {
-        navigate(routes.scheduler.task(task.slug))
+    const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setSearchValue(e.target.value)
     }
 
-    const removeTask = async (task: Task) => {
+    const handleSelectTask = (task: Task) => {
+        searchParams.set('task', task.slug)
+        setSearchParams(searchParams)
+    }
+
+    const handleCloseTaskDetails = () => {
+        searchParams.delete('task')
+        setSearchParams(searchParams)
+    }
+
+    const handleDeleteTask = async (task: Task) => {
         try {
-            await deleteTask({ projectId: Number(projectId), taskSlug: task.slug }).unwrap()
-            toast.success(t('notice-list.task-deleted'))
-            const remaining = tasksData?.results.filter(t => t.id !== task.id)
-            if (remaining?.length) {
-                navigateToTask(remaining[0])
-            } else {
-                navigate(routes.scheduler.tasks())
+            await deleteTask({
+                projectId: Number(projectId),
+                taskSlug: task.slug
+            }).unwrap()
+
+            toast.success(isTemplates ? t('notice-list.template-deleted') : t('notice-list.task-deleted'))
+
+            if (selectedTaskSlug === task.slug) {
+                handleCloseTaskDetails()
             }
         } catch {
-            toast.error(t('errors.error-deleting-task'))
+            toast.error(isTemplates ? t('errors.error-deleting-template') : t('errors.error-deleting-task'))
         }
     }
 
@@ -83,63 +118,185 @@ export default function Tasks() {
         toast.info(t('notice-list.template-created-from-task'))
     }
 
-    const handleFilterChange = (newParams: Partial<Omit<TasksFilterParams, 'projectId'>>) => {
-        setFilterParams({ ...(filterParams ?? {}), ...newParams } as TasksFilterParams)
+    const handleFilterChange = (value: DateRange | string | undefined, filterType: 'date' | 'search') => {
+        if (filterType === 'date') {
+            const created_at__range = value && typeof value === 'object'
+                ? format(value?.from || new Date(), DATE_REQUEST_FORMAT) + ',' + format(value?.to || new Date(), DATE_REQUEST_FORMAT)
+                : undefined
+            setFilterParams({
+                ...(filterParams ?? {}),
+                created_at__range: created_at__range
+            } as TasksFilterParams)
+        } else {
+            setSearchValue(value as string)
+        }
     }
 
-    if (tasksLoading) {
-        return (
-            <div className="flex items-center justify-center h-[50vh]">
-                <Loader2 className="h-10 w-10 animate-spin text-primary" />
+    const handlePaginationChange = (value: { limit: number; offset: number }) => {
+        setFilterParams({ ...(filterParams ?? {}), ...value } as TasksFilterParams)
+    }
+
+    useEffect(() => {
+        setFilterParams({
+            ...(filterParams ?? {}),
+            name__icontains: debouncedSearchValue || undefined
+        } as TasksFilterParams)
+    }, [debouncedSearchValue])
+
+    const renderTaskDetails = () => {
+        if (!selectedTaskSlug || !taskData) {
+            return <div className="flex items-center justify-center h-full text-muted-foreground">
+                <div className="text-center">
+                    <p className="text-lg mb-2">{ isTemplates ? t(`templates-page.no-templates-selected`) : t(`tasks-page.no-task-selected`)}</p>
+                    <p className="text-sm">{isTemplates ? t(`templates-page.select-template-to-view`) : t(`tasks-page.select-task-to-view`)}</p>
+                </div>
             </div>
-        )
+        }
+        if (taskFetching) {
+            return <div className="flex items-center justify-center h-full text-muted-foreground">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            </div>
+        }
+        return <TaskDetails
+            task={taskData}
+            tags={tagsResponse?.results ?? []}
+            statuses={statuses ?? []}
+            members={members ?? []}
+            taskSlug={selectedTaskSlug || ''}
+        />
     }
 
     return (
-        <div className="space-y-8">
-            <div className="flex items-center justify-between">
-                <h1 className="text-3xl font-bold tracking-tight">
-                    {t('tasks-page.title')}
-                </h1>
+            <ResizablePanelGroup
+                className="h-fit rounded-lg border border-border "
+                orientation="horizontal"
+            >
+                <ResizablePanel
+                    defaultSize={40}
+                >
+                    <div className="flex flex-col h-full ">
+                        <div className="p-4 ">
+                            <div className="flex items-center justify-between mb-4">
+                                <h1 className="text-2xl font-bold tracking-tight">
+                                    {t(`${type}.title`)}
+                                </h1>
+                                <Dialog open={createModalOpen} onOpenChange={setCreateModalOpen}>
+                                    <DialogTrigger asChild>
+                                        <Button size="sm">
+                                            <Plus className="h-4 w-4 mr-2" />
+                                            { isTemplates ? t(`templates-page.create-template`) : t(`tasks-page.create-task`)}
+                                        </Button>
+                                    </DialogTrigger>
+                                    <DialogContent>
+                                        <DialogHeader>
+                                            <DialogTitle>{isTemplates ? t(`templates-page.create-template`) : t(`tasks-page.create-task`)}</DialogTitle>
+                                        </DialogHeader>
+                                        <CreateTaskForm onCreate={handleAddTask} isTemplates={isTemplates} />
+                                    </DialogContent>
+                                </Dialog>
+                            </div>
 
-                <div className="flex items-center gap-4">
-                    {/* Фильтр */}
-                    <TasksFilter />
-                    {/* Создать задачу */}
-                    <Dialog open={createModalOpen} onOpenChange={setCreateModalOpen}>
-                        <DialogTrigger asChild>
-                            <Button>
-                                <Plus className="h-4 w-4 mr-2" />
-                                {t('tasks-page.create-task')}
-                            </Button>
-                        </DialogTrigger>
-                        <DialogContent>
-                            <DialogHeader>
-                                <DialogTitle>{t('tasks-page.create-task')}</DialogTitle>
-                            </DialogHeader>
-                            <CreateTaskForm onCreate={handleAddTask} />
-                        </DialogContent>
-                    </Dialog>
-                </div>
-            </div>
+                            <div className="space-y-2">
+                                <div className="relative">
+                                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                    <Input
+                                        type="text"
+                                        value={searchValue}
+                                        onChange={handleSearch}
+                                        className="w-full pl-9 pr-8"
+                                        placeholder={t('fields.search')}
+                                        disabled={tasksLoading}
+                                    />
+                                    {searchValue && (
+                                        <X
+                                            className="absolute cursor-pointer right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground hover:text-foreground"
+                                            onClick={() => setSearchValue('')}
+                                        />
+                                    )}
+                                </div>
 
-            {
-                tasksData?.results && tasksData?.results.length > 0 && (
-                    <TasksList
-                        tasks={tasksData?.results || []}
-                        getTask={navigateToTask}
-                        deleteTask={removeTask}
-                        createTemplate={createTemplate}
-                        changePagination={(params) => handleFilterChange(params)}
-                    />
-                )}
+                                <div className="flex gap-2">
+                                    <RangePicker
+                                        value={filterParams.created_at__range
+                                            ? {
+                                                from: new Date(filterParams.created_at__range.split(',')[0]),
+                                                to: new Date(filterParams.created_at__range.split(',')[1])
+                                            }
+                                            : undefined}
+                                        placeholder={t('fields.date-range')}
+                                        onChange={(range) => handleFilterChange(range, 'date')}
+                                        className="flex-1"
+                                    />
 
-                {(tasksData?.results && tasksData?.results.length === 0 || !tasksData?.results) && (
-                    <div className="text-center py-12 text-muted-foreground">
-                        {t('tasks-page.tasks-absent-message')}
+                                    <Button
+                                        variant="outline"
+                                        size="icon"
+                                        onClick={() => setFilterParams({
+                                            ...(filterParams ?? {}),
+                                            ordering: filterParams.ordering === '-created_at' ? 'created_at' : '-created_at'
+                                        } as TasksFilterParams)}
+                                    >
+                                        {filterParams.ordering === '-created_at' ? (
+                                            <SortDesc className="h-4 w-4" />
+                                        ) : (
+                                            <SortAsc className="h-4 w-4" />
+                                        )}
+                                    </Button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <ErrorBoundary fallback={<div>Something went wrong</div>}>
+                            <Suspense fallback={
+                                <div className="flex items-center justify-center py-8">
+                                    <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                                </div>
+                            }>
+                                {tasksData?.results && tasksData.results.length > 0 ? (
+                                    <TasksList
+                                        tasks={tasksData.results}
+                                        selectedTaskSlug={selectedTaskSlug || undefined}
+                                        selectTask={handleSelectTask}
+                                        deleteTask={handleDeleteTask}
+                                        createTemplate={createTemplate}
+                                        changePagination={handlePaginationChange}
+                                        pagination={{
+                                            limit: Number(filterParams.limit) || 10,
+                                            offset: Number(filterParams.offset) || 0,
+                                            total: tasksData.count
+                                        }}
+                                    />
+                                ) : (
+                                    <div className="text-center py-12 text-muted-foreground">
+                                        { isTemplates ? t(`templates-page.templates-absent-message`) : t(`tasks-page.tasks-absent-message`)}
+                                        {(filterParams.created_at__range || filterParams.name__icontains) && (
+                                            <div className="mt-4">
+                                                <Button
+                                                    variant="outline"
+                                                    size="sm"
+                                                    onClick={() => {
+                                                        setFilterParams({ limit: 10, offset: 0 })
+                                                        setSearchValue('')
+                                                    }}
+                                                >
+                                                    {t('fields.clear-filters')}
+                                                </Button>
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+                            </Suspense>
+                        </ErrorBoundary>
                     </div>
-                )}
+                </ResizablePanel>
 
-        </div>
+                <ResizableHandle withHandle />
+
+                <ResizablePanel defaultSize={60} className="border-none rounded-none">
+                    <div className="h-[calc(100vh-64px-32px-32px-16px)]">
+                        {renderTaskDetails()}
+                    </div>
+                </ResizablePanel>
+            </ResizablePanelGroup>
     )
 }

@@ -3,38 +3,45 @@ import { Button } from '../../../shared/ui/button'
 import { Card, CardContent } from '../../../shared/ui/card'
 
 import type { Task } from '../../../entities/task/model/types'
-import TaskCard from './TaskCard'
+import { useDeferredValue } from 'react'
+import { TaskCard } from '../../../entities/task'
 
 interface Props {
   tasks: Task[]
-  getTask: (task: Task) => void
+  selectedTaskSlug?: string
+  selectTask: (task: Task) => void
   deleteTask: (task: Task) => void
   createTemplate: (task: Task) => void
   changePagination: (params: { limit: number; offset: number }) => void
+  pagination: {
+    limit: number
+    offset: number
+    total: number
+  }
 }
 
-const TasksList = ({ tasks, getTask, deleteTask, createTemplate, changePagination }: Props) => {
+const TasksList = ({ tasks, selectedTaskSlug,selectTask, deleteTask, createTemplate, changePagination, pagination }: Props) => {
   const { t } = useTranslation()
 
+  const deferredTasks = useDeferredValue(tasks)
+
   return (
-    <Card className="p-0 border-none bg-transparent">
-      <CardContent className="p-0 border-none">
+    <Card className="px-4 border-none bg-transparent">
         <div className="flex flex-col gap-2 overflow-y-auto">
-          {tasks.map((task) => (
+          {deferredTasks.map((task) => (
             <TaskCard
-              key={task.id}
+              key={ `${task.is_template ? 'template' : 'task'}-${task.id}`}
               task={task}
-              getTask={getTask}
+              selectTask={selectTask}
               deleteTask={deleteTask}
               createTemplate={createTemplate}
+              isActive={selectedTaskSlug === task.slug}
             />
           ))}
         </div>
-      </CardContent>
 
-      {/* Пагинация */}
       {
-        tasks.length >= 10 && (
+        deferredTasks.length >= 10 && (
           <div className="flex justify-center p-4">
             <Button variant="outline" onClick={() => changePagination({ limit: 10, offset: (tasks.length || 0) + 10 })}>
               {t('common.load-more')}

@@ -34,7 +34,7 @@ export const routes = {
       list: () => '/scheduler',
       tasks: () => '/scheduler/tasks',
       task: (slug: string) => `/scheduler/tasks/${slug}`,
-      tasksTemplate: () => '/scheduler/tasks-template',
+      templates: () => '/scheduler/templates',
       statuses: () => '/scheduler/statuses',
       roadmap: () => '/scheduler/roadmap',
     },

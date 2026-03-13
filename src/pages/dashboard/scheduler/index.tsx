@@ -19,12 +19,12 @@ const SchedulerPage = () => {
         },
         {
             label: t('scheduler-page.tasks-template'),
-            href: routes.scheduler.tasksTemplate(),
+            href: routes.scheduler.templates(),
         },
-        {
-            label: t('scheduler-page.tasks-statuses'),
-            href: routes.scheduler.statuses(),
-        },
+        // {
+        //     label: t('scheduler-page.tasks-statuses'),
+        //     href: routes.scheduler.statuses(),
+        // },
         {
             label: t('scheduler-page.roadmap'),
             href: routes.scheduler.roadmap(),
@@ -33,7 +33,7 @@ const SchedulerPage = () => {
 
     return (
         <RootPageLayout navItems={navItems}>
-            <div className="h-full overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
+            <div className="h-full w-full">
                 <Outlet />
             </div>
         </RootPageLayout>

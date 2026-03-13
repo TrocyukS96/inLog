@@ -10,8 +10,10 @@ import {
 } from 'lucide-react'
 import { useTheme } from 'next-themes'
 import { useTranslation } from 'react-i18next'
+import { useDispatch } from 'react-redux'
 import { NavLink, useLocation, useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
+import { userApi } from '../../entities/user/model/userSlice'
 import { routes } from '../../shared/lib/routes'
 import { cn } from '../../shared/lib/utils'
 import { Button } from '../../shared/ui/button'
@@ -21,13 +23,13 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '../../shared/ui/dropdown-menu'
+import { LogoIcon } from '../../shared/ui/icons/LogoIcon'
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from '../../shared/ui/tooltip';
-import { LogoIcon } from '../../shared/ui/icons/LogoIcon'
+} from '../../shared/ui/tooltip'
 
 
 export function Sidebar() {
@@ -35,10 +37,12 @@ export function Sidebar() {
   const { theme, setTheme } = useTheme()
   const navigate = useNavigate()
   const location = useLocation()
+  const dispatch = useDispatch()
 
   const handleLogout = async () => {
     try {
-      sessionStorage.clear()
+      localStorage.clear()
+      dispatch(userApi.util.resetApiState());
       toast.success(t('notice-list.log-out-success'))
       navigate(routes.login())
     } catch {

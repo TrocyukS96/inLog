@@ -33,10 +33,10 @@ export const authApi = createApi({
         try {
           const { data } = await queryFulfilled
           if (data?.access_token) {
-            sessionStorage.setItem(ACCESS_TOKEN, JSON.stringify(data.access_token))
+            localStorage.setItem(ACCESS_TOKEN, JSON.stringify(data.access_token))
           }
           if (data?.refresh_token) {
-            sessionStorage.setItem(REFRESH_TOKEN, JSON.stringify(data.refresh_token))
+            localStorage.setItem(REFRESH_TOKEN, JSON.stringify(data.refresh_token))
           }
         } catch {}
       },
@@ -51,7 +51,7 @@ export const authApi = createApi({
       async onQueryStarted(_, { queryFulfilled }) {
         try {
           await queryFulfilled
-          sessionStorage.removeItem('ACCESS_TOKEN')
+          localStorage.removeItem(ACCESS_TOKEN)
         } catch {}
       },
     }),

@@ -1,14 +1,14 @@
-import { MoreHorizontal, Trash2, Copy } from 'lucide-react'
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../../../shared/ui/dropdown-menu'
-import { Button } from '../../../shared/ui/button'
-import { cn } from '../../../shared/lib/utils'
+import { Copy, MoreHorizontal, Trash2 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
+import { cn, getPriorityColorStyle } from '../../../shared/lib/utils'
+import { Button } from '../../../shared/ui/button'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../../../shared/ui/dropdown-menu'
 
-import type { Task } from '../../../entities/task/model/types'
+import type { Task } from '../model/types'
 
 interface TaskCardProps {
     task: Task
-    getTask: (task: Task) => void
+    selectTask: (task: Task) => void
     deleteTask: (task: Task) => void
     createTemplate: (task: Task) => void
     isActive?: boolean
@@ -16,34 +16,20 @@ interface TaskCardProps {
 
 const TaskCard = ({
     task,
-    getTask,
+    selectTask,
     deleteTask,
     createTemplate,
     isActive = false,
 }: TaskCardProps) => {
     const { t } = useTranslation()
-
-    const priorityTypes = {
-        low: 'low',
-        medium: 'medium',
-        high: 'high',
-        critical: 'critical',
-        important: 'important',
-    }
-
-    const priorityColor = {
-        [priorityTypes.low]: 'bg-green-500',
-        [priorityTypes.medium]: 'bg-yellow-500',
-        [priorityTypes.high]: 'bg-orange-500',
-        [priorityTypes.critical]: 'bg-red-500',
-        [priorityTypes.important]: 'bg-yellow-500',
-    }
-
+    const isTemplate = task.is_template
+    console.log(isTemplate,'---isTemplate')
     return (
         <div
-            onClick={() => getTask(task)}
+            onClick={() => selectTask(task)}
             className={cn(
                 "group relative flex items-center justify-between p-2 rounded-lg border transition-all duration-200 cursor-pointer bg-card",
+                getPriorityColorStyle(task.priority, 'border'),
                 isActive
                     ? "border-primary shadow-sm"
                     : "border-border hover:border-primary/50",
@@ -51,23 +37,14 @@ const TaskCard = ({
             )}
         >
             {/* Цветная точка слева */}
-            <div className="absolute left-0 top-0 bottom-0 w-2 rounded-l-lg" style={{ backgroundColor: priorityColor[task.priority] }} />
+            <div className='absolute left-0 top-0 bottom-0 w-2 rounded-l-lg' style={getPriorityColorStyle(task.priority, 'background')} />
 
-            {/* Основной контент */}
             <div className="flex items-center gap-4 flex-1 pl-3">
                 <div className="flex flex-col">
                     <span className="font-medium text-foreground group-hover:text-primary transition-colors">
                         {task.name}
                     </span>
                     <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
-                        {/* <span className={cn("font-medium", style.text)}>
-              {t(`fields.${task.priority.toLowerCase()}`)}
-            </span>
-            {task.due_date_end && (
-              <span>
-                {t('due')}: {new Date(task.due_date_end).toLocaleDateString()}
-              </span>
-            )} */}
                     </div>
                 </div>
             </div>
@@ -95,18 +72,15 @@ const TaskCard = ({
                             onClick={() => deleteTask(task)}
                         >
                             <Trash2 className="h-4 w-4 mr-2" />
-                            {t('tasks-page.delete-task')}
+                            {isTemplate ? t('templates-page.delete-template') : t('tasks-page.delete-task')}
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => createTemplate(task)}>
+                        {/* <DropdownMenuItem onClick={() => createTemplate(task)}>
                             <Copy className="h-4 w-4 mr-2" />
-                            {t('tasks-page.create-template')}
-                        </DropdownMenuItem>
+                            {isTemplates ? t('templates-page.create-template') : t('tasks-page.create-task')}
+                        </DropdownMenuItem> */}
                     </DropdownMenuContent>
                 </DropdownMenu>
             </div>
-
-            {/* Меню 3 точки */}
-
         </div>
     )
 }

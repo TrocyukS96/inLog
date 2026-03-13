@@ -39,6 +39,21 @@
   --error-bg: oklch(0.96 0.02 350 / 0.8); /* light red bg */
   --light-orange: oklch(0.78 0.18 70 / 0.4);
   --gray-bg: oklch(0.88 0 0 / 0.19);
+
+  --radius: 5px;
+  --cell-size: 44px;
+  --calendar-bg: var(--card);
+  --calendar-text: var(--foreground);
+  --calendar-hover: var(--accent);
+  --calendar-selected: var(--primary);
+  --calendar-selected-text: var(--primary-foreground);
+  --calendar-today: var(--accent);
+  --calendar-range-bg: oklch(0.72 0.14 190 / 0.2);
+  
+  --low-priority: oklch(72.3% 0.219 149.579); 
+  --medium-priority: oklch(79.5% 0.184 86.047);
+  --important-priority: oklch(70.5% 0.213 47.604);
+  --critical-priority: oklch(63.7% 0.237 25.331);  
 }
 
 /* Тёмная тема (если планируешь добавить dark mode позже — подстрой) */
@@ -92,4 +107,86 @@
   --color-card-foreground: var(--card-foreground);
   --color-popover: var(--popover);
   --color-popover-foreground: var(--popover-foreground);
+
+}
+
+@keyframes accordion-down {
+  from {
+    height: 0;
+    opacity: 0.5;
+  }
+  to {
+    height: var(--radix-accordion-content-height);
+    opacity: 1;
+  }
+}
+
+@keyframes accordion-up {
+  from {
+    height: var(--radix-accordion-content-height);
+    opacity: 1;
+  }
+  to {
+    height: 0;
+    opacity: 0.5;
+  }
+}
+
+.animate-accordion-down {
+  animation: accordion-down 0.2s ease-out;
+}
+
+.animate-accordion-up {
+  animation: accordion-up 0.2s ease-out;
+}
+
+
+.tiptap {
+  > * + * {
+    margin-top: 0.75em;
+  }
+
+  ul, ol {
+    padding: 0 1rem;
+  }
+
+  ul {
+    list-style-type: disc;
+  }
+
+  ol {
+    list-style-type: decimal;
+  }
+
+  li {
+    margin-top: 0.25em;
+  }
+}
+
+/* Стили для placeholder */
+.tiptap p.is-editor-empty:first-child::before {
+  color: #9ca3af; /* text-muted-foreground */
+  content: attr(data-placeholder);
+  float: left;
+  height: 0;
+  pointer-events: none;
+}
+
+/* Скроллбар для выпадающих списков */
+.overflow-auto::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.overflow-auto::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.overflow-auto::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 4px;
+}
+
+.dark .overflow-auto::-webkit-scrollbar-thumb {
+  background: #4b5563;
 }

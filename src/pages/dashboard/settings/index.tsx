@@ -24,7 +24,7 @@ const SettingsPage = () => {
 
     return (
         <RootPageLayout navItems={navItems}>
-            <div className="h-full overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
+            <div className="h-full">
                 <Outlet />
             </div>
         </RootPageLayout>

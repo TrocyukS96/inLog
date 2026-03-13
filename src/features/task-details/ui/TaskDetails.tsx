@@ -1,0 +1,973 @@
+'use client'
+
+import { zodResolver } from '@hookform/resolvers/zod'
+import { useForm } from 'react-hook-form'
+import { z } from 'zod'
+
+import { taskApi, useAddTaskCommentMutation, useAddTaskDoerMutation, useAddTaskSupervisorMutation, useAddTaskTagMutation, useCreateTaskFileMutation, useCreateTaskMutation, useDeleteTaskCommentMutation, useDeleteTaskDoerMutation, useDeleteTaskFileMutation, useDeleteTaskMutation, useDeleteTaskSupervisorMutation, useEditTaskCommentMutation, useUpdateTaskMutation } from '../../../entities/task/model/taskSlice'
+import { Form } from '../../../shared/ui/form'
+
+import { format } from 'date-fns'
+import { CalendarIcon, CircleUserRoundIcon, EyeIcon, FileTextIcon, FlagIcon, Kanban, TagIcon, UserIcon, UserPlusIcon } from 'lucide-react'
+import { useCallback, useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
+import { useSearchParams } from 'react-router-dom'
+import { toast } from 'sonner'
+import { SubTasks } from '../../../entities/subtasks'
+import { TaskComments } from '../../../entities/task-comments'
+import type { Status, SubTask, Tag, Task, TaskPriority } from '../../../entities/task/model/types'
+import { DATE_VIEW_FORMAT, priorityTypes, TASK_STATUSES_STORAGE } from '../../../shared/config/constants'
+import { errorsHandler } from '../../../shared/lib/errors-handler'
+import { cn, getPriorityColorStyle } from '../../../shared/lib/utils'
+import type { MemberResponse } from '../../../shared/types/dto/project'
+import type { TaskUpdate } from '../../../shared/types/dto/task'
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../../../shared/ui/accordion'
+import { Badge } from '../../../shared/ui/badge'
+import { DatePicker } from '../../../shared/ui/date-picker'
+import { EditableField } from '../../../shared/ui/editable-field'
+import { Label } from '../../../shared/ui/label'
+import { ScrollArea } from '../../../shared/ui/scroll-area'
+import { TagsInput } from '../../../shared/ui/tags-input'
+import { FileAttachment } from '../../../shared/ui/file-attachment'
+import { useDispatch } from 'react-redux'
+import TaskDescription from './TaskDescription'
+
+const taskSchema = z.object({
+  name: z.string().min(1, 'Название обязательно'),
+  description: z.string().optional(),
+  priority: z.enum(['low', 'medium', 'high', 'critical', 'important']),
+  due_date_start: z.date().nullable(),
+  due_date_end: z.date().nullable(),
+  deadline: z.date().nullable(),
+  status: z.string().optional(),
+  supervisor: z.number().optional(),
+  doers: z.array(z.string()).optional(),
+  tags: z.array(z.string()).optional(),
+})
+
+type FormValues = z.infer<typeof taskSchema>
+
+interface Props {
+  task: Task
+  tags: Tag[]
+  taskSlug: string
+  statuses: Status[]
+  members: MemberResponse[]
+}
+
+const TaskDetails = ({ task, tags: existingTags, taskSlug, statuses, members }: Props) => {
+  const { t, i18n } = useTranslation()
+  const [createTask] = useCreateTaskMutation()
+  const [updateTask] = useUpdateTaskMutation()
+  const [deleteTask] = useDeleteTaskMutation()
+  const [addTaskDoer] = useAddTaskDoerMutation()
+  const [deleteTaskDoer] = useDeleteTaskDoerMutation()
+  const [addTaskSupervisor] = useAddTaskSupervisorMutation()
+  const [deleteTaskSupervisor] = useDeleteTaskSupervisorMutation()
+  const [addTaskTag] = useAddTaskTagMutation()
+  const [addTaskComment] = useAddTaskCommentMutation()
+  const [editTaskComment] = useEditTaskCommentMutation()
+  const [deleteTaskComment] = useDeleteTaskCommentMutation()
+  const [createTaskFile] = useCreateTaskFileMutation()
+  const [deleteTaskFile] = useDeleteTaskFileMutation()
+  const [searchParams] = useSearchParams()
+
+  const dispatch = useDispatch()
+
+  const [subtasks, setSubtasks] = useState<Array<{ completed: boolean } & SubTask>>([])
+  const isTemplate = task?.is_template ?? false
+
+  useEffect(() => {
+    setSubtasks((task?.subtasks ?? []).map((subtask) => ({
+      ...subtask,
+      completed: JSON.parse(localStorage.getItem(TASK_STATUSES_STORAGE) || '[]')?.find((status: { id: string | number }) => status.id === subtask.id)?.completed ?? false,
+    })))
+  }, [task?.subtasks])
+
+  const form = useForm<FormValues>({
+    resolver: zodResolver(taskSchema),
+    defaultValues: {
+      name: '',
+      description: '',
+      priority: 'medium',
+      due_date_start: null,
+      due_date_end: null,
+      deadline: null,
+      status: undefined,
+      supervisor: undefined,
+      doers: [],
+      tags: [],
+    },
+  })
+
+  useEffect(() => {
+    if (!task) return
+
+    form.reset({
+      name: task.name,
+      description: task.description || '',
+      priority: task.priority,
+      due_date_start: task.due_date_start ? new Date(task.due_date_start) : null,
+      due_date_end: task.due_date_end ? new Date(task.due_date_end) : null,
+      status: task.status?.id?.toString(),
+      supervisor: task.supervisor?.user?.id,
+      doers: task.doers?.map((d) => d.user?.id.toString() || ''),
+      tags: task.tags?.map((tag) => tag.name) || [],
+    })
+  }, [task])
+
+  const checkTaskAccess = async () => {
+    let isHasAccess = true
+    if (!taskSlug) {
+      toast.error(t('errors.task-not-found'))
+      return false
+    }
+
+    const projectId = searchParams.get('project')
+
+    if (!projectId) {
+      toast.error(t('errors.select-project-first'))
+      return false
+    }
+
+    return isHasAccess
+  }
+
+  const updateField = async (
+    field: keyof FormValues,
+    value: any,
+  ) => {
+    const previous = form.getValues(field)
+    const projectId = searchParams.get('project')
+
+    const isHasAccess = await checkTaskAccess()
+    if (!isHasAccess) {
+      return
+    }
+
+    try {
+      await updateTask({
+        projectId: Number(projectId),
+        taskSlug: taskSlug || '',
+        data: {
+          id: task.id,
+          [field]:
+            value instanceof Date
+              ? value.toISOString()
+              : value,
+        } as TaskUpdate,
+      }).unwrap()
+
+      form.setValue(field, value, {
+        shouldDirty: false,
+      })
+    } catch (error) {
+      errorsHandler(error, t)
+      form.setValue(field, previous)
+    }
+  }
+
+  const changeSupervisor = async (value: number) => {
+    const projectId = searchParams.get('project')
+    const isHasAccess = await checkTaskAccess()
+    if (!isHasAccess) {
+      return
+    }
+    const previousValue = form.getValues('supervisor')
+    const currentSupervisorId = task.supervisor?.id
+
+    if (currentSupervisorId) {
+      try {
+
+        await deleteTaskSupervisor({
+          projectId: Number(projectId),
+          taskSlug: taskSlug || '',
+          supervisorId: currentSupervisorId,
+        }).unwrap()
+
+        await addTaskSupervisor({
+          projectId: Number(projectId),
+          taskSlug: taskSlug || '',
+          data: {
+            user: value,
+          },
+        }).unwrap()
+
+        form.setValue('supervisor', value, {
+          shouldDirty: false,
+        })
+      } catch (error) {
+        errorsHandler(error, t)
+        form.setValue('supervisor', previousValue, {
+          shouldDirty: false,
+        })
+      }
+    } else {
+      try {
+        await addTaskSupervisor({
+          projectId: Number(projectId),
+          taskSlug: taskSlug || '',
+          data: {
+            user: value,
+          },
+        }).unwrap()
+        form.setValue('supervisor', value, {
+          shouldDirty: false,
+        })
+      } catch (error) {
+        errorsHandler(error, t)
+        form.setValue('supervisor', previousValue, {
+          shouldDirty: false,
+        })
+      }
+    }
+  }
+
+  const changeDoers = async (value: string[]) => {
+    const projectId = searchParams.get('project')
+    const isHasAccess = await checkTaskAccess()
+    if (!isHasAccess) {
+      return
+    }
+
+    const previousValue = form.getValues('doers') || []
+    const newUserIds = value.filter((userId) => !previousValue.includes(userId))
+
+    let operationType: 'add' | 'delete' = 'add';
+    let targetId: string | null = null;
+
+    if (previousValue.length > value.length) {
+      operationType = 'delete'
+      targetId = previousValue.find((userId) => !value.includes(userId)) ?? null;
+    } else {
+      operationType = 'add'
+      if (value.length === 1) {
+        targetId = value[0] || null
+      } else if (value.length === 0) {
+        targetId = previousValue[0] || null
+        operationType = 'delete'
+      } else {
+        targetId = newUserIds[0] || null
+      }
+    }
+
+    if (!targetId) {
+      return
+    }
+
+    if (operationType === 'delete') {
+      try {
+        const targetDoer = task.doers?.find((doer) => doer.user?.id.toString() === targetId)
+        if (!targetDoer) {
+          return
+        }
+
+        await deleteTaskDoer({
+          projectId: Number(projectId),
+          taskSlug: taskSlug || '',
+          doerId: targetDoer.id,
+        }).unwrap()
+        form.setValue('doers', previousValue.filter((doer) => doer !== targetId), {
+          shouldDirty: false,
+        })
+      } catch (error) {
+        errorsHandler(error, t)
+        form.setValue('doers', previousValue, {
+          shouldDirty: false,
+        })
+      }
+
+    } else {
+      try {
+        await addTaskDoer({
+          projectId: Number(projectId),
+          taskSlug: taskSlug || '',
+          data: {
+            user: Number(targetId),
+          },
+        }).unwrap()
+        form.setValue('doers', [...previousValue, targetId], {
+          shouldDirty: false,
+        })
+      } catch (error) {
+        errorsHandler(error, t)
+        form.setValue('doers', previousValue, {
+          shouldDirty: false,
+        })
+      }
+    }
+
+  }
+
+  const changeTags = async (value: string[]) => {
+    const projectId = searchParams.get('project')
+
+    const isHasAccess = await checkTaskAccess()
+    if (!isHasAccess) {
+      return
+    }
+
+    const previousValue = form.getValues('tags') || []
+
+    // Определяем тип операции
+    const operationType: 'add' | 'delete' = previousValue.length < value.length ? 'add' : 'delete'
+
+    if (operationType === 'delete') {
+      // Находим удаленный тег
+      const deletedTagName = previousValue.find(tag => !value.includes(tag))
+
+      if (!deletedTagName) {
+        return
+      }
+
+      // Получаем текущие ID тегов задачи
+      const currentTagIds = task.tags?.map(tag => tag.id) || []
+
+      // Фильтруем, оставляем только теги, которые не удаляем
+      const updatedTagIds = currentTagIds.filter(tagId => {
+        const tag = task.tags?.find(t => t.id === tagId)
+        return tag?.name !== deletedTagName
+      })
+
+      try {
+        await updateTask({
+          projectId: Number(projectId),
+          taskSlug: taskSlug || '',
+          data: {
+            id: task.id,
+            tags: updatedTagIds,
+          } as TaskUpdate,
+        }).unwrap()
+
+        form.setValue('tags', value, {
+          shouldDirty: false,
+        })
+
+      } catch (error) {
+        errorsHandler(error, t)
+        form.setValue('tags', previousValue, {
+          shouldDirty: false,
+        })
+      }
+    } else {
+      // Находим добавленные теги
+      const addedTagNames = value.filter(tag => !previousValue.includes(tag))
+
+      if (addedTagNames.length === 0) {
+        return
+      }
+
+      try {
+        let currentTagIds = task.tags?.map(tag => tag.id) || []
+
+        for (const tagName of addedTagNames) {
+          const existingTag = existingTags.find(tag => tag.name === tagName)
+
+          if (existingTag) {
+            if (!currentTagIds.includes(existingTag.id)) {
+              currentTagIds.push(existingTag.id)
+            }
+          } else {
+            const createdTag = await addTaskTag({
+              projectId: Number(projectId),
+              data: { name: tagName },
+            }).unwrap()
+
+            if (createdTag && createdTag.id) {
+              currentTagIds.push(createdTag.id)
+            }
+          }
+        }
+
+        await updateTask({
+          projectId: Number(projectId),
+          taskSlug: taskSlug || '',
+          data: {
+            id: task.id,
+            tags: currentTagIds,
+          } as TaskUpdate,
+        }).unwrap()
+
+        form.setValue('tags', value, {
+          shouldDirty: false,
+        })
+
+      } catch (error) {
+        errorsHandler(error, t)
+        form.setValue('tags', previousValue, {
+          shouldDirty: false,
+        })
+      }
+    }
+  }
+
+  const addSubtask = async (title: string) => {
+    const projectId = searchParams.get('project')
+    const isHasAccess = await checkTaskAccess()
+    if (!isHasAccess) {
+      return
+    }
+    try {
+      await createTask({
+        projectId: Number(projectId),
+        data: {
+          name: title,
+          parent: task.id,
+          is_template: isTemplate,
+        },
+      }).unwrap()
+    } catch (error) {
+      errorsHandler(error, t)
+    }
+  }
+
+  const editSubtask = async (_: string, title: string) => {
+    const projectId = searchParams.get('project')
+    const isHasAccess = await checkTaskAccess()
+    if (!isHasAccess) {
+      return
+    }
+    try {
+      await updateTask({
+        projectId: Number(projectId),
+        taskSlug: taskSlug || '',
+        data: {
+          name: title,
+          parent: task.id,
+        },
+      }).unwrap()
+    } catch (error) {
+      errorsHandler(error, t)
+    }
+  }
+
+  const deleteSubtask = async (slug: string) => {
+    const projectId = searchParams.get('project')
+    const isHasAccess = await checkTaskAccess()
+    if (!isHasAccess) {
+      return
+    }
+
+    try {
+      await deleteTask({
+        projectId: Number(projectId),
+        taskSlug: taskSlug || '',
+      }).unwrap()
+
+      setSubtasks((prevSubtasks) => prevSubtasks.filter((subtask) => subtask.slug !== slug))
+      localStorage.setItem(TASK_STATUSES_STORAGE, JSON.stringify(subtasks.filter((subtask) => subtask.slug !== slug)))
+    } catch (error) {
+      errorsHandler(error, t)
+    }
+  }
+
+  const changeDescription = useCallback(async (value: string) => {
+    const projectId = searchParams.get('project')
+    const isHasAccess = await checkTaskAccess()
+    if (!isHasAccess) {
+      return
+    }
+    try {
+      await updateTask({
+        projectId: Number(projectId),
+        taskSlug: taskSlug || '',
+        data: {
+          id: task?.id ?? 0,
+          description: value,
+        } as TaskUpdate,
+      }).unwrap()
+
+    } catch (error) {
+      errorsHandler(error, t)
+    }
+  }, [task?.id, taskSlug, searchParams, t])
+
+  const toggleCompleteSubtask = async (id: string | number, completed: boolean) => {
+    const taskStatuses = localStorage.getItem(TASK_STATUSES_STORAGE)
+
+    if (!taskStatuses) {
+      localStorage.setItem(TASK_STATUSES_STORAGE, JSON.stringify([
+        {
+          id: id,
+          completed: completed,
+        }
+      ]))
+    } else {
+      const taskStatusesArray = JSON.parse(taskStatuses)
+      const taskStatus = taskStatusesArray.find((status: { id: string | number }) => status.id === id)
+      if (!taskStatus) {
+        taskStatusesArray.push({ id: id, completed: completed })
+      } else {
+        taskStatus.completed = completed
+      }
+      localStorage.setItem(TASK_STATUSES_STORAGE, JSON.stringify(taskStatusesArray))
+    }
+    setSubtasks((prevSubtasks) => prevSubtasks.map((subtask) => subtask.id === id ? { ...subtask, completed: completed } : subtask))
+  }
+
+  const addComment = async (text: string) => {
+    const projectId = searchParams.get('project')
+    const isHasAccess = await checkTaskAccess()
+    if (!isHasAccess) {
+      return
+    }
+
+    try {
+      await addTaskComment({
+        projectId: Number(projectId),
+        taskSlug: taskSlug || '',
+        data: { text },
+      }).unwrap()
+    } catch (error) {
+      errorsHandler(error, t)
+    }
+  }
+
+  const editComment = async (commentId: string | number, text: string) => {
+    const projectId = searchParams.get('project')
+    const isHasAccess = await checkTaskAccess()
+    if (!isHasAccess) {
+      return
+    }
+
+    try {
+      await editTaskComment({
+        projectId: Number(projectId),
+        taskSlug: taskSlug || '',
+        commentId: commentId as number,
+        data: { text },
+      }).unwrap()
+    } catch (error) {
+      errorsHandler(error, t)
+    }
+  }
+
+  const deleteComment = async (commentId: string | number) => {
+    const projectId = searchParams.get('project')
+    const isHasAccess = await checkTaskAccess()
+    if (!isHasAccess) {
+      return
+    }
+
+    try {
+      await deleteTaskComment({
+        projectId: Number(projectId),
+        taskSlug: taskSlug || '',
+        commentId: Number(commentId),
+      }).unwrap()
+    } catch (error) {
+      errorsHandler(error, t)
+    }
+  }
+
+  const addFile = async (file: File) => {
+    const projectId = searchParams.get('project')
+    const isHasAccess = await checkTaskAccess()
+    if (!isHasAccess) {
+      return
+    }
+
+    try {
+      const newFile = await createTaskFile({
+        projectId: Number(projectId),
+        taskSlug: taskSlug || '',
+        file: file,
+      }).unwrap()
+
+      if (newFile) {
+        await updateTask({
+          projectId: Number(projectId),
+          taskSlug: taskSlug || '',
+          data: {
+            id: task.id,
+            files: [...(task.files || []), newFile],
+          },
+        }).unwrap()
+      }
+      dispatch(taskApi.util.invalidateTags(['Task']))
+    } catch (error) {
+      errorsHandler(error, t)
+    }
+  }
+
+  const deleteFile = async (fileId: number) => {
+    const projectId = searchParams.get('project')
+    const isHasAccess = await checkTaskAccess()
+    if (!isHasAccess) {
+      return
+    }
+
+    try {
+      await deleteTaskFile({
+        projectId: Number(projectId),
+        taskSlug: taskSlug || '',
+        fileId: fileId,
+      }).unwrap()
+
+      await updateTask({
+        projectId: Number(projectId),
+        taskSlug: taskSlug || '',
+        data: {
+          id: task.id,
+          files: task.files?.filter((file) => file.id !== fileId),
+        },
+      }).unwrap()
+      dispatch(taskApi.util.invalidateTags(['Task']))
+    } catch (error) {
+      errorsHandler(error, t)
+    }
+  }
+
+
+  const fieldLabel = (label: string, icon?: React.ReactNode) => {
+    return (
+      <div className={cn("flex items-center gap-2")}>
+        {icon && icon}
+        <span>{label}</span>
+      </div>
+    )
+  }
+  const renderStatusValue = (value: number | string) => {
+    const targetStatus = statuses && statuses.find((status) => status.id?.toString() === value?.toString())
+    if (!targetStatus) {
+      return <span>{t('fields.not-specified')}</span>
+    }
+    return targetStatus[`name${i18n.language === 'ru' ? '_ru' : '_en'}`]
+  }
+
+  const renderSupervisorValue = (value: number | string) => {
+    if (!value) {
+      return <span>{t('fields.not-specified')}</span>
+    }
+    const targetMember = members.find((member) => member?.user?.id.toString() === value.toString())
+    if (!targetMember) {
+      return <span>{t('fields.not-specified')}</span>
+    }
+
+    return (
+      <div className="flex items-center gap-2">
+        {targetMember.user?.avatar?.small ? (
+          <img src={targetMember.user?.avatar?.small} alt={targetMember.user?.full_name} width={20} height={20} className="rounded-full object-cover" />
+        ) : (
+          <CircleUserRoundIcon className="w-4 h-4 text-muted-foreground" />
+        )}
+        <span>{targetMember.user?.full_name}</span>
+      </div>
+    )
+  }
+
+  const renderDoersValue = (value: string[]) => {
+    if (!value.length) {
+      return <span>{t('fields.not-specified')}</span>
+    }
+    const targetMembers = members.filter((member) => value.includes(member.user?.id.toString() ?? ''))
+
+    if (!targetMembers.length) {
+      return <span>{t('fields.not-specified')}</span>
+    }
+
+    return (
+      <div className="flex flex-col gap-2">
+
+        {targetMembers.map((member) => (
+          <div className="flex items-center gap-2" key={member.user?.id}>
+            {
+              member.user?.avatar?.small ? (
+                <img src={member.user?.avatar?.small} alt={member.user?.full_name} width={20} height={20} className="rounded-full object-cover" />
+              ) : (
+                <CircleUserRoundIcon className="w-4 h-4 text-muted-foreground" />
+              )
+            }
+            <span>{member.user?.full_name}</span>
+          </div>
+        ))}
+      </div>
+    )
+  }
+
+  return (
+    <div className="w-full h-full">
+      <Form {...form}>
+        <div className="h-full bg-card/80 backdrop-blur-sm shadow-xl">
+          <ScrollArea className="h-full">
+            <div className="p-4">
+              <EditableField<FormValues>
+                name="name"
+                label={t('fields.name')}
+                control={form.control}
+                className="max-w-3xl"
+                onSave={(name, value) => updateField(name as keyof FormValues, value)}
+              />
+
+              <Accordion
+                type="multiple"
+                className="mt-4"
+                defaultValue={['task-details', 'description', 'subtasks', 'files', 'comments']}
+              >
+                <AccordionItem value="task-details">
+                  <AccordionTrigger>{isTemplate ? t('templates-page.templates-details') : t('tasks-page.task-details')}</AccordionTrigger>
+                  <AccordionContent>
+                    <div className="grid grid-cols-2 gap-4">
+                      <EditableField<FormValues>
+                        name="priority"
+                        label={fieldLabel(t('fields.priority'), <FlagIcon className="w-4 h-4" />)}
+                        control={form.control}
+                        type="select"
+                        options={Object.values(priorityTypes).map((priority) => ({
+                          label: t(`fields.priority-types.${priority}`),
+                          value: priority
+                        }))}
+                        renderValue={(value) => (
+                          <div className="flex items-center gap-2">
+                            <div className='w-4 h-4 rounded-[5px]' style={getPriorityColorStyle(value as TaskPriority, 'background')} />
+                            <span>{t(`fields.priority-types.${value}`)}</span>
+                          </div>
+                        )}
+                        renderOption={(option) => (
+                          <div className="flex items-center gap-2">
+                            <div className='w-4 h-4 rounded-[25px]' style={getPriorityColorStyle(option.value as TaskPriority, 'background')} />
+                            <span>{t(`fields.priority-types.${option.value}`)}</span>
+                          </div>
+                        )}
+
+                        className="max-w-3xl"
+                        onSave={(name, value) => updateField(name as keyof FormValues, value)}
+                      />
+                      {!!task?.creator && (
+                        <div className="flex flex-col gap-2">
+                          <div className="flex gap-2">
+                            <UserPlusIcon className="w-4 h-4" />
+                            <Label >{t('fields.creator')}</Label>
+                          </div>
+                          <div className="flex items-center gap-2 bg-muted/50 opacity-100 px-2 py-1.5 rounded-md cursor-not-allowed">
+                            {task?.creator?.avatar?.small ? (
+                              <img src={task?.creator?.avatar?.small} alt={task?.creator?.full_name} width={20} height={20} className="rounded-full object-cover" />
+                            ) : (
+                              <CircleUserRoundIcon className="w-4 h-4 text-muted-foreground" />
+                            )}
+                            <span>{task?.creator?.full_name}</span>
+                          </div>
+                        </div>
+                      )}
+
+                      <EditableField<FormValues>
+                        name="due_date_start"
+                        label={fieldLabel(t('fields.due-date-start'), <CalendarIcon className="w-4 h-4" />)}
+                        control={form.control}
+                        type="custom"
+                        className="max-w-3xl"
+                        onSave={(name, value) => updateField(name as keyof FormValues, value)}
+                        renderValue={(value) => (
+                          <span>{value ? format(value, DATE_VIEW_FORMAT) : t('fields.not-specified')}</span>
+                        )}
+                        renderCustom={(value, save) => (
+                          <DatePicker
+                            value={value}
+                            onChange={(date) => {
+                              save(date)
+                            }}
+                          />
+                        )}
+                      />
+                      <EditableField<FormValues>
+                        name="doers"
+                        label={fieldLabel(t('fields.assignees'), <UserIcon className="w-4 h-4" />)}
+                        control={form.control}
+                        type="multiple-select"
+                        options={members.map((member: MemberResponse) => ({
+                          label: member.user.full_name,
+                          value: member.user.id.toString()
+                        }))}
+                        className="max-w-3xl"
+                        isVisible={!isTemplate}
+                        onSave={(_, value: string[]) => changeDoers(value)}
+                        renderValue={(value) => (
+                          <div className="flex items-center gap-2">
+                            {renderDoersValue(value)}
+                          </div>
+                        )}
+                      />
+                      <EditableField<FormValues>
+                        name="due_date_end"
+                        label={fieldLabel(t('fields.due-date-end'), <CalendarIcon className="w-4 h-4" />)}
+                        control={form.control}
+                        type="custom"
+                        className="max-w-3xl"
+                        onSave={(name, value) => updateField(name as keyof FormValues, value)}
+                        renderValue={(value) => (
+                          <span>{value ? format(value, DATE_VIEW_FORMAT) : t('fields.not-specified')}</span>
+                        )}
+                        renderCustom={(value, save) => (
+                          <DatePicker
+                            value={value}
+                            onChange={(date) => {
+                              save(date)
+                            }}
+                          />
+                        )}
+                      />
+
+                      <EditableField<FormValues>
+                        name="supervisor"
+                        label={fieldLabel(t('fields.supervisor'), <EyeIcon className="w-4 h-4" />)}
+                        control={form.control}
+                        type="select"
+                        options={members.map((member) => ({
+                          label: member.user.full_name || member.user.email || t('fields.not-specified'),
+                          value: member.user.id.toString()
+                        }))}
+                        className="max-w-3xl"
+                        isVisible={!isTemplate}
+                        onSave={(_, value) => changeSupervisor(value as number)}
+                        renderValue={(value) => (
+                          <div className="flex items-center gap-2">
+                            {renderSupervisorValue(value)}
+                          </div>
+                        )}
+                      />
+
+                      <EditableField<FormValues>
+                        name="status"
+                        label={fieldLabel(t('fields.status'), <Kanban className="w-4 h-4" />)}
+                        control={form.control}
+                        type="select"
+                        options={statuses.map((status) => ({
+                          label: status.name ?? i18n.language === 'ru' ? status.name_ru ?? '' : status.name_en ?? '',
+                          value: status.id.toString()
+                        }))}
+                        className="max-w-3xl"
+                        isVisible={!isTemplate}
+                        onSave={(name, value) => updateField(name as keyof FormValues, value)}
+                        renderValue={(value) => (
+                          <div className="flex items-center gap-2">
+                            <span>{renderStatusValue(value)}</span>
+                          </div>
+                        )}
+                      />
+                      <EditableField<FormValues>
+                        name="tags"
+                        label={fieldLabel(t('fields.tags'), <TagIcon className="w-4 h-4" />)}
+                        control={form.control}
+                        type="custom"
+                        className="max-w-3xl"
+                        onSave={(_, value) => changeTags(value)}
+                        renderValue={(value) => (
+                          <div className="flex flex-wrap gap-2">
+                            {value && value.length > 0 ? (
+                              value.map((tag: string) => (
+                                <Badge key={tag} variant="secondary" className="text-sm">
+                                  {tag}
+                                </Badge>
+                              ))
+                            ) : (
+                              <span className="text-muted-foreground">{t('fields.not-specified')}</span>
+                            )}
+                          </div>
+                        )}
+                        renderCustom={(value, save) => (
+                          <TagsInput
+                            value={value || []}
+                            options={existingTags?.map((tag) => tag.name || '') || []}
+                            onChange={(tags) => save(tags)}
+                            placeholder={t('fields.add-tags')}
+                            maxTags={10}
+                          />
+                        )}
+                      />
+                    </div>
+                  </AccordionContent>
+                </AccordionItem>
+                <AccordionItem className="w-full" value="description">
+                  <AccordionTrigger>{t('fields.description')}</AccordionTrigger>
+                  <AccordionContent>
+                    <div>
+                      <EditableField<FormValues>
+                        name="description"
+                        type="custom"
+                        control={form.control}
+                        className="max-w-3xl"
+                        onSave={(name, value) => updateField(name as keyof FormValues, value)}
+                        renderValue={(value) => {
+                          if (!value) {
+                            return <span>{t('fields.not-specified')}</span>
+                          }
+                          return <div className="prose dark:prose-invert max-w-none" dangerouslySetInnerHTML={{ __html: value || '' }} />
+                        }}
+                        renderCustom={(value, save) => (
+                          <TaskDescription
+                            value={value || ''}
+                            onChange={(value) => save(value)}
+                          />
+                        )}
+                      />
+                    </div>
+                  </AccordionContent>
+                </AccordionItem>
+                {task.parent === undefined || task.parent === null && (
+                  <AccordionItem className="w-full" value="subtasks">
+                    <AccordionTrigger>{isTemplate ? t('subtasks-entity.subtemplates') : t('subtasks-entity.subtasks')}</AccordionTrigger>
+                    <AccordionContent>
+                      <SubTasks
+                        subtasks={task.subtasks.map((subtask) => ({
+                          id: subtask.id,
+                          title: subtask.name,
+                          slug: subtask.slug,
+                          completed: JSON.parse(localStorage.getItem(TASK_STATUSES_STORAGE) || '[]')?.find((status: { id: string | number }) => status.id === subtask.id)?.completed ?? false,
+                        }))}
+                        isTemplate={isTemplate}
+                        onAddSubtask={addSubtask}
+                        onEditSubtask={editSubtask}
+                        onDeleteSubtask={deleteSubtask}
+                        onToggleCompleteSubtask={toggleCompleteSubtask}
+                      />
+                    </AccordionContent>
+                  </AccordionItem>
+                )}
+                <AccordionItem className="w-full" value="files">
+                  <AccordionTrigger>{t('fields.files')}</AccordionTrigger>
+                  <AccordionContent>
+                    <FileAttachment files={task.files?.map((file) => ({
+                      id: file.id,
+                      file: file.file ?? '',
+                      filename: file.filename ?? '',
+                      size: file.size,
+                    }))} onUpload={addFile} onDelete={deleteFile} />
+                  </AccordionContent>
+                </AccordionItem>
+                <AccordionItem className="w-full" value="comments">
+                  <AccordionTrigger>{t('comments-entity.comments')}</AccordionTrigger>
+                  <AccordionContent>
+                    <TaskComments
+                      comments={task.comments?.map((comment) => ({
+                        id: comment.id,
+                        text: comment.text,
+                        author: {
+                          id: comment.user.id,
+                          name: comment.user.full_name || comment.user.email || t('fields.not-specified'),
+                          avatar: comment.user.avatar?.small,
+                          email: comment.user.email,
+                        },
+                        createdAt: comment.created_at,
+                        files: comment.files,
+                      })) || []}
+                      currentUser={{
+                        id: task?.creator?.id ?? 0,
+                        name: task?.creator?.full_name || task?.creator?.email || t('fields.not-specified'),
+                        avatar: task?.creator?.avatar?.small,
+                      }}
+                      onAddComment={addComment}
+                      onEditComment={editComment}
+                      onDeleteComment={deleteComment}
+                    />
+                  </AccordionContent>
+                </AccordionItem>
+              </Accordion>
+            </div>
+          </ScrollArea>
+        </div>
+      </Form>
+    </div>
+  )
+}
+
+export default TaskDetails

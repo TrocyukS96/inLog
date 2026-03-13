@@ -35,7 +35,8 @@ export interface Avatar {
     firstName: string          // name → firstName (более понятно)
     middleName: string         // patronymic
     lastName: string           // surname
-    fullName?: string          // вычисляемое поле, если нужно
+    fullName?: string 
+    full_name?: string         // вычисляемое поле, если нужно
   
     companyName?: string
     position?: string
@@ -47,6 +48,9 @@ export interface Avatar {
     phone?: string | null
     mobilePhone?: string | null
     workPhone?: string | null
+
+    work_phone?: string | null
+    mobile_phone?: string | null
   
     settings: UserSettings
   
@@ -127,4 +131,7 @@ export interface Avatar {
     size?: number
     mimeType?: string
     createdAt?: string
+    task?:number
+    filename?:string
+    file?:string
   }

@@ -23,17 +23,13 @@ export function UserMenu() {
   const handleLogout = async () => {
     try {
       await logout().unwrap()
-      sessionStorage.clear()
+      localStorage.clear()
       toast.success(t('notice-list.log-out-success'))
       window.location.href = routes.login()
     } catch {
       toast.error(t('errors.error-logout'))
     }
   }
-
-  // const initials = user
-  //   ? `${user.firstName?.[0] || ''}${user.lastName?.[0] || ''}`.toUpperCase()
-  //   : '??'
 
   return (
     <DropdownMenu>

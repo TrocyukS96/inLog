@@ -2,6 +2,7 @@ import { createSelector } from '@reduxjs/toolkit'
 import type { RootState } from '../../../app/store/store'
 import { userApi } from './userSlice'
 import type { User } from './types'
+import { ACCESS_TOKEN } from '../../../shared/config/constants'
 
 // Базовый селектор на весь userApi slice (RTK Query хранит данные в state[userApi.reducerPath])
 const selectUserApiSlice = (state: RootState) => state[userApi.reducerPath]
@@ -62,6 +63,6 @@ export const selectUserRole = createSelector(selectUser, (user) => user?.role)
 // Альтернатива: если авторизация определяется наличием токена + user
 export const selectIsAuthenticatedAlternative = createSelector(
   selectUser,
-  () => !!sessionStorage.getItem('ACCESS_TOKEN'),
+  () => !!localStorage.getItem(ACCESS_TOKEN),
   (user, hasToken) => !!user && hasToken
 )

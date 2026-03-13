@@ -7,7 +7,7 @@ export interface Task {
     slug: string
     project: number
     creator: User
-    priority: 'low' | 'medium' | 'important' | 'critical'
+    priority: TaskPriority
     status: Status
     status_position: number | string
     due_date_start: string
@@ -27,6 +27,8 @@ export interface Task {
     days_to_complete?:number
 }
 
+export type TaskPriority = 'low' | 'medium' | 'critical' | 'important'
+
 export interface TasksFilterParams {
     slug: string
     status: string
@@ -35,7 +37,7 @@ export interface TasksFilterParams {
     name__icontains: string
     tags: Tag[]
     priority: Task['priority']
-    created_at__range: string
+    created_at__range: any
     supervisor__user: Supervisor['user']
     ordering: string
     limit: string | number
@@ -70,9 +72,27 @@ export interface Tag {
     linked_object_content_type?:string | null
 }
 
+
 export interface ResearchEntity {
     id?: number
     name: string
     project?: number
     created_at?: string
 }
+
+interface CommentFile {
+    id: number
+    url: string
+    name: string
+    size?: number
+    mime_type?: string
+  }
+
+export interface Comment {
+    id: number
+    text: string
+    project: number
+    user: User
+    files: CommentFile[]
+    created_at: string // ISO date string
+  }

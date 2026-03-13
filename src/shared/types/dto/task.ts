@@ -1,8 +1,11 @@
-export interface TaskCreate {
+import type { Tag, TaskPriority } from "../../../entities/task/model/types"
+import type { UserFile } from "../../../entities/user/model/types"
+
+    export interface TaskCreate {
     name: string
     title: string
     description: string
-    priority: 'low' | 'medium' | 'important' | 'critical'
+    priority: TaskPriority
     project: number
     parent: number
     status: number
@@ -12,9 +15,10 @@ export interface TaskCreate {
 }
 
 export interface TaskUpdate {
+    id: number
     name: string
     description: string
-    priority: 'low' | 'medium' | 'important' | 'critical'
+    priority: TaskPriority
     status: number
     status_position: number
     due_date_start: string
@@ -31,4 +35,12 @@ export interface TaskUpdate {
     equipment: number
     archived: boolean
     is_template: boolean
+    files:UserFile[]
+}
+
+export interface TagsResponse {
+    count: number
+    next: string | null
+    previous: string | null
+    results: Tag[]
 }

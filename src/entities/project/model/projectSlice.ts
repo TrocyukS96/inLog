@@ -1,7 +1,7 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
 import { baseQuery } from "../../../shared/api/clientApi";
 import type { Project } from "./types";
-import type { ProjectRequest } from "../../../shared/types/dto/project";
+import type { MemberResponse, ProjectRequest } from "../../../shared/types/dto/project";
 
 export const projectApi = createApi({
     reducerPath: 'projectApi',
@@ -49,7 +49,10 @@ export const projectApi = createApi({
             }),
             invalidatesTags: ['Project'],
           }),
+          getProjectMembers: builder.query<MemberResponse[], number>({
+            query: (id) => `projects/${id}/members/`,
+          }),
     }),
 })
 
-export const { useGetProjectsQuery, useAddProjectMutation, useGetProjectByIdQuery, useUpdateProjectMutation, useDeleteProjectMutation } = projectApi
+export const { useGetProjectsQuery, useAddProjectMutation, useGetProjectByIdQuery, useUpdateProjectMutation, useDeleteProjectMutation, useGetProjectMembersQuery } = projectApi

@@ -12,46 +12,48 @@ import { useGetOrganizationsQuery } from '../../entities/organization/model/orga
 import { useGetProjectsQuery } from '../../entities/project/model/projectSlice'
 import { useTranslation } from 'react-i18next'
 import { Loader2 } from 'lucide-react'
+import { useSelector } from 'react-redux'
 
 export function RootLayout() {
   const { i18n, t} = useTranslation()
   const navigate = useNavigate()
   const [verifyToken] = useVerifyTokenMutation()
 
+  
+
   const fetchVerifyToken = async (token: string) => {
     try {
        await verifyToken({ token }).unwrap()
     } catch (error) {
         toast.error(t('errors.error-loading-token'))
-        sessionStorage.removeItem(ACCESS_TOKEN)
+        localStorage.removeItem(ACCESS_TOKEN)
         navigate(routes.login())
     }
   }
 
   const { data: user, isLoading: isUserLoading, error: userError} = useGetMeQuery(undefined, {
-    skip: !isAuthenticated,
+    skip: !localStorage.getItem(ACCESS_TOKEN),
+    refetchOnMountOrArgChange: true,
   })
 
+  const isAuth = !!user
+
   const { data: organizations, isLoading: isOrgsLoading } = useGetOrganizationsQuery(undefined, {
-    skip: !isAuthenticated || !user,
+    skip: !isAuth || !user,
   })
 
   const firstOrgId = organizations?.[0]?.id
 
   const { data: projects, isLoading: isProjectsLoading } = useGetProjectsQuery(
     { organization: firstOrgId! },
-    { skip: !isAuthenticated || !firstOrgId }
+    { skip: !isAuth || !firstOrgId }
   )
 
   useEffect(() => {
-    const token = sessionStorage.getItem(ACCESS_TOKEN)
-
-    if (!token) {
-      navigate(routes.login())
-      return
+    const token = localStorage.getItem(ACCESS_TOKEN)
+    if(token) {
+      fetchVerifyToken(JSON.parse(token))
     }
-    fetchVerifyToken(JSON.parse(token))
-    
   }, [])
 
   useEffect(() => {
@@ -61,20 +63,22 @@ export function RootLayout() {
   }, [user, i18n])
 
   const verifyAndRedirect = useCallback(() => {
-    if (isUserLoading || isOrgsLoading || isProjectsLoading) return
+    const token = localStorage.getItem(ACCESS_TOKEN)
+    if (isUserLoading || isOrgsLoading || isProjectsLoading || !token) return
 
     if (userError) {
+      console.log(userError,'-----> userError')
       toast.error(t('errors.error-loading-user'))
       navigate(routes.login())
       return
     }
 
-    if (!organizations?.length) {
+    if ( organizations && organizations?.length === 0) {
       navigate(routes.organizations.new())
       return
     }
 
-    if (!projects?.length) {
+    if ( projects && projects?.length === 0) {
       navigate(routes.projects.new())
       return
     }
@@ -94,13 +98,13 @@ export function RootLayout() {
   }
 
   return (
-    <div className="min-h-screen flex bg-background text-foreground">
+    <div className="min-h-screen flex bg-background text-foreground overflow-hidden">
       <Sidebar />
 
-      <div className="flex-1 flex flex-col h-full">
+      <div className="flex-1 flex flex-col h-full min-w-0">
         <Header />
 
-        <main className="flex-1 h-full">
+        <main className="flex-1 h-full min-w-0 overflow-hidden">
           <Outlet />
         </main>
       </div>

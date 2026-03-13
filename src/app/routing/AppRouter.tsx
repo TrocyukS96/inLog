@@ -6,14 +6,15 @@ import PasswordRecoveryPage from '../../pages/auth/password-recovery'
 import RecoveryMessagePage from '../../pages/auth/recovery-message'
 import RegisterPage from '../../pages/auth/register'
 import DashboardPage from '../../pages/dashboard'
+import GeoMechanicsPage from '../../pages/dashboard/geo-mechanics'
+import SchedulerPage from '../../pages/dashboard/scheduler'
+import TasksPage from '../../pages/dashboard/scheduler/tasks'
+import SettingsPage from '../../pages/dashboard/settings'
 import OrganizationsAndProjectsPage from '../../pages/dashboard/settings/ogranizations-and-projects'
+import ProfilePage from '../../pages/dashboard/settings/profile'
 import { routes } from '../../shared/lib/routes'
 import { RootLayout } from '../../widgets/root-layout'
-import SettingsPage from '../../pages/dashboard/settings'
-import ProfilePage from '../../pages/dashboard/settings/profile'
-import SchedulerPage from '../../pages/dashboard/scheduler'
-import TaskPage from '../../pages/dashboard/scheduler/tasks'
-import GeoMechanicsPage from '../../pages/dashboard/geo-mechanics'
+import TemplatesPage from '../../pages/dashboard/scheduler/templates'
 
 export function AppRouter() {
   return (
@@ -32,8 +33,8 @@ export function AppRouter() {
             <Route index element={<DashboardPage />} />
             <Route path={routes.scheduler.list()} element={<SchedulerPage />} >
               <Route index element={<Navigate to={routes.scheduler.tasks()} replace />} />
-              <Route path={routes.scheduler.tasks()} element={<TaskPage />} />
-              <Route path={routes.scheduler.tasksTemplate()} element={<div>Tasks Template</div>} />
+              <Route path={routes.scheduler.tasks()} element={<TasksPage />} />
+              <Route path={routes.scheduler.templates()} element={<TemplatesPage />} />
               <Route path={routes.scheduler.statuses()} element={<div>Statuses</div>} />
               <Route path={routes.scheduler.roadmap()} element={<div>Roadmap</div>} />
             </Route>

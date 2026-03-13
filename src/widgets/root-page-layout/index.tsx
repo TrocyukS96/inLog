@@ -1,6 +1,7 @@
 import { Link, useLocation } from "react-router-dom"
 import { cn } from "../../shared/lib/utils"
 import { OrgProjectSelector } from "../../features/org-project-selector"
+import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "../../shared/ui/resizable"
 
 interface NavItem {
   label: string
@@ -9,33 +10,64 @@ interface NavItem {
   onClick?: () => void
 }
 
-const RootPageLayout = ({ children, navItems }: { children: React.ReactNode, navItems: NavItem[] }) => {
+interface RootPageLayoutProps {
+  children: React.ReactNode
+  navItems: NavItem[]
+}
+
+const RootPageLayout = ({ 
+  children, 
+  navItems,
+}: RootPageLayoutProps) => {
 
     const location = useLocation()
 
     const isActive = (href: string) => {
-        return location.pathname === href
+        return location.pathname.includes(href)
     }
 
   return (
-    <div className="flex flex-row h-full">
-      <nav className="w-1/4 h-[calc(100vh-64px)] p-4 border-r border-gray-200">
-        <div className="mb-4">
-        <OrgProjectSelector />
-        </div>
-        
-        {navItems.map((item) => (
-          <Link key={item.label} to={item.href ?? ''} onClick={item.onClick} className={cn("flex items-center gap-2 p-2 rounded-lg w-full transition-all duration-300", isActive(item.href ?? '') && 'bg-accent text-white')} >
-            {item.icon && <span className={cn('w-4 h-4')} >{item.icon}</span>}
-            <span className="text-sm">{item.label}</span>
-          </Link>
-        ))}
-      </nav>
-      <div className="w-3/4 p-4 h-[calc(100vh-80px)] ">
-        <div className="h-full overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
-          {children}
-        </div>
-      </div>
+    <div className="h-[calc(100vh-64px-8px)] w-full">
+      <ResizablePanelGroup orientation="horizontal" className="h-full">
+        <ResizablePanel 
+          defaultSize={15} 
+          minSize={15}
+
+        >
+          <nav className="h-full p-4 border-r border-border ">
+            <div className="mb-4">
+              <OrgProjectSelector />
+            </div>
+            
+            <div className="space-y-1">
+              {navItems.map((item) => (
+                <Link 
+                  key={item.label} 
+                  to={item.href ?? ''} 
+                  onClick={item.onClick} 
+                  className={cn(
+                    "flex items-center gap-2 p-2 rounded-lg w-full transition-all duration-300 hover:bg-accent/50",
+                    isActive(item.href ?? '') && 'bg-accent text-accent-foreground'
+                  )}
+                >
+                  {item.icon && <span className="w-4 h-4">{item.icon}</span>}
+                  <span className="text-sm truncate">{item.label}</span>
+                </Link>
+              ))}
+            </div>
+          </nav>
+        </ResizablePanel>
+
+        <ResizableHandle withHandle />
+
+        <ResizablePanel defaultSize={85} className="min-w-0">
+          <div className="h-full p-4 pr-0 pl-1 min-w-0">
+            <div className="h-[calc(100vh-64px-16px-8px)] pr-0 mr-4 min-w-0">
+              {children}
+            </div>
+          </div>
+        </ResizablePanel>
+      </ResizablePanelGroup>
     </div>
   )
 }

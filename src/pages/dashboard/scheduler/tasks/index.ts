@@ -1,3 +1,3 @@
-import TaskPage from "./ui/TaskPage"
+import TasksPage from "./ui/TasksPage"
 
-export default TaskPage;
+export default TasksPage;
