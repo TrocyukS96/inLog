@@ -1,7 +1,7 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
 import { baseQuery } from "../../../shared/api/clientApi";
-import type { Status, Tag, Task, TasksFilterParams } from "./types";
 import type { TagsResponse, TaskCreate, TaskUpdate } from "../../../shared/types/dto/task";
+import type { Status, Task, TasksFilterParams } from "./types";
 
 export const taskApi = createApi({
     reducerPath: 'taskApi',
@@ -32,7 +32,7 @@ export const taskApi = createApi({
             query: ({ projectId, taskSlug }) => ({
                 url: `projects/${projectId}/tasks/task/${taskSlug}/`,
             }),
-            providesTags: (result, error, { taskSlug }) => [{ type: 'Task', id: taskSlug }],
+            providesTags: ['Task'],
         }),
 
         updateTask: builder.mutation<Task, { projectId: number; taskSlug: string; data: { id?: number, parent?: number } & Partial<TaskUpdate> }>({

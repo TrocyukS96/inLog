@@ -8,9 +8,10 @@ import { taskApi, useAddTaskCommentMutation, useAddTaskDoerMutation, useAddTaskS
 import { Form } from '../../../shared/ui/form'
 
 import { format } from 'date-fns'
-import { CalendarIcon, CircleUserRoundIcon, EyeIcon, FileTextIcon, FlagIcon, Kanban, TagIcon, UserIcon, UserPlusIcon } from 'lucide-react'
-import { useCallback, useEffect, useState } from 'react'
+import { CalendarIcon, CircleUserRoundIcon, EyeIcon, FlagIcon, Kanban, TagIcon, UserIcon, UserPlusIcon } from 'lucide-react'
+import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { useDispatch } from 'react-redux'
 import { useSearchParams } from 'react-router-dom'
 import { toast } from 'sonner'
 import { SubTasks } from '../../../entities/subtasks'
@@ -25,11 +26,10 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '..
 import { Badge } from '../../../shared/ui/badge'
 import { DatePicker } from '../../../shared/ui/date-picker'
 import { EditableField } from '../../../shared/ui/editable-field'
+import { FileAttachment } from '../../../shared/ui/file-attachment'
 import { Label } from '../../../shared/ui/label'
 import { ScrollArea } from '../../../shared/ui/scroll-area'
 import { TagsInput } from '../../../shared/ui/tags-input'
-import { FileAttachment } from '../../../shared/ui/file-attachment'
-import { useDispatch } from 'react-redux'
 import TaskDescription from './TaskDescription'
 
 const taskSchema = z.object({
@@ -309,21 +309,17 @@ const TaskDetails = ({ task, tags: existingTags, taskSlug, statuses, members }: 
 
     const previousValue = form.getValues('tags') || []
 
-    // Определяем тип операции
     const operationType: 'add' | 'delete' = previousValue.length < value.length ? 'add' : 'delete'
 
     if (operationType === 'delete') {
-      // Находим удаленный тег
       const deletedTagName = previousValue.find(tag => !value.includes(tag))
 
       if (!deletedTagName) {
         return
       }
 
-      // Получаем текущие ID тегов задачи
       const currentTagIds = task.tags?.map(tag => tag.id) || []
 
-      // Фильтруем, оставляем только теги, которые не удаляем
       const updatedTagIds = currentTagIds.filter(tagId => {
         const tag = task.tags?.find(t => t.id === tagId)
         return tag?.name !== deletedTagName
@@ -350,7 +346,6 @@ const TaskDetails = ({ task, tags: existingTags, taskSlug, statuses, members }: 
         })
       }
     } else {
-      // Находим добавленные теги
       const addedTagNames = value.filter(tag => !previousValue.includes(tag))
 
       if (addedTagNames.length === 0) {
@@ -460,27 +455,6 @@ const TaskDetails = ({ task, tags: existingTags, taskSlug, statuses, members }: 
       errorsHandler(error, t)
     }
   }
-
-  const changeDescription = useCallback(async (value: string) => {
-    const projectId = searchParams.get('project')
-    const isHasAccess = await checkTaskAccess()
-    if (!isHasAccess) {
-      return
-    }
-    try {
-      await updateTask({
-        projectId: Number(projectId),
-        taskSlug: taskSlug || '',
-        data: {
-          id: task?.id ?? 0,
-          description: value,
-        } as TaskUpdate,
-      }).unwrap()
-
-    } catch (error) {
-      errorsHandler(error, t)
-    }
-  }, [task?.id, taskSlug, searchParams, t])
 
   const toggleCompleteSubtask = async (id: string | number, completed: boolean) => {
     const taskStatuses = localStorage.getItem(TASK_STATUSES_STORAGE)

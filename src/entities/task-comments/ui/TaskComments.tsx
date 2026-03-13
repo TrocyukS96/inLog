@@ -1,20 +1,20 @@
 'use client'
 
-import { Plus, Send } from 'lucide-react'
+import { Plus } from 'lucide-react'
 import React, { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { cn } from '../../../shared/lib/utils'
+import { Avatar, AvatarFallback, AvatarImage } from '../../../shared/ui/avatar'
 import { Button } from '../../../shared/ui/button'
 import {
-    Dialog,
-    DialogContent,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
 } from '../../../shared/ui/dialog'
-import { Textarea } from '../../../shared/ui/textarea'
 import { Label } from '../../../shared/ui/label'
-import { Avatar, AvatarFallback, AvatarImage } from '../../../shared/ui/avatar'
+import { Textarea } from '../../../shared/ui/textarea'
 import TaskComment from './TaskComment'
 
 interface CommentItem {

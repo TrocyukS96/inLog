@@ -6,13 +6,11 @@ import { ACCESS_TOKEN } from '../../shared/config/constants'
 import { routes } from '../../shared/lib/routes'
 import { Header } from '../header'
 import { Sidebar } from '../sidebar'
-import { isAuthenticated } from '../../features/auth/model/selectors'
 import { useGetMeQuery } from '../../entities/user/model/userSlice'
 import { useGetOrganizationsQuery } from '../../entities/organization/model/organizationSlice'
 import { useGetProjectsQuery } from '../../entities/project/model/projectSlice'
 import { useTranslation } from 'react-i18next'
 import { Loader2 } from 'lucide-react'
-import { useSelector } from 'react-redux'
 
 export function RootLayout() {
   const { i18n, t} = useTranslation()

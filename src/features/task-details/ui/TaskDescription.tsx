@@ -2,8 +2,8 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { cn } from '../../../shared/lib/utils'; // для условных классов
-import { Button } from '../../../shared/ui/button'; // импортируем компонент Button из shadcn
+import { cn } from '../../../shared/lib/utils';
+import { Button } from '../../../shared/ui/button';
 import { TextEditor } from '../../../shared/ui/text-editor';
 import { SaveIcon } from 'lucide-react';
 
@@ -33,11 +33,6 @@ const TaskDescription = ({ value, onChange }: Props) => {
             setIsChanged(false);
         }
     }, [localValue, value, onChange]);
-
-    const handleCancel = useCallback(() => {
-        setLocalValue(value);
-        setIsChanged(false);
-    }, [value]);
 
     return (
         <div className="space-y-2">

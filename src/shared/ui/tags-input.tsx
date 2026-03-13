@@ -1,20 +1,12 @@
+import { Check, Search, X } from "lucide-react"
 import * as React from "react"
-import { X, Check, Search } from "lucide-react"
-import { Badge } from "./badge"
-import { Input } from "./input"
 import { cn } from "../lib/utils"
+import { Badge } from "./badge"
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "./popover"
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-} from "./command"
 
 export interface TagsInputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'onChange' | 'value'> {
   value?: string[]
@@ -26,7 +18,7 @@ export interface TagsInputProps extends Omit<React.InputHTMLAttributes<HTMLInput
 }
 
 const TagsInput = React.forwardRef<HTMLInputElement, TagsInputProps>(
-  ({ className, value = [], onChange, placeholder, disabled, maxTags, options = [], ...props }, ref) => {
+  ({ className, value = [], onChange, placeholder, disabled, maxTags, options = [], ...props }) => {
     const [inputValue, setInputValue] = React.useState("")
     const [open, setOpen] = React.useState(false)
     const inputRef = React.useRef<HTMLInputElement>(null)
@@ -64,8 +56,7 @@ const TagsInput = React.forwardRef<HTMLInputElement, TagsInputProps>(
       }
     }
 
-    const handleBlur = (e: React.FocusEvent) => {
-      // Даем время для клика по popover
+    const handleBlur = () => {
       setTimeout(() => {
         if (!open && inputValue.trim()) {
           addTag()
@@ -159,7 +150,7 @@ const TagsInput = React.forwardRef<HTMLInputElement, TagsInputProps>(
               ) : (
                 filteredOptions.map((option, index) => (
                   <button
-                    key={option}
+                    key={option+index}
                     className={cn(
                       "relative flex w-full cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground",
                       "data-[disabled]:pointer-events-none data-[disabled]:opacity-50"

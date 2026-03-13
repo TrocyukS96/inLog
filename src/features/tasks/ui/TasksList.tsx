@@ -1,10 +1,10 @@
 import { useTranslation } from 'react-i18next'
 import { Button } from '../../../shared/ui/button'
-import { Card, CardContent } from '../../../shared/ui/card'
+import { Card } from '../../../shared/ui/card'
 
-import type { Task } from '../../../entities/task/model/types'
 import { useDeferredValue } from 'react'
 import { TaskCard } from '../../../entities/task'
+import type { Task } from '../../../entities/task/model/types'
 
 interface Props {
   tasks: Task[]
@@ -20,7 +20,7 @@ interface Props {
   }
 }
 
-const TasksList = ({ tasks, selectedTaskSlug,selectTask, deleteTask, createTemplate, changePagination, pagination }: Props) => {
+const TasksList = ({ tasks, selectedTaskSlug,selectTask, deleteTask, createTemplate, changePagination }: Props) => {
   const { t } = useTranslation()
 
   const deferredTasks = useDeferredValue(tasks)

@@ -1,4 +1,4 @@
-import { Copy, MoreHorizontal, Trash2 } from 'lucide-react'
+import { MoreHorizontal, Trash2 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { cn, getPriorityColorStyle } from '../../../shared/lib/utils'
 import { Button } from '../../../shared/ui/button'
@@ -18,7 +18,6 @@ const TaskCard = ({
     task,
     selectTask,
     deleteTask,
-    createTemplate,
     isActive = false,
 }: TaskCardProps) => {
     const { t } = useTranslation()
@@ -33,10 +32,8 @@ const TaskCard = ({
                 isActive
                     ? "border-primary shadow-sm"
                     : "border-border hover:border-primary/50",
-                // style.bg
             )}
         >
-            {/* Цветная точка слева */}
             <div className='absolute left-0 top-0 bottom-0 w-2 rounded-l-lg' style={getPriorityColorStyle(task.priority, 'background')} />
 
             <div className="flex items-center gap-4 flex-1 pl-3">

@@ -3,42 +3,39 @@
 import { formatDistance } from 'date-fns'
 import { enUS, ru } from 'date-fns/locale'
 import {
-    Copy,
-    Edit,
-    MoreHorizontal,
-    Pin,
-    PinOff,
-    Reply,
-    Trash2,
+  Edit,
+  MoreHorizontal,
+  Pin,
+  Trash2
 } from 'lucide-react'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { cn } from '../../../shared/lib/utils'
 import {
-    AlertDialog,
-    AlertDialogAction,
-    AlertDialogCancel,
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogTitle,
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
 } from '../../../shared/ui/alert-dialog'
 import { Avatar, AvatarFallback, AvatarImage } from '../../../shared/ui/avatar'
 import { Button } from '../../../shared/ui/button'
 import {
-    Dialog,
-    DialogContent,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
 } from '../../../shared/ui/dialog'
 import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuTrigger,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
 } from '../../../shared/ui/dropdown-menu'
 import { Textarea } from '../../../shared/ui/textarea'
 
@@ -89,7 +86,6 @@ const TaskComment = ({
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
   const [editText, setEditText] = useState(comment.text)
-  const [showReplies, setShowReplies] = useState(true)
 
   const isAuthor = currentUser?.id === comment.author.id
   const dateLocale = i18n.language === 'ru' ? ru : enUS

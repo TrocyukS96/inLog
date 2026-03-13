@@ -1,7 +1,7 @@
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
 import type { TaskPriority } from "../../entities/task/model/types"
-import { priorityColors, priorityColorStyles } from "../config/constants"
+import { priorityColorStyles } from "../config/constants"
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
