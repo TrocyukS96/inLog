@@ -245,7 +245,11 @@
         "task-details": "Task details",
         "loading-task-details": "Loading task details",
         "no-task-selected": "No task selected",
-        "select-task-to-view": "Select task to view"
+        "select-task-to-view": "Select task to view",
+        "kanban-board": "Kanban board",
+        "kanban-board-description": "Kanban board for managing tasks",
+        "no-statuses-selected": "No statuses",
+        "create-status-first": "Create first status"
     },
     "templates-page": {
         "title": "Templates",

@@ -34,6 +34,18 @@ export const taskApi = createApi({
             }),
             providesTags: ['Task'],
         }),
+        
+        getTaskByParams: builder.mutation<{
+            count: number
+            next: string | null
+            previous: string | null
+            results: Task[]
+        }, { projectId: number; params: Partial<TasksFilterParams> }>({
+            query: ({ projectId, params }) => ({
+                url: `projects/${projectId}/tasks/task/`,
+                params: { ...params },
+            }),
+        }),
 
         updateTask: builder.mutation<Task, { projectId: number; taskSlug: string; data: { id?: number, parent?: number } & Partial<TaskUpdate> }>({
             query: ({ projectId, taskSlug, data }) => ({
@@ -180,6 +192,7 @@ export const {
     useDeleteTaskCommentMutation,
     useCreateTaskFileMutation,
     useDeleteTaskFileMutation,
+    useGetTaskByParamsMutation,
 } = taskApi;
 
 

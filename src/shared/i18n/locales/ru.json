@@ -232,7 +232,11 @@
         "task-details": "Детали задачи",
         "loading-task-details": "Загрузка деталей задачи",
         "no-task-selected": "Задача не выбрана",
-        "select-task-to-view": "Выберите задачу для просмотра"
+        "select-task-to-view": "Выберите задачу для просмотра",
+        "kanban-board": "Kanban доска",
+        "kanban-board-description": "Kanban доска для управления задачами",
+        "no-statuses-selected": "Нет статусов",
+        "create-status-first": "Создайте первый статус"
     },
 
     "templates-page": {

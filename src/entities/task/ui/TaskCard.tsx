@@ -22,7 +22,6 @@ const TaskCard = ({
 }: TaskCardProps) => {
     const { t } = useTranslation()
     const isTemplate = task.is_template
-    console.log(isTemplate,'---isTemplate')
     return (
         <div
             onClick={() => selectTask(task)}

@@ -1,71 +1,69 @@
 'use client'
 
 import {
-    closestCenter,
     DndContext,
     DragOverlay,
     KeyboardSensor,
+    MeasuringStrategy,
     PointerSensor,
+    closestCenter,
+    pointerWithin,
     useSensor,
     useSensors,
     type DragEndEvent,
-    type DragStartEvent,
+    type DragOverEvent,
+    type DragStartEvent
 } from '@dnd-kit/core'
 import {
-    restrictToParentElement,
-    restrictToVerticalAxis,
+    restrictToParentElement
 } from '@dnd-kit/modifiers'
 import {
-    arrayMove,
     SortableContext,
     sortableKeyboardCoordinates,
-    verticalListSortingStrategy,
+    verticalListSortingStrategy
 } from '@dnd-kit/sortable'
 import { Loader2 } from 'lucide-react'
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-
 import { useSearchParams } from 'react-router-dom'
-import { TaskCard } from '../../../../entities/task'
-import { useGetStatusesQuery, useGetTasksQuery } from '../../../../entities/task/model/taskSlice'
+import { useGetStatusesQuery, useGetTaskByParamsMutation, useUpdateTaskMutation } from '../../../../entities/task/model/taskSlice'
 import type { Task } from '../../../../entities/task/model/types'
-import { ScrollArea } from '../../../../shared/ui/scroll-area'
-import KanbanColumn from './KanbanColumn'
-import { SortableTaskCard } from './SortableTaskCard'
+import { errorsHandler } from '../../../../shared/lib/errors-handler'
 import { cn } from '../../../../shared/lib/utils'
 import type { LanguageType } from '../../../../shared/types/enums'
+import { ScrollArea } from '../../../../shared/ui/scroll-area'
+import KanbanColumn from './KanbanColumn'
+import SortableTaskCard from './SortableTaskCard'
 
 const KANBAN_HEIGHT = 'h-[calc(100vh-64px-32px-32px-16px)]';
 
 interface Props {
     isLoading?: boolean
-    onTaskClick?: (task: Task) => void
-    onTaskDelete?: (task: Task) => void
-    onTaskStatusChange?: (taskId: number, newStatusId: number) => void
+    onTaskClick?: (task: Task | undefined) => void
+    onTaskDelete?: (task: Task | undefined) => void
     onCreateTask?: (statusId: number) => void
     selectedTaskSlug?: string
 }
 
-const TasksKanban = ({
-    isLoading,
-    onTaskClick,
-    onTaskDelete,
-    onTaskStatusChange,
-    onCreateTask,
-    selectedTaskSlug,
-}: Props) => {
+const TasksKanban = (props: Props) => {
+    const { isLoading, onTaskClick, onTaskDelete, selectedTaskSlug } = props
+
     const { t, i18n } = useTranslation()
-    const [activeTask, setActiveTask] = useState<Task | null>(null)
     const [columns, setColumns] = useState<Record<number, Task[]>>({})
+    const [activeTask, setActiveTask] = useState<Task | null>(null)
+
+    const [dragMeta, setDragMeta] = useState<{
+        taskId: number
+        fromStatusId: number
+    } | null>(null)
+
     const [searchParams] = useSearchParams()
     const projectId = searchParams.get('project')
 
-    const { data: tasksData, isLoading: tasksLoading } = useGetTasksQuery(
-        { projectId: Number(projectId), params: { limit: 10000 } },
-        { skip: !projectId }
-    )
+    const [isTasksLoading, setIsTasksLoading] = useState(false)
 
-    const tasks = useMemo(() => tasksData?.results || [], [tasksData?.results])
+    const [getTaskByParams] = useGetTaskByParamsMutation()
+    const [updateTask] = useUpdateTaskMutation()
 
     const { data: statuses, isLoading: statusesLoading } = useGetStatusesQuery(
         { projectId: Number(projectId) },
@@ -73,69 +71,194 @@ const TasksKanban = ({
     )
 
     const sensors = useSensors(
-        useSensor(PointerSensor, {
-            activationConstraint: {
-                distance: 8,
-            },
-        }),
+        useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
         useSensor(KeyboardSensor, {
             coordinateGetter: sortableKeyboardCoordinates,
         })
     )
 
+    const fetchTasksByStatuses = useCallback(async () => {
+        if (!statuses || !projectId) return
+
+        setIsTasksLoading(true)
+        try {
+            const results = await Promise.all(
+                statuses.map(status =>
+                    getTaskByParams({
+                        projectId: Number(projectId),
+                        params: {
+                            status: status.id.toString(),
+                            limit: 1000,
+                            ordering: 'status_position',
+                            is_template: false
+                        }
+                    }).unwrap()
+                )
+            )
+
+            const newColumns: Record<number, Task[]> = {}
+            statuses.forEach((status, i) => {
+                newColumns[status.id] = results[i]?.results || []
+            })
+
+            setColumns(newColumns)
+        } catch (error) {
+            errorsHandler(error, t)
+        } finally {
+            setIsTasksLoading(false)
+        }
+    }, [statuses, projectId, getTaskByParams, t])
+
     useEffect(() => {
-        if (!statuses || !tasks) return
-
-        const grouped = statuses.reduce((acc, status) => {
-            acc[status.id] = tasks.filter(task => task.status.id === status.id)
-            return acc
-        }, {} as Record<number, Task[]>)
-
-        setColumns(grouped)
-    }, [tasks, statuses])
+        fetchTasksByStatuses()
+    }, [fetchTasksByStatuses])
 
     const handleDragStart = (event: DragStartEvent) => {
         const { active } = event
-        const task = tasks.find(t => t.id === active.id)
-        setActiveTask(task || null)
+
+        for (const [statusId, tasks] of Object.entries(columns)) {
+            const task = tasks.find(t => t.id === active.id)
+            if (task) {
+                setActiveTask(task)
+                setDragMeta({
+                    taskId: task.id,
+                    fromStatusId: Number(statusId),
+                })
+                break
+            }
+        }
     }
 
-    const handleDragEnd = (event: DragEndEvent) => {
+    const handleDragOver = (event: DragOverEvent) => {
         const { active, over } = event
-        setActiveTask(null)
-
         if (!over) return
 
         const activeId = active.id
-        const overId = over.id
+        const overData = over.data.current
 
-        if (activeId === overId) return
+        if (!overData) return
 
-        const activeTask = tasks.find(t => t.id === activeId)
-        const overTask = tasks.find(t => t.id === overId)
+        setColumns(prev => {
+            let sourceStatusId: number | null = null
 
-        if (!activeTask) return
-
-        if (over.data.current?.type === 'column') {
-            const newStatusId = Number(overId)
-            if (activeTask.status.id !== newStatusId) {
-                onTaskStatusChange?.(activeTask.id, newStatusId)
+            for (const [statusId, tasks] of Object.entries(prev)) {
+                if (tasks.find(t => t.id === activeId)) {
+                    sourceStatusId = Number(statusId)
+                    break
+                }
             }
-            return
-        }
 
-        if (activeTask.status.id === overTask?.status.id) {
-            const statusId = activeTask.status.id
-            const oldIndex = columns[statusId].findIndex(t => t.id === activeId)
-            const newIndex = columns[statusId].findIndex(t => t.id === overId)
+            if (!sourceStatusId) return prev
 
-            const newColumns = { ...columns }
-            newColumns[statusId] = arrayMove(newColumns[statusId], oldIndex, newIndex)
-            setColumns(newColumns)
-        }
+            let targetStatusId: number | null = null
+
+            if (overData.type === 'column') {
+                targetStatusId = overData.statusId
+            } else if (overData.type === 'task') {
+                targetStatusId = overData.task.status.id
+            }
+
+            if (!targetStatusId || sourceStatusId === targetStatusId) return prev
+
+            const source = [...prev[sourceStatusId]]
+            const target = [...prev[targetStatusId]]
+
+            const index = source.findIndex(t => t.id === activeId)
+            if (index === -1) return prev
+
+            const [moved] = source.splice(index, 1)
+
+            const updated = {
+                ...moved,
+                status: { ...moved.status, id: targetStatusId }
+            }
+
+            const overIndex = target.findIndex(t => t.id === over.id)
+
+            if (overIndex === -1) {
+                target.push(updated)
+            } else {
+                target.splice(overIndex, 0, updated)
+            }
+
+            return {
+                ...prev,
+                [sourceStatusId]: source,
+                [targetStatusId]: target
+            }
+        })
     }
 
-    if (isLoading || statusesLoading || tasksLoading) {
+    const handleDragEnd = async (event: DragEndEvent) => {
+        const { active, over } = event
+        if (!over || !dragMeta) return
+
+        const overData = over.data.current
+
+        let targetStatusId: number
+
+        if (overData?.type === 'column') {
+            targetStatusId = overData.statusId
+        } else {
+            targetStatusId = overData?.task?.status?.id
+        }
+
+        const { fromStatusId } = dragMeta
+
+        setColumns(prev => {
+            const source = [...prev[fromStatusId]]
+            const target = [...prev[targetStatusId]]
+
+            const oldIndex = source.findIndex(t => t.id === active.id)
+            if (oldIndex === -1) return prev
+
+            const [moved] = source.splice(oldIndex, 1)
+
+            let newIndex = 0
+
+            if (overData?.type === 'task') {
+                newIndex = target.findIndex(t => t.id === over.id)
+            } else {
+                newIndex = target.length
+            }
+
+            if (newIndex < 0) newIndex = target.length
+
+            const updated = {
+                ...moved,
+                status: { ...moved.status, id: targetStatusId }
+            }
+
+            target.splice(newIndex, 0, updated)
+
+            // 🔥 ВАЖНО: позиция = индекс + 1
+            const targetPosition = newIndex + 1
+
+            // 🔥 API
+            updateTask({
+                projectId: Number(projectId),
+                taskSlug: updated.slug,
+                data: {
+                    status: targetStatusId,
+                    status_position: targetPosition
+                },
+            }).catch((error) => {
+                errorsHandler(error, t)
+                fetchTasksByStatuses()
+            })
+
+            return {
+                ...prev,
+                [fromStatusId]: source,
+                [targetStatusId]: target
+            }
+        })
+
+        setActiveTask(null)
+        setDragMeta(null)
+    }
+
+    if (isLoading || statusesLoading || isTasksLoading) {
         return (
             <div className={cn("flex items-center justify-center", KANBAN_HEIGHT)}>
                 <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -143,77 +266,48 @@ const TasksKanban = ({
         )
     }
 
-    if (!statuses?.length) {
-        return (
-            <div className={cn("flex items-center justify-center", KANBAN_HEIGHT)}>
-                <div className="text-center">
-                    <p className="text-lg mb-2">{t('kanban.no-statuses')}</p>
-                    <p className="text-sm">{t('kanban.create-status-first')}</p>
-                </div>
-            </div>
-        )
-    }
-
     return (
         <DndContext
             sensors={sensors}
-            collisionDetection={closestCenter}
+            collisionDetection={pointerWithin}
             onDragStart={handleDragStart}
+            onDragOver={handleDragOver}
             onDragEnd={handleDragEnd}
-            modifiers={[restrictToVerticalAxis, restrictToParentElement]}
+            modifiers={[restrictToParentElement]}
         >
-            <div
-                className={cn(
-                    "w-full min-w-0 overflow-x-auto",
-                    KANBAN_HEIGHT
-                )}
-            >
-                <div
-                    className="flex gap-4 pb-4 w-max h-full"
-                >
-                    {statuses.map((status) => (
-                        <div key={status.id}>
-                            <KanbanColumn
-                                id={status.id}
-                                title={status[`name_${(i18n.language || 'ru') as LanguageType}`] || ''}
-                                color={''}
-                                count={columns[status.id]?.length || 0}
-                                onAddClick={() => onCreateTask?.(status.id)}
-                            >
-                                <SortableContext
-                                    items={columns[status.id]?.map(t => t.id) || []}
-                                    strategy={verticalListSortingStrategy}
-                                >
-                                    <ScrollArea className="h-[calc(100vh-64px-32px-32px-16px-120px)]">
-                                        <div className="space-y-2">
-                                            {columns[status.id]?.map((task) => (
-                                                <SortableTaskCard
-                                                    key={task.id}
-                                                    task={task}
-                                                    onClick={() => onTaskClick?.(task)}
-                                                    onDelete={() => onTaskDelete?.(task)}
-                                                    isActive={selectedTaskSlug === task.slug}
-                                                />
-                                            ))}
-                                        </div>
-                                    </ScrollArea>
-                                </SortableContext>
-                            </KanbanColumn>
-                        </div>
-                    ))}
-                </div>
+            <div className="flex gap-4 overflow-x-auto pb-2">
+                {statuses?.map(status => (
+                    <KanbanColumn
+                        key={status.id}
+                        id={status.id}
+                        title={status[`name_${i18n.language as LanguageType}`] || ''}
+                        count={columns[status.id]?.length || 0}
+                    >
+                        <SortableContext
+                            items={columns[status.id]?.map(t => t.id) || []}
+                            strategy={verticalListSortingStrategy}
+                        >
+                            <ScrollArea className="h-[calc(100vh-64px-32px-32px-16px-80px)] flex flex-col gap-2">
+                                {columns[status.id]?.map((task, taskIndex) => (
+                                    <SortableTaskCard
+                                        key={task.id}
+                                        task={task}
+                                        onClick={onTaskClick}
+                                        onDelete={onTaskDelete}
+                                        isActive={selectedTaskSlug === task.slug}
+                                        className={cn(taskIndex !== 0 && 'mt-2')}
+                                    />
+                                ))}
+                            </ScrollArea>
+                        </SortableContext>
+                    </KanbanColumn>
+                ))}
             </div>
 
             <DragOverlay>
                 {activeTask && (
                     <div className="opacity-80 rotate-2 scale-105">
-                        <TaskCard
-                            task={activeTask}
-                            selectTask={() => { }}
-                            deleteTask={() => { }}
-                            createTemplate={() => { }}
-                            isActive={false}
-                        />
+                        <SortableTaskCard task={activeTask} />
                     </div>
                 )}
             </DragOverlay>
@@ -221,4 +315,4 @@ const TasksKanban = ({
     )
 }
 
-export default TasksKanban
+export default TasksKanban;
