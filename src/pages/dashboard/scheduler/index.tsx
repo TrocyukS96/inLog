@@ -25,16 +25,18 @@ const SchedulerPage = () => {
         //     label: t('scheduler-page.tasks-statuses'),
         //     href: routes.scheduler.statuses(),
         // },
-        {
-            label: t('scheduler-page.roadmap'),
-            href: routes.scheduler.roadmap(),
-        },
+        // {
+        //     label: t('scheduler-page.roadmap'),
+        //     href: routes.scheduler.roadmap(),
+        // },
     ]
 
     return (
         <RootPageLayout navItems={navItems}>
             <div className="h-full w-full">
+                <div className="pl-2 min-w-0">
                 <Outlet />
+                </div>
             </div>
         </RootPageLayout>
     )

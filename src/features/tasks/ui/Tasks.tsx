@@ -1,6 +1,5 @@
 import { Loader2, Plus, Search, SortAsc, SortDesc, X } from 'lucide-react'
-import { Suspense, useEffect, useState } from 'react'
-import { ErrorBoundary } from "react-error-boundary"
+import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useSearchParams } from 'react-router-dom'
 import { toast } from 'sonner'
@@ -34,7 +33,7 @@ export default function Tasks({ type = 'tasks-page' }: { type?: 'tasks-page' | '
 
     const [createModalOpen, setCreateModalOpen] = useState(false)
     const [filterParams, setFilterParams] = useState<Partial<TasksFilterParams>>({
-        limit: 10,
+        limit: 100,
         offset: 0
     })
     const [searchValue, setSearchValue] = useState('')
@@ -44,9 +43,9 @@ export default function Tasks({ type = 'tasks-page' }: { type?: 'tasks-page' | '
     const { data: members } = useGetProjectMembersQuery(Number(projectId), { skip: !projectId })
     const { data: tagsResponse } = useGetTaskTagsQuery({ projectId: Number(projectId), limit: 9999, is_orphan: false }, { skip: !projectId })
 
-    const { data: tasksData, isLoading: tasksLoading } = useGetTasksQuery({
+    const { data: tasksData, isLoading: tasksLoading, isFetching: tasksFetching } = useGetTasksQuery({
         projectId: Number(projectId),
-        params: {...(filterParams ?? {}), ...{ is_template: isTemplates ? true : false }},
+        params: { ...(filterParams ?? {}), ...{ is_template: isTemplates ? true : false } },
 
     }, { skip: !projectId })
 
@@ -147,7 +146,7 @@ export default function Tasks({ type = 'tasks-page' }: { type?: 'tasks-page' | '
         if (!selectedTaskSlug || !taskData) {
             return <div className="flex items-center justify-center h-full text-muted-foreground">
                 <div className="text-center">
-                    <p className="text-lg mb-2">{ isTemplates ? t(`templates-page.no-templates-selected`) : t(`tasks-page.no-task-selected`)}</p>
+                    <p className="text-lg mb-2">{isTemplates ? t(`templates-page.no-templates-selected`) : t(`tasks-page.no-task-selected`)}</p>
                     <p className="text-sm">{isTemplates ? t(`templates-page.select-template-to-view`) : t(`tasks-page.select-task-to-view`)}</p>
                 </div>
             </div>
@@ -167,136 +166,131 @@ export default function Tasks({ type = 'tasks-page' }: { type?: 'tasks-page' | '
     }
 
     return (
-            <ResizablePanelGroup
-                className="h-fit rounded-lg border border-border "
-                orientation="horizontal"
+        <ResizablePanelGroup
+            className="h-fit rounded-lg border border-border "
+            orientation="horizontal"
+        >
+            <ResizablePanel
+                defaultSize={40}
             >
-                <ResizablePanel
-                    defaultSize={40}
-                >
-                    <div className="flex flex-col h-full ">
-                        <div className="p-4 ">
-                            <div className="flex items-center justify-between mb-4">
-                                <h1 className="text-2xl font-bold tracking-tight">
-                                    {t(`${type}.title`)}
-                                </h1>
-                                <Dialog open={createModalOpen} onOpenChange={setCreateModalOpen}>
-                                    <DialogTrigger asChild>
-                                        <Button size="sm">
-                                            <Plus className="h-4 w-4 mr-2" />
-                                            { isTemplates ? t(`templates-page.create-template`) : t(`tasks-page.create-task`)}
-                                        </Button>
-                                    </DialogTrigger>
-                                    <DialogContent>
-                                        <DialogHeader>
-                                            <DialogTitle>{isTemplates ? t(`templates-page.create-template`) : t(`tasks-page.create-task`)}</DialogTitle>
-                                        </DialogHeader>
-                                        <CreateTaskForm onCreate={handleAddTask} isTemplates={isTemplates} />
-                                    </DialogContent>
-                                </Dialog>
-                            </div>
-
-                            <div className="space-y-2">
-                                <div className="relative">
-                                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                                    <Input
-                                        type="text"
-                                        value={searchValue}
-                                        onChange={handleSearch}
-                                        className="w-full pl-9 pr-8"
-                                        placeholder={t('fields.search')}
-                                        disabled={tasksLoading}
-                                    />
-                                    {searchValue && (
-                                        <X
-                                            className="absolute cursor-pointer right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground hover:text-foreground"
-                                            onClick={() => setSearchValue('')}
-                                        />
-                                    )}
-                                </div>
-
-                                <div className="flex gap-2">
-                                    <RangePicker
-                                        value={filterParams.created_at__range
-                                            ? {
-                                                from: new Date(filterParams.created_at__range.split(',')[0]),
-                                                to: new Date(filterParams.created_at__range.split(',')[1])
-                                            }
-                                            : undefined}
-                                        placeholder={t('fields.date-range')}
-                                        onChange={(range) => handleFilterChange(range, 'date')}
-                                        className="flex-1"
-                                    />
-
-                                    <Button
-                                        variant="outline"
-                                        size="icon"
-                                        onClick={() => setFilterParams({
-                                            ...(filterParams ?? {}),
-                                            ordering: filterParams.ordering === '-created_at' ? 'created_at' : '-created_at'
-                                        } as TasksFilterParams)}
-                                    >
-                                        {filterParams.ordering === '-created_at' ? (
-                                            <SortDesc className="h-4 w-4" />
-                                        ) : (
-                                            <SortAsc className="h-4 w-4" />
-                                        )}
+                <div className="flex flex-col h-full ">
+                    <div className="p-4 ">
+                        <div className="flex items-center justify-between mb-4">
+                            <h1 className="text-2xl font-bold tracking-tight">
+                                {t(`${type}.title`)}
+                            </h1>
+                            <Dialog open={createModalOpen} onOpenChange={setCreateModalOpen}>
+                                <DialogTrigger asChild>
+                                    <Button size="sm">
+                                        <Plus className="h-4 w-4 mr-2" />
+                                        {isTemplates ? t(`templates-page.create-template`) : t(`tasks-page.create-task`)}
                                     </Button>
-                                </div>
-                            </div>
+                                </DialogTrigger>
+                                <DialogContent>
+                                    <DialogHeader>
+                                        <DialogTitle>{isTemplates ? t(`templates-page.create-template`) : t(`tasks-page.create-task`)}</DialogTitle>
+                                    </DialogHeader>
+                                    <CreateTaskForm onCreate={handleAddTask} isTemplates={isTemplates} />
+                                </DialogContent>
+                            </Dialog>
                         </div>
 
-                        <ErrorBoundary fallback={<div>Something went wrong</div>}>
-                            <Suspense fallback={
-                                <div className="flex items-center justify-center py-8">
-                                    <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                                </div>
-                            }>
-                                {tasksData?.results && tasksData.results.length > 0 ? (
-                                    <TasksList
-                                        tasks={tasksData.results}
-                                        selectedTaskSlug={selectedTaskSlug || undefined}
-                                        selectTask={handleSelectTask}
-                                        deleteTask={handleDeleteTask}
-                                        createTemplate={createTemplate}
-                                        changePagination={handlePaginationChange}
-                                        pagination={{
-                                            limit: Number(filterParams.limit) || 10,
-                                            offset: Number(filterParams.offset) || 0,
-                                            total: tasksData.count
-                                        }}
+                        <div className="space-y-2">
+                            <div className="relative">
+                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                <Input
+                                    type="text"
+                                    value={searchValue}
+                                    onChange={handleSearch}
+                                    className="w-full pl-9 pr-8"
+                                    placeholder={t('fields.search')}
+                                    disabled={tasksLoading || taskFetching || tasksData?.results?.length === 0}
+                                />
+                                {searchValue && (
+                                    <X
+                                        className="absolute cursor-pointer right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground hover:text-foreground"
+                                        onClick={() => setSearchValue('')}
                                     />
-                                ) : (
-                                    <div className="text-center py-12 text-muted-foreground">
-                                        { isTemplates ? t(`templates-page.templates-absent-message`) : t(`tasks-page.tasks-absent-message`)}
-                                        {(filterParams.created_at__range || filterParams.name__icontains) && (
-                                            <div className="mt-4">
-                                                <Button
-                                                    variant="outline"
-                                                    size="sm"
-                                                    onClick={() => {
-                                                        setFilterParams({ limit: 10, offset: 0 })
-                                                        setSearchValue('')
-                                                    }}
-                                                >
-                                                    {t('fields.clear-filters')}
-                                                </Button>
-                                            </div>
-                                        )}
-                                    </div>
                                 )}
-                            </Suspense>
-                        </ErrorBoundary>
-                    </div>
-                </ResizablePanel>
+                            </div>
 
-                <ResizableHandle withHandle />
+                            <div className="flex gap-2">
+                                <RangePicker
+                                    value={filterParams.created_at__range
+                                        ? {
+                                            from: new Date(filterParams.created_at__range.split(',')[0]),
+                                            to: new Date(filterParams.created_at__range.split(',')[1])
+                                        }
+                                        : undefined}
+                                    placeholder={t('fields.date-range')}
+                                    onChange={(range) => handleFilterChange(range, 'date')}
+                                    className="flex-1"
+                                    disabled={tasksLoading || taskFetching || tasksData?.results?.length === 0}
+                                />
 
-                <ResizablePanel defaultSize={60} className="border-none rounded-none">
-                    <div className="h-[calc(100vh-64px-32px-32px-16px)]">
-                        {renderTaskDetails()}
+                                <Button
+                                    variant="outline"
+                                    size="icon"
+                                    disabled={tasksLoading || taskFetching || tasksData?.results?.length === 0}
+                                    onClick={() => setFilterParams({
+                                        ...(filterParams ?? {}),
+                                        ordering: filterParams.ordering === '-created_at' ? 'created_at' : '-created_at'
+                                    } as TasksFilterParams)}
+                                >
+                                    {filterParams.ordering === '-created_at' ? (
+                                        <SortDesc className="h-4 w-4" />
+                                    ) : (
+                                        <SortAsc className="h-4 w-4" />
+                                    )}
+                                </Button>
+                            </div>
+                        </div>
                     </div>
-                </ResizablePanel>
-            </ResizablePanelGroup>
+
+                    {tasksData?.results && tasksData.results.length > 0 ? (
+                        <TasksList
+                            tasks={tasksData.results}
+                            selectedTaskSlug={selectedTaskSlug || undefined}
+                            selectTask={handleSelectTask}
+                            deleteTask={handleDeleteTask}
+                            createTemplate={createTemplate}
+                            changePagination={handlePaginationChange}
+                            isLoading={tasksLoading || tasksFetching}
+                            pagination={{
+                                limit: Number(filterParams.limit) || 10,
+                                offset: Number(filterParams.offset) || 0,
+                                total: tasksData.count
+                            }}
+                        />
+                    ) : (
+                        <div className="text-center py-12 text-muted-foreground">
+                            {isTemplates ? t(`templates-page.templates-absent-message`) : t(`tasks-page.tasks-absent-message`)}
+                            {(filterParams.created_at__range || filterParams.name__icontains) && (
+                                <div className="mt-4">
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={() => {
+                                            setFilterParams({ limit: 10, offset: 0 })
+                                            setSearchValue('')
+                                        }}
+                                    >
+                                        {t('fields.clear-filters')}
+                                    </Button>
+                                </div>
+                            )}
+                        </div>
+                    )}
+                </div>
+            </ResizablePanel>
+
+            <ResizableHandle withHandle />
+
+            <ResizablePanel defaultSize={60} className="border-none rounded-none">
+                <div className="h-[calc(100vh-64px-32px-32px-16px)]">
+                    {renderTaskDetails()}
+                </div>
+            </ResizablePanel>
+        </ResizablePanelGroup>
     )
 }

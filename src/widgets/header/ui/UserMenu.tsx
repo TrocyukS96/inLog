@@ -14,6 +14,7 @@ import { routes } from '../../../shared/lib/routes'
 import { toast } from 'sonner'
 import { useTranslation } from 'react-i18next'
 import { selectUser } from '../../../entities/user/model/selectors'
+import { Avatar, AvatarFallback, AvatarImage } from '../../../shared/ui/avatar'
 
 export function UserMenu() {
   const { t } = useTranslation()
@@ -38,7 +39,15 @@ export function UserMenu() {
           <AvatarImage src={user?.avatar?.medium} alt={user?.fullName} />
           <AvatarFallback>{initials}</AvatarFallback>
         </Avatar> */}
-        <UserIcon className="h-6 w-6 cursor-pointer" />
+        <Avatar className="h-10 w-10 border-2 border-border">
+          <AvatarImage
+            src={user?.avatar?.medium}
+            alt={`${user?.surname} ${user?.name}`}
+          />
+          <AvatarFallback className="bg-primary/10">
+            <UserIcon className="h-6 w-6 text-primary" />
+          </AvatarFallback>
+        </Avatar>
       </DropdownMenuTrigger>
 
       <DropdownMenuContent align="end" className="w-56">

@@ -35,6 +35,9 @@ export interface Avatar {
     firstName: string          // name → firstName (более понятно)
     middleName: string         // patronymic
     lastName: string           // surname
+    name: string
+    surname: string
+    patronymic: string
     fullName?: string 
     full_name?: string         // вычисляемое поле, если нужно
   
@@ -55,16 +58,20 @@ export interface Avatar {
     settings: UserSettings
   
     // поля из профиля сотрудника
-    dateOfBirth?: string       // ISO или 'YYYY-MM-DD'
+    date_of_birth?: string       // ISO или 'YYYY-MM-DD'
     department?: string
     experienceYears?: number | string
     joinedAt?: string          // in_organization_since
-    personnelNumber?: string   // табельный номер
+    personnel_number?: string   // табельный номер
     room?: string
     workplace?: string
+    experience?: string
+    in_organization_since?: string
   
     // файлы пользователя (документы, сканы и т.д.)
     files?: UserFile[]
+
+    organization?: string
   }
   
   /**

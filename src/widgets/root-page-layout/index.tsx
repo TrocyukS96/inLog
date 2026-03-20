@@ -2,6 +2,7 @@ import { Link, useLocation } from "react-router-dom"
 import { cn } from "../../shared/lib/utils"
 import { OrgProjectSelector } from "../../features/org-project-selector"
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "../../shared/ui/resizable"
+import { routes } from "../../shared/lib/routes"
 
 interface NavItem {
   label: string
@@ -35,9 +36,13 @@ const RootPageLayout = ({
 
         >
           <nav className="h-full p-4 border-r border-border ">
-            <div className="mb-4">
-              <OrgProjectSelector />
-            </div>
+            {
+              location.pathname.includes(routes.scheduler.list()) && (
+                <div className="mb-4">
+                  <OrgProjectSelector />
+                </div>
+              )
+            }
             
             <div className="space-y-1">
               {navItems.map((item) => (

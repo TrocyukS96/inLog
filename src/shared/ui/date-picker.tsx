@@ -76,20 +76,20 @@ export function DatePicker({
         </Label>
       )}
 
-      <Popover open={isOpen} onOpenChange={setIsOpen}>
+      <Popover open={isOpen} onOpenChange={setIsOpen} >
         <PopoverTrigger asChild>
           <Button
             id={id}
             variant="outline"
             className={cn(
-              "w-full justify-start text-left font-normal px-3",
+              "w-full justify-start text-left font-normal px-3 bg-transparent",
               !date && "text-muted-foreground",
               disabled && "opacity-50 cursor-not-allowed",
               triggerClassName
             )}
             disabled={disabled}
           >
-            <CalendarIcon className={`mr-2 h-4 w-4 transition-colors text-muted-foreground ${isOpen && "text-primary"}`} />
+            <CalendarIcon className={`h-4 w-4 transition-colors text-muted-foreground ${isOpen && "text-primary"}`} />
             {date ? (
               format(date, DATE_VIEW_FORMAT)
             ) : (
@@ -114,7 +114,7 @@ export function DatePicker({
               }}
             />
           </div>
-          <div className="flex items-center justify-end gap-2 p-3 pt-0 border-t">
+          <div className="flex items-center justify-end gap-2 p-2 pt-0">
             <Button 
               variant="ghost" 
               size="sm"

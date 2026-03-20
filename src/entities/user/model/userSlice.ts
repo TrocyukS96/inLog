@@ -13,7 +13,7 @@ export const userApi = createApi({
       providesTags: ['User']
     }),
 
-    updateMe: builder.mutation<User, Partial<User>>({
+    updateMe: builder.mutation<User, FormData>({
       query: (data) => ({
         url: 'users/me/',
         method: 'PATCH',

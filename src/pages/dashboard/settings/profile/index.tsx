@@ -1,10 +1,11 @@
-import { useTranslation } from "react-i18next"
+import { Profile } from "../../../../features/profile"
 
 const ProfilePage = () => {
-    const { t } = useTranslation()
 
     return (
-        <div>{t('settings-page.profile')}</div>
+        <div className="pl-2 min-w-0">
+            <Profile />
+        </div>
     )
 }
 

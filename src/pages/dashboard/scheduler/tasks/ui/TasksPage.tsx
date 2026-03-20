@@ -3,12 +3,14 @@ import { useState } from "react"
 import { Kanban, LayoutList } from "lucide-react"
 import { Tabs, TabsList, TabsTrigger } from "../../../../../shared/ui/tabs"
 import TasksKanban from "../../../../../features/tasks/tasks-kanban"
+import { useTranslation } from "react-i18next"
 
 const TasksPage = () => {
+    const { t } = useTranslation()
     const [viewMode, setViewMode] = useState<"list" | "kanban">("list")
 
     return (
-        <div className="pl-2 space-y-4 min-w-0">
+        <div className="space-y-4 min-w-0">
             <div className="flex justify-start">
                 <Tabs
                     value={viewMode}
@@ -18,11 +20,11 @@ const TasksPage = () => {
                     <TabsList className="grid w-[200px] grid-cols-2">
                         <TabsTrigger value="list" className="flex items-center gap-2 cursor-pointer">
                             <LayoutList className="h-4 w-4" />
-                            <span>Список</span>
+                            <span>{t('buttons.list')}</span>
                         </TabsTrigger>
                         <TabsTrigger value="kanban" className="flex items-center gap-2 cursor-pointer">
                             <Kanban className="h-4 w-4" />
-                            <span>Канбан</span>
+                            <span>{t('buttons.kanban')}</span>
                         </TabsTrigger>
                     </TabsList>
                 </Tabs>

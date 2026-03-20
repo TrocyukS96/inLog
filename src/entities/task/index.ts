@@ -1,2 +1,3 @@
 import TaskCard from "./ui/TaskCard"
-export { TaskCard }
+import TaskCardSkeleton from "./ui/TaskCardSkeleton"
+export { TaskCard, TaskCardSkeleton }

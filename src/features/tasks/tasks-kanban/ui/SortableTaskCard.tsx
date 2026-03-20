@@ -29,17 +29,18 @@ const SortableTaskCard = ({ task, onClick, onDelete, isActive, className }: Prop
             type: 'task',
             task: task,
         },
-        disabled: false, // Явно указываем, что не отключено
+        disabled: false, 
         animateLayoutChanges: () => true,
     })
 
     const style = {
         transform: CSS.Transform.toString(transform),
         transition,
+        zIndex: isDragging ? 100 : undefined,
+    opacity: isDragging ? 0.3 : 1,
     }
 
-    const handleClick = (e: React.MouseEvent) => {
-        // Предотвращаем срабатывание drag при клике
+    const handleClick = () => {
         if (!isDragging) {
             onClick?.(task)
         }
@@ -53,16 +54,15 @@ const SortableTaskCard = ({ task, onClick, onDelete, isActive, className }: Prop
             {...listeners}
             className={cn(
                 "cursor-grab active:cursor-grabbing",
-                isDragging && "opacity-50",
+                isDragging && "pointer-events-none",
                 className
             )}
             onClick={handleClick}
         >
             <TaskCard
                 task={task}
-                selectTask={() => {}}
-                deleteTask={() => onDelete?.(task)}
-                createTemplate={() => {}}
+                isDragging={isDragging}
+                deleteTask={onDelete}
                 isActive={isActive}
             />
         </div>

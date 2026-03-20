@@ -6,18 +6,15 @@ import {
     KeyboardSensor,
     MeasuringStrategy,
     PointerSensor,
-    closestCenter,
-    pointerWithin,
     useSensor,
     useSensors,
+    pointerWithin,
     type DragEndEvent,
     type DragOverEvent,
     type DragStartEvent
 } from '@dnd-kit/core'
 import {
-    restrictToParentElement
-} from '@dnd-kit/modifiers'
-import {
+    arrayMove,
     SortableContext,
     sortableKeyboardCoordinates,
     verticalListSortingStrategy
@@ -31,9 +28,9 @@ import type { Task } from '../../../../entities/task/model/types'
 import { errorsHandler } from '../../../../shared/lib/errors-handler'
 import { cn } from '../../../../shared/lib/utils'
 import type { LanguageType } from '../../../../shared/types/enums'
-import { ScrollArea } from '../../../../shared/ui/scroll-area'
 import KanbanColumn from './KanbanColumn'
 import SortableTaskCard from './SortableTaskCard'
+import { ScrollArea } from '../../../../shared/ui/scroll-area'
 
 const KANBAN_HEIGHT = 'h-[calc(100vh-64px-32px-32px-16px)]';
 
@@ -51,11 +48,6 @@ const TasksKanban = (props: Props) => {
     const { t, i18n } = useTranslation()
     const [columns, setColumns] = useState<Record<number, Task[]>>({})
     const [activeTask, setActiveTask] = useState<Task | null>(null)
-
-    const [dragMeta, setDragMeta] = useState<{
-        taskId: number
-        fromStatusId: number
-    } | null>(null)
 
     const [searchParams] = useSearchParams()
     const projectId = searchParams.get('project')
@@ -116,148 +108,118 @@ const TasksKanban = (props: Props) => {
     const handleDragStart = (event: DragStartEvent) => {
         const { active } = event
 
-        for (const [statusId, tasks] of Object.entries(columns)) {
+        for (const [_, tasks] of Object.entries(columns)) {
             const task = tasks.find(t => t.id === active.id)
             if (task) {
                 setActiveTask(task)
-                setDragMeta({
-                    taskId: task.id,
-                    fromStatusId: Number(statusId),
-                })
                 break
             }
         }
     }
 
     const handleDragOver = (event: DragOverEvent) => {
-        const { active, over } = event
-        if (!over) return
-
-        const activeId = active.id
-        const overData = over.data.current
-
-        if (!overData) return
-
-        setColumns(prev => {
-            let sourceStatusId: number | null = null
-
-            for (const [statusId, tasks] of Object.entries(prev)) {
-                if (tasks.find(t => t.id === activeId)) {
-                    sourceStatusId = Number(statusId)
-                    break
-                }
+        const { active, over } = event;
+        if (!over) return;
+    
+        const activeId = active.id;
+        const overId = over.id;
+    
+        const activeContId = active.data.current?.sortable?.containerId;
+        const overContId = over.data.current?.type === 'column' 
+            ? over.id 
+            : over.data.current?.sortable?.containerId;
+    
+        if (!activeContId || !overContId) return;
+    
+        const activeContainer = Number(activeContId);
+        const overContainer = Number(overContId);
+    
+        if (activeContainer === overContainer) {
+            const items = columns[activeContainer];
+            const oldIndex = items.findIndex(t => t.id === activeId);
+            const newIndex = items.findIndex(t => t.id === overId);
+            
+            if (oldIndex !== newIndex && oldIndex !== -1 && newIndex !== -1) {
+                setColumns(prev => ({
+                    ...prev,
+                    [activeContainer]: arrayMove(items, oldIndex, newIndex)
+                }));
             }
-
-            if (!sourceStatusId) return prev
-
-            let targetStatusId: number | null = null
-
-            if (overData.type === 'column') {
-                targetStatusId = overData.statusId
-            } else if (overData.type === 'task') {
-                targetStatusId = overData.task.status.id
-            }
-
-            if (!targetStatusId || sourceStatusId === targetStatusId) return prev
-
-            const source = [...prev[sourceStatusId]]
-            const target = [...prev[targetStatusId]]
-
-            const index = source.findIndex(t => t.id === activeId)
-            if (index === -1) return prev
-
-            const [moved] = source.splice(index, 1)
-
-            const updated = {
-                ...moved,
-                status: { ...moved.status, id: targetStatusId }
-            }
-
-            const overIndex = target.findIndex(t => t.id === over.id)
-
-            if (overIndex === -1) {
-                target.push(updated)
-            } else {
-                target.splice(overIndex, 0, updated)
-            }
-
-            return {
-                ...prev,
-                [sourceStatusId]: source,
-                [targetStatusId]: target
-            }
-        })
-    }
-
-    const handleDragEnd = async (event: DragEndEvent) => {
-        const { active, over } = event
-        if (!over || !dragMeta) return
-
-        const overData = over.data.current
-
-        let targetStatusId: number
-
-        if (overData?.type === 'column') {
-            targetStatusId = overData.statusId
-        } else {
-            targetStatusId = overData?.task?.status?.id
+            return;
         }
-
-        const { fromStatusId } = dragMeta
-
-        setColumns(prev => {
-            const source = [...prev[fromStatusId]]
-            const target = [...prev[targetStatusId]]
-
-            const oldIndex = source.findIndex(t => t.id === active.id)
-            if (oldIndex === -1) return prev
-
-            const [moved] = source.splice(oldIndex, 1)
-
-            let newIndex = 0
-
-            if (overData?.type === 'task') {
-                newIndex = target.findIndex(t => t.id === over.id)
+    
+        setColumns((prev) => {
+            const sourceItems = prev[activeContainer] || [];
+            const targetItems = prev[overContainer] || [];
+    
+            const activeIndex = sourceItems.findIndex((i) => i.id === activeId);
+            if (activeIndex === -1) return prev;
+    
+            let newIndex: number;
+            if (over.data.current?.type === 'column') {
+                newIndex = targetItems.length;
             } else {
-                newIndex = target.length
+                newIndex = targetItems.findIndex((i) => i.id === overId);
+                newIndex = newIndex === -1 ? targetItems.length : newIndex;
             }
-
-            if (newIndex < 0) newIndex = target.length
-
-            const updated = {
-                ...moved,
-                status: { ...moved.status, id: targetStatusId }
-            }
-
-            target.splice(newIndex, 0, updated)
-
-            // 🔥 ВАЖНО: позиция = индекс + 1
-            const targetPosition = newIndex + 1
-
-            // 🔥 API
-            updateTask({
-                projectId: Number(projectId),
-                taskSlug: updated.slug,
-                data: {
-                    status: targetStatusId,
-                    status_position: targetPosition
-                },
-            }).catch((error) => {
-                errorsHandler(error, t)
-                fetchTasksByStatuses()
-            })
-
+    
+            const movedTask = {
+                ...sourceItems[activeIndex],
+                status: { ...sourceItems[activeIndex].status, id: overContainer }
+            };
+    
             return {
                 ...prev,
-                [fromStatusId]: source,
-                [targetStatusId]: target
+                [activeContainer]: sourceItems.filter((i) => i.id !== activeId),
+                [overContainer]: [
+                    ...targetItems.slice(0, newIndex),
+                    movedTask,
+                    ...targetItems.slice(newIndex),
+                ],
+            };
+        });
+    };
+    
+    const handleDragEnd = async (event: DragEndEvent) => {
+        const { active, over } = event;
+    
+        setActiveTask(null);
+    
+        if (!over) return;
+    
+        let finalStatusId: number | null = null;
+        let finalIndex = -1;
+    
+        for (const [statusId, tasks] of Object.entries(columns)) {
+            const index = tasks.findIndex(t => t.id === active.id);
+            if (index !== -1) {
+                finalStatusId = Number(statusId);
+                finalIndex = index;
+                break;
             }
-        })
-
-        setActiveTask(null)
-        setDragMeta(null)
-    }
-
+        }
+    
+        if (finalStatusId === null || finalIndex === -1) return;
+    
+        const taskToUpdate = columns[finalStatusId][finalIndex];
+        
+        const newPosition = finalIndex + 1;
+    
+        try {
+            await updateTask({
+                projectId: Number(projectId),
+                taskSlug: taskToUpdate.slug,
+                data: {
+                    status: finalStatusId,
+                    status_position: newPosition
+                },
+            }).unwrap();
+        } catch (error) {
+            errorsHandler(error, t);
+            fetchTasksByStatuses();
+        }
+    };
+    
     if (isLoading || statusesLoading || isTasksLoading) {
         return (
             <div className={cn("flex items-center justify-center", KANBAN_HEIGHT)}>
@@ -273,7 +235,11 @@ const TasksKanban = (props: Props) => {
             onDragStart={handleDragStart}
             onDragOver={handleDragOver}
             onDragEnd={handleDragEnd}
-            modifiers={[restrictToParentElement]}
+            measuring={{
+                droppable: {
+                    strategy: MeasuringStrategy.Always,
+                },
+            }}
         >
             <div className="flex gap-4 overflow-x-auto pb-2">
                 {statuses?.map(status => (
@@ -285,9 +251,10 @@ const TasksKanban = (props: Props) => {
                     >
                         <SortableContext
                             items={columns[status.id]?.map(t => t.id) || []}
+                            id={status.id.toString()}
                             strategy={verticalListSortingStrategy}
                         >
-                            <ScrollArea className="h-[calc(100vh-64px-32px-32px-16px-80px)] flex flex-col gap-2">
+                            <ScrollArea className=" h-[calc(100vh-64px-32px-32px-16px-80px)] flex flex-col gap-2">
                                 {columns[status.id]?.map((task, taskIndex) => (
                                     <SortableTaskCard
                                         key={task.id}

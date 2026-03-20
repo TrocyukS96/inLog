@@ -71,13 +71,13 @@ export function RootLayout() {
       return
     }
 
-    if ( organizations && organizations?.length === 0) {
-      navigate(routes.organizations.new())
-      return
-    }
+    // if ( organizations && organizations?.length === 0) {
+    //   navigate(routes.organizations.new())
+    //   return
+    // }
 
     if ( projects && projects?.length === 0) {
-      navigate(routes.projects.new())
+      navigate(routes.settings.organizationsAndProjects())
       return
     }
 

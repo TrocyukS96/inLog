@@ -41,6 +41,11 @@
         "password": "Пароль",
         "confirm-password": "Подтвердите пароль",
         "name": "Имя",
+        "surname": "Фамилия",
+        "patronymic": "Отчество",
+        "last-name": "Фамилия",
+        "first-name": "Имя",
+        "middle-name": "Отчество",
         "description": "Описание",
         "due-date-start": "Дата начала",
         "due-date-end": "Дата окончания",
@@ -50,8 +55,6 @@
         "assignee": "Исполнитель",
         "tags": "Теги",
         "comments": "Комментарии",
-        "surname": "Фамилия",
-        "patronymic": "Отчество",
         "phone": "Телефон",
         "address": "Адрес",
         "city": "Город",
@@ -96,8 +99,25 @@
         "write-reply": "Напишите ответ...",
         "enter-subtemplate-name": "Введите название под-шаблона",
         "files": "Файлы",
+        "files-placeholder": "Файлы не найдены",
         "upload-file-or-drag-it-here": "Загрузите файл или перетащите его сюда",
-        "drag-file": "или перетащите его сюда"
+        "drag-file": "или перетащите его сюда",
+        "reservoir": "Резервуар",
+ 
+        "date-of-birth": "Дата рождения",
+        "mobile-phone": "Мобильный телефон",
+        "work-phone": "Рабочий телефон",
+        "organization": "Организация",
+        "position": "Должность",
+        "email-address": "Email",
+        "in-organization-since": "Дата начала работы",
+        "experience": "Стаж работы",
+        "personnel-number": "Табельный номер",
+        "department": "Отдел",
+        "room": "Кабинет",
+        "workplace": "Рабочее место",
+        "experience-years": "Стаж работы",
+        "joined-at": "Дата начала работы"
     },
     "notice-list": {
         "resend-letter-if-didnt-get-mail": "Если письмо не пришло, проверьте папку \"Спам\" или нажмите кнопку ниже",
@@ -121,7 +141,17 @@
         "task-not-found": "Задача не найдена",
         "deleting-organization": "Удаление организации",
         "deleting-project": "Удаление проекта",
-        "link-copied-successfully": "Ссылка успешно скопирована"
+        "link-copied-successfully": "Ссылка успешно скопирована",
+    "creating-organization": "Создание организации",
+        "creating-project": "Создание проекта",
+        "saving-employee-data": "Сохранение данных сотрудника",
+        "employee-data-saved-successfully": "Данные сотрудника успешно сохранены",
+        "file-added-successfully": "Файл успешно добавлен",
+        "file-deleted-successfully": "Файл успешно удален",
+        "adding-file": "Добавление файла",
+        "deleting-file": "Удаление файла",
+        "changing-password": "Изменение пароля",
+        "mail-to-change-password-has-been-sent": "Письмо для сброса пароля успешно отправлено"
         
     },
     "buttons": {
@@ -131,6 +161,7 @@
         "delete": "Удалить",
         "edit": "Редактировать",
         "add": "Добавить",
+        "create": "Создать",
         "open-in-new-tab": "Открыть в новой вкладке",
         "copy-link": "Скопировать ссылку",
         "add-comment": "Добавить комментарий",
@@ -138,7 +169,12 @@
         "clear": "Очистить",
         "apply": "Применить",
         "preview": "Предпросмотр",
-        "download": "Скачать"
+        "download": "Скачать",
+        "list": "Список",
+        "kanban": "Канбан",
+        "saving": "Сохранение...",  
+        "change-password": "Изменить пароль",
+        "sending": "Отправка..."
     },
     "errors": {
         "email-not-found": "Email не найден",
@@ -159,6 +195,7 @@
         "error-loading-user": "Произошла ошибка при загрузке пользователя",
         "error-loading-organizations": "Произошла ошибка при загрузке организаций",
         "error-loading-projects": "Произошла ошибка при загрузке проектов",
+        "error-loading-token": "Произошла ошибка при загрузке токена",
         "you-dont-have-supervisor": "У вас нет наблюдателя",
         "no-task-selected": "Задача не выбрана",
         "task-not-found": "Задача не найдена",
@@ -187,6 +224,18 @@
         "profile": "Профиль",
         "user-menu": "Меню пользователя",
         "logout": "Выйти"
+    },
+
+    "dashboard-page": {
+        "title": "Главная",
+        "welcome": "Добро пожаловать в inLog",
+        "description": "Лабораторная информационная система для управления исследованиями керна и данными скважин",
+        "organizations": "Организации",
+        "organizations-description": "Управление организациями",
+        "projects": "Проекты",
+        "projects-description": "Управление проектами и кустами",
+        "tasks": "Задачи",
+        "tasks-description": "Управление задачами и статусами"
     },
 
     "scheduler-page": {
@@ -219,7 +268,9 @@
         "new-project": "Новый проект",
         "new-organization": "Новая организация",
         "select-organization-first": "Выберите организацию",
-        "create-first-project": "Создать первый проект"
+        "create-first-project": "Создать первый проект",
+        "create-organization": "Создать организацию",
+        "create-project": "Создать проект"
     },
 
     "tasks-page": {
@@ -250,6 +301,28 @@
         "templates-not-found": "Шаблоны не найдены",
         "no-templates-selected": "Шаблон не выбран",
         "select-template-to-view": "Выберите шаблон для просмотра"
+    },
+
+    "profile-page": {
+        "profile": "Профиль",
+        "profile-information": "Информация о профиле",
+        "profile-tab-placeholder": "Информация о профиле",
+        "methods": "Методики",
+        "working-methods": "Рабочие методики",
+        "methods-tab-placeholder": "Информация о рабочих методиках",
+        "employee": "Сотрудник",
+        "education": "Образование",
+        "education-history": "История образования",
+        "education-tab-placeholder": "Информация о образовании",
+        "medical": "Мед. осмотры",
+        "medical-examinations": "Мед. осмотры",
+        "medical-tab-placeholder": "Информация о медицинских исследованиях",
+        "quality": "Мероприятия по качеству",
+        "quality-measures": "Мероприятия по качеству",
+        "quality-tab-placeholder": "Информация о мероприятиях по качеству",
+        "personal-information": "Личная информация",
+        "tap-button-to-change-password": "Если вы хотите изменить свой пароль, пожалуйста, нажмите кнопку справа",
+        "password-security-description": "Для безопасности вашего аккаунта рекомендуется периодически менять пароль"
     },
 
     "subtasks-entity": {

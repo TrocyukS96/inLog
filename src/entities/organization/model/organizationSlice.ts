@@ -22,7 +22,7 @@ export const organizationApi = createApi({
             },
             providesTags: ['Organization'],
           }),
-          addOrganization: builder.mutation<OrganizationResponse, OrganizationRequest>({
+          addOrganization: builder.mutation<OrganizationResponse, Partial<OrganizationRequest>>({
             query: (data) => ({
               url: 'organizations/organization/',
               method: 'POST',

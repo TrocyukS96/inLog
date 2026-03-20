@@ -1,33 +1,44 @@
 import { MoreHorizontal, Trash2 } from 'lucide-react'
+import { memo, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { cn, getPriorityColorStyle } from '../../../shared/lib/utils'
 import { Button } from '../../../shared/ui/button'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../../../shared/ui/dropdown-menu'
-
 import type { Task } from '../model/types'
 
 interface TaskCardProps {
     task: Task
-    selectTask: (task: Task) => void
-    deleteTask: (task: Task) => void
-    createTemplate: (task: Task) => void
+    className?: string
+    isDragging?: boolean
+    selectTask?: (task: Task) => void
+    deleteTask?: (task: Task) => void
+    createTemplate?: (task: Task) => void
     isActive?: boolean
 }
 
 const TaskCard = ({
     task,
-    selectTask,
-    deleteTask,
+    className = '',
+    isDragging = false,
+    selectTask = () => {},
+    deleteTask = () => {},
     isActive = false,
 }: TaskCardProps) => {
     const { t } = useTranslation()
     const isTemplate = task.is_template
+
+    const formattedDate = useMemo(() => {
+        if (!task.due_date_end) return null;
+        return new Date(task.due_date_end).toLocaleDateString();
+    }, [task.due_date_end]);
+
     return (
         <div
             onClick={() => selectTask(task)}
             className={cn(
                 "group relative flex items-center justify-between p-2 rounded-lg border transition-all duration-200 cursor-pointer bg-card",
                 getPriorityColorStyle(task.priority, 'border'),
+                className,
                 isActive
                     ? "border-primary shadow-sm"
                     : "border-border hover:border-primary/50",
@@ -48,37 +59,39 @@ const TaskCard = ({
             <div className="flex flex-col items-end">
                 {task.due_date_end && (
                     <span className="text-base text-muted-foreground">
-                        {new Date(task.due_date_end).toLocaleDateString()}
+                        {formattedDate}
                     </span>
                 )}
-                <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                        <Button
-                            variant="ghost"
-                            size="icon"
-                            className="transition-opacity"
-                            onClick={(e) => e.stopPropagation()}
-                        >
-                            <MoreHorizontal className="h-4 w-4" />
-                        </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="w-48">
-                        <DropdownMenuItem
-                            className="text-destructive focus:text-destructive"
-                            onClick={() => deleteTask(task)}
-                        >
-                            <Trash2 className="h-4 w-4 mr-2" />
-                            {isTemplate ? t('templates-page.delete-template') : t('tasks-page.delete-task')}
-                        </DropdownMenuItem>
-                        {/* <DropdownMenuItem onClick={() => createTemplate(task)}>
+                {!isDragging && (
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                className="transition-opacity"
+                                onClick={(e) => e.stopPropagation()}
+                            >
+                                <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-48">
+                            <DropdownMenuItem
+                                className="text-destructive focus:text-destructive"
+                                onClick={() => deleteTask(task)}
+                            >
+                                <Trash2 className="h-4 w-4 mr-2" />
+                                {isTemplate ? t('templates-page.delete-template') : t('tasks-page.delete-task')}
+                            </DropdownMenuItem>
+                            {/* <DropdownMenuItem onClick={() => createTemplate(task)}>
                             <Copy className="h-4 w-4 mr-2" />
                             {isTemplates ? t('templates-page.create-template') : t('tasks-page.create-task')}
                         </DropdownMenuItem> */}
-                    </DropdownMenuContent>
-                </DropdownMenu>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+                )}
             </div>
         </div>
     )
 }
 
-export default TaskCard
+export default memo(TaskCard)
