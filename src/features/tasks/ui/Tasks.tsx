@@ -287,7 +287,7 @@ export default function Tasks({ type = 'tasks-page' }: { type?: 'tasks-page' | '
             <ResizableHandle withHandle />
 
             <ResizablePanel defaultSize={60} className="border-none rounded-none">
-                <div className="h-[calc(100vh-64px-32px-32px-16px)]">
+                <div className={isTemplates ? "h-[calc(100vh-64px-28px)]" : "h-[calc(100vh-64px-32px-32px-16px)]"}>
                     {renderTaskDetails()}
                 </div>
             </ResizablePanel>

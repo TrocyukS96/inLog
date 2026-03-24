@@ -19,14 +19,16 @@ import {
   PopoverTrigger,
 } from "../../shared/ui/popover"
 import { Badge } from "../../shared/ui/badge"
+import { useTranslation } from 'react-i18next'
 
 export interface MultiSelectOption {
   value: string
   label: string
+  fixed?: boolean 
 }
 
 interface MultiSelectProps {
-  options: { label: string; value: string }[]
+  options: { label: string; value: string; fixed?: boolean }[]
   value?: string[]
   onValueChange?: (value: string[]) => void
   placeholder?: string
@@ -39,14 +41,36 @@ export function MultiSelect({
   options = [],
   value = [],
   onValueChange,
-  placeholder = "Выберите элементы...",
+  placeholder,
   disabled = false,
   className,
   renderOption,
 }: MultiSelectProps) {
   const [open, setOpen] = React.useState(false)
+  const { t } = useTranslation()
+
+  const fixedOptions = React.useMemo(() => {
+    return options.filter(opt => opt.fixed === true)
+  }, [options])
+
+  const fixedValues = React.useMemo(() => {
+    return fixedOptions.map(opt => opt.value)
+  }, [fixedOptions])
+
+  React.useEffect(() => {
+    const missingFixedValues = fixedValues.filter(v => !value.includes(v))
+    if (missingFixedValues.length > 0 && onValueChange) {
+      onValueChange([...value, ...missingFixedValues])
+    }
+  }, [fixedValues, value, onValueChange])
 
   const handleToggle = (optionValue: string) => {
+    const option = options.find(opt => opt.value === optionValue)
+    
+    if (option?.fixed) {
+      return
+    }
+
     const newValue = value.includes(optionValue)
       ? value.filter((v) => v !== optionValue)
       : [...value, optionValue]
@@ -56,6 +80,12 @@ export function MultiSelect({
 
   const handleRemove = (optionValue: string, event: React.MouseEvent) => {
     event.stopPropagation()
+    const option = options.find(opt => opt.value === optionValue)
+    
+    if (option?.fixed) {
+      return
+    }
+    
     const newValue = value.filter((v) => v !== optionValue)
     onValueChange?.(newValue)
   }
@@ -63,6 +93,11 @@ export function MultiSelect({
   const getOptionLabel = (optionValue: string) => {
     const option = options.find((opt) => opt.value === optionValue)
     return option?.label || optionValue
+  }
+
+  const isOptionFixed = (optionValue: string) => {
+    const option = options.find(opt => opt.value === optionValue)
+    return option?.fixed === true
   }
 
   return (
@@ -73,31 +108,36 @@ export function MultiSelect({
           role="combobox"
           aria-expanded={open}
           className={cn(
-            "w-full justify-between h-auto min-h-10 px-3 py-2",
-            disabled && "opacity-50 cursor-not-allowed",
+            "w-full justify-between h-auto min-h-10 px-2 py-0",
+            disabled && "cursor-not-allowed",
             className
           )}
           disabled={disabled}
         >
-          <div className="flex flex-wrap gap-1 flex-1 mr-2">
+          <div className="h-full flex flex-wrap gap-1 flex-1 mr-2">
             {value.length > 0 ? (
-              value.map((itemValue) => (
-                <Badge
-                  key={itemValue}
-                  variant="secondary"
-                  className="mr-1 mb-1"
-                >
-                  {getOptionLabel(itemValue)}
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-4 w-4 p-0 ml-1 hover:bg-transparent"
-                    onClick={(e) => handleRemove(itemValue, e)}
+              value.map((itemValue) => {
+                const isFixed = isOptionFixed(itemValue)
+                return (
+                  <Badge
+                    key={itemValue}
+                    // variant={isFixed ? "default" : "secondary"}
+                    className=""
                   >
-                    <X className="h-3 w-3" />
-                  </Button>
-                </Badge>
-              ))
+                    {getOptionLabel(itemValue)}
+                    {!isFixed && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-4 w-4 p-0 ml-1 hover:bg-transparent"
+                        onClick={(e) => handleRemove(itemValue, e)}
+                      >
+                        <X className="h-3 w-3" />
+                      </Button>
+                    )}
+                  </Badge>
+                )
+              })
             ) : (
               <span className="text-muted-foreground">{placeholder}</span>
             )}
@@ -107,31 +147,47 @@ export function MultiSelect({
       </PopoverTrigger>
       <PopoverContent className="w-full p-0" align="start">
         <Command>
-          <CommandInput placeholder="Поиск..." />
-          <CommandEmpty>Ничего не найдено</CommandEmpty>
+          <CommandInput placeholder={t('fields.search')} />
+          <CommandEmpty>{t('fields.nothing-found')}</CommandEmpty>
           <CommandList>
             <CommandGroup>
-              {options.map((option) => (
-                <CommandItem
-                  key={option.value}
-                  value={option.value}
-                  onSelect={() => handleToggle(option.value)}
-                >
-                  <div
+              {options.map((option) => {
+                const isFixed = option.fixed === true
+                const isSelected = value.includes(option.value)
+                
+                return (
+                  <CommandItem
+                    key={option.value}
+                    value={option.value}
+                    onSelect={() => handleToggle(option.value)}
+                    disabled={isFixed}
                     className={cn(
-                      "mr-2 flex h-4 w-4 items-center justify-center rounded-sm border border-primary",
-                      value.includes(option.value)
-                        ? "bg-primary text-primary-foreground"
-                        : "opacity-50"
+                      "cursor-pointer text-popover-foreground",
+                      isFixed && "cursor-default text-muted-foreground"
                     )}
                   >
-                    {value.includes(option.value) && (
-                      <Check className="h-3 w-3" />
-                    )}
-                  </div>
-                  {renderOption ? renderOption(option) : option.label}
-                </CommandItem>
-              ))}
+                    <div
+                      className={cn(
+                        "mr-2 flex h-4 w-4 items-center justify-center rounded-sm border",
+                        isSelected
+                          ? "bg-primary border-primary text-popover-foreground"
+                          : "border-muted-foreground/20",
+                        // isFixed && "bg-primary/20 border-primary/50"
+                      )}
+                    >
+                      {isSelected && (
+                        <Check className="h-3 w-3" />
+                      )}
+                    </div>
+                    <span className={cn(
+                      "flex-1",
+                      // isFixed && "text-muted-foreground"
+                    )}>
+                      {renderOption ? renderOption(option) : option.label}
+                    </span>
+                  </CommandItem>
+                )
+              })}
             </CommandGroup>
           </CommandList>
         </Command>

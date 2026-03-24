@@ -15,6 +15,12 @@ export function Header() {
     if (pathname.includes('settings')) {
       return t('settings-page.title')
     }
+    if (pathname.includes('admin')) {
+      return t('admin-page.admin-panel')
+    }
+    if (pathname.includes('geo-mechanics')) {
+      return t('geo-mechanics-page.geo-mechanics')
+    }
     return t('header.dashboard')
    
   }

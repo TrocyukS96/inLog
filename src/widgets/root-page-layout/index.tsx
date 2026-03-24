@@ -39,7 +39,14 @@ const RootPageLayout = ({
             {
               location.pathname.includes(routes.scheduler.list()) && (
                 <div className="mb-4">
-                  <OrgProjectSelector />
+                  <OrgProjectSelector type="all" />
+                </div>
+              )
+            }
+            {
+              location.pathname.includes(routes.admin.list()) && (
+                <div className="mb-4">
+                  <OrgProjectSelector type="organization" />
                 </div>
               )
             }

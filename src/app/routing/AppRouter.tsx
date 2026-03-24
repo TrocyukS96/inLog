@@ -1,5 +1,7 @@
 import { useEffect } from 'react'
 import { BrowserRouter, Navigate, Outlet, Route, Routes, useNavigate } from 'react-router-dom'
+import AdminPage from '../../pages/admin'
+import { AdminConstructorPage } from '../../pages/admin/admin-constructor'
 import CheckEmailPage from '../../pages/auth/check-email'
 import LoginPage from '../../pages/auth/login'
 import PasswordRecoveryPage from '../../pages/auth/password-recovery'
@@ -9,12 +11,12 @@ import DashboardPage from '../../pages/dashboard'
 import GeoMechanicsPage from '../../pages/dashboard/geo-mechanics'
 import SchedulerPage from '../../pages/dashboard/scheduler'
 import TasksPage from '../../pages/dashboard/scheduler/tasks'
+import TemplatesPage from '../../pages/dashboard/scheduler/templates'
 import SettingsPage from '../../pages/dashboard/settings'
 import OrganizationsAndProjectsPage from '../../pages/dashboard/settings/ogranizations-and-projects'
 import ProfilePage from '../../pages/dashboard/settings/profile'
 import { routes } from '../../shared/lib/routes'
 import { RootLayout } from '../../widgets/root-layout'
-import TemplatesPage from '../../pages/dashboard/scheduler/templates'
 
 export function AppRouter() {
   return (
@@ -38,12 +40,17 @@ export function AppRouter() {
               <Route path={routes.scheduler.statuses()} element={<div>Statuses</div>} />
               <Route path={routes.scheduler.roadmap()} element={<div>Roadmap</div>} />
             </Route>
+            <Route path={routes.admin.list()} element={<AdminPage />} >
+              {/* <Route index element={<Navigate to={routes.admin.settings()} replace />} /> */}
+              <Route index element={<Navigate to={routes.admin.constructor()} replace />} />
+              <Route path={routes.admin.constructor()} element={<AdminConstructorPage />} />
+            </Route>
             <Route path={routes.settings.list()} element={<SettingsPage />}  >
               <Route index element={<Navigate to={routes.settings.profile()} replace />} />
               <Route path={routes.settings.profile()} element={<ProfilePage />} />
               <Route path={routes.settings.organizationsAndProjects()} element={<OrganizationsAndProjectsPage />} />
             </Route>
-            <Route path={routes.geoMechanics.list()} element={<GeoMechanicsPage />} />  
+            <Route path={routes.geoMechanics.list()} element={<GeoMechanicsPage />} />
           </Route>
         </Route>
 

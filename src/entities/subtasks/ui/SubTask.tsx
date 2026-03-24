@@ -121,7 +121,7 @@ const handleCopyLink = () => {
           />
           
           <span className={cn(
-            "text-sm truncate",
+            "text-sm",
             subtask.completed && "line-through text-muted-foreground"
           )}>
             {subtask.title}

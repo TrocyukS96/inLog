@@ -117,7 +117,15 @@
         "room": "Кабинет",
         "workplace": "Рабочее место",
         "experience-years": "Стаж работы",
-        "joined-at": "Дата начала работы"
+        "joined-at": "Дата начала работы",
+        "connection-with": "Связь с",
+        "name-in-russian": "Название (русский)",
+        "name-in-english": "Название (английский)",
+        "enter-name-in-russian": "Введите название (русский)",
+        "enter-name-in-english": "Введите название (английский)",
+        "select-connections": "Выберите связи",
+        "enter-name": "Введите название",
+        "nothing-found": "Ничего не найдено"
     },
     "notice-list": {
         "resend-letter-if-didnt-get-mail": "Если письмо не пришло, проверьте папку \"Спам\" или нажмите кнопку ниже",
@@ -151,7 +159,13 @@
         "adding-file": "Добавление файла",
         "deleting-file": "Удаление файла",
         "changing-password": "Изменение пароля",
-        "mail-to-change-password-has-been-sent": "Письмо для сброса пароля успешно отправлено"
+        "mail-to-change-password-has-been-sent": "Письмо для сброса пароля успешно отправлено",
+        "creating-node": "Создание узла",
+        "updating-node": "Обновление узла",
+        "deleting-node": "Удаление узла",
+        "node-created": "Узел успешно создан",
+        "node-updated": "Узел успешно обновлен",
+        "node-deleted": "Узел успешно удален"
         
     },
     "buttons": {
@@ -174,7 +188,10 @@
         "kanban": "Канбан",
         "saving": "Сохранение...",  
         "change-password": "Изменить пароль",
-        "sending": "Отправка..."
+        "sending": "Отправка...",
+        "add-column": "Добавить колонку",
+        "add-row": "Добавить строку",
+        "add-tab": "Добавить вкладку"
     },
     "errors": {
         "email-not-found": "Email не найден",
@@ -200,11 +217,17 @@
         "no-task-selected": "Задача не выбрана",
         "task-not-found": "Задача не найдена",
         "template-not-found": "Шаблон не найдена",
-        "template-not-selected": "Шаблон не выбран"
+        "template-not-selected": "Шаблон не выбран",
+        "no-data": "Нет данных",
+        "something-went-wrong": "Что-то пошло не так",
+        "network-error": "Ошибка сети",
+        "fill-field-in-russian": "Заполните поле на русском языке",
+        "fill-field-in-english": "Заполните поле на английском языке"
     },
     "sidebar": {
         "dashboard": "Главная",
         "scheduler": "Планировщик",
+        "admin-panel": "Админ панель",      
         "settings": "Настройки",
         "geo-mechanics": "Геомеханика",
         "tasks": "Задачи",
@@ -323,6 +346,44 @@
         "personal-information": "Личная информация",
         "tap-button-to-change-password": "Если вы хотите изменить свой пароль, пожалуйста, нажмите кнопку справа",
         "password-security-description": "Для безопасности вашего аккаунта рекомендуется периодически менять пароль"
+    },
+
+    "admin-page": {
+        "admin-panel": "Админ панель",
+        "constructor": "Конструктор",
+        "edit-node": "Редактировать узел",
+        "delete-node": "Удалить узел",
+        "confirm-delete": "Подтверждение удаления",
+        "delete-node-confirmation": "Вы уверены, что хотите удалить этот узел?",
+        "table": "Таблица",
+        "no-entity-selected": "Узел не выбран",
+        "no-nodes-available": "Нет узлов",
+        "create-node": "Создать узел",
+        "tabs": "Вкладки",
+        "no-tabs-available": "Нет вкладок",
+        "create-tab": "Создать вкладку",
+        "create-new-tab": "Создать новую вкладку",
+        "edit-tab": "Редактировать вкладку",
+        "delete-tab": "Удалить вкладку",
+        "add-tab": "Добавить вкладку",
+        "delete-node-title": "Удалить узел",
+        "delete-node-warning": "Вы уверены, что хотите удалить этот узел?"
+    },
+
+    "geo-mechanics-page": {
+        "geo-mechanics": "Геомеханика",
+        "graphics": "Графики",
+        "create-geo-mechanics": "Создать геомеханику",
+        "delete-geo-mechanics": "Удалить геомеханику",
+        "edit-geo-mechanics": "Редактировать геомеханику",
+        "geo-mechanics-absent-message": "Геомеханика не найдена",
+        "geo-mechanics-details": "Детали геомеханики",
+        "loading-geo-mechanics-details": "Загрузка деталей геомеханики",
+        "vertical-graphics": "Вертикальные графики",
+        "horizontal-graphics": "Горизонтальные графики",
+        "single-track-graphics": "Одинарный график",
+        "double-track-graphics": "Двойной график"
+        
     },
 
     "subtasks-entity": {

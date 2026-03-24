@@ -5,6 +5,7 @@ import { userApi } from '../../entities/user/model/userSlice'
 import { organizationApi } from '../../entities/organization/model/organizationSlice'
 import { projectApi } from '../../entities/project/model/projectSlice'
 import { taskApi } from '../../entities/task/model/taskSlice'
+import { adminApi } from '../../entities/admin/model/adminSlice'
 
 export const store = configureStore({
   reducer: {
@@ -13,6 +14,7 @@ export const store = configureStore({
     [organizationApi.reducerPath]: organizationApi.reducer,
     [projectApi.reducerPath]: projectApi.reducer,
     [taskApi.reducerPath]: taskApi.reducer,
+    [adminApi.reducerPath]: adminApi.reducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware().concat(
@@ -21,6 +23,7 @@ export const store = configureStore({
       organizationApi.middleware,
       projectApi.middleware,
       taskApi.middleware,
+      adminApi.middleware,
     ),
 })
 

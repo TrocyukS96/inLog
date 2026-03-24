@@ -5,6 +5,7 @@ import {
   Monitor,
   Moon,
   Settings,
+  ShieldPlus,
   Sun,
   TowerControl
 } from 'lucide-react'
@@ -30,6 +31,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '../../shared/ui/tooltip'
+import { useCallback } from 'react'
 
 
 export function Sidebar() {
@@ -50,15 +52,24 @@ export function Sidebar() {
     }
   }
 
-  const getIsActive = (path: string) => {
-    if (path.includes(routes.settings.list())) {
-      return location.pathname.includes(routes.settings.list())
-    }
+  const getIsActive = useCallback((path: string) => {
     if (path.includes(routes.scheduler.list())) {
       return location.pathname.includes(routes.scheduler.list())
     }
+    if (path.includes(routes.admin.list())) {
+      return location.pathname.includes(routes.admin.list())
+    }
+    if (path.includes(routes.settings.list())) {
+      return location.pathname.includes(routes.settings.list())
+    }
+    if (path.includes(routes.geoMechanics.list())) {
+      return location.pathname.includes(routes.geoMechanics.list())
+    }
     return location.pathname === path
-  }
+  },[location.pathname])
+
+  console.log(getIsActive(routes.admin.list()),'-----> getIsActive admin list')
+  console.log(getIsActive(routes.settings.list()),'-----> getIsActive settings list')
 
   const getLinkClassName = (path: string) => {
     return cn(`p-2 h-9 w-9 flex items-center justify-center rounded-lg transition-colors hover:bg-accent hover:text-accent-foreground ${getIsActive(path) ? 'bg-accent' : ''}`)
@@ -96,6 +107,19 @@ export function Sidebar() {
               </NavLink>
             </TooltipTrigger>
             <TooltipContent side="right">{t('sidebar.scheduler')}</TooltipContent>
+          </Tooltip>
+
+          {/* TODO: add admin panel page */}
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <NavLink
+                to={routes.admin.list()}
+                className={getLinkClassName(routes.admin.list())}
+              >
+                <ShieldPlus className="h-7 w-7 text-white" />
+              </NavLink>
+            </TooltipTrigger>
+            <TooltipContent side="right">{t('sidebar.admin-panel')}</TooltipContent>
           </Tooltip>
 
           <Tooltip>

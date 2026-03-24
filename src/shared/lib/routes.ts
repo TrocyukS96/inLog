@@ -39,6 +39,11 @@ export const routes = {
       roadmap: () => '/scheduler/roadmap',
     },
 
+    admin: {
+      list: () => '/admin',
+      constructor: () => '/admin/constructor',
+    },
+
     settings: {
       list: () => '/settings',
       profile: () => '/settings/profile',

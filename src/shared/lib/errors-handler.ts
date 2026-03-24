@@ -20,7 +20,7 @@ export const errorsHandler = (
 
   // 1. Сетевые ошибки или таймауты
   if (error instanceof Error && error.message === 'Network Error') {
-    toast.error(t('network-error') || 'Проверьте подключение к интернету')
+    toast.error(t('errors.network-error'))
     return
   }
 
@@ -30,7 +30,7 @@ export const errorsHandler = (
 
     // Общие серверные ошибки без детализации
     if ([404, 500, 405].includes(Number(status)) && !data?.detail) {
-      toast.error(t('server-error') || 'Ошибка сервера')
+      toast.error(t('errors.server-error'))
       return
     }
 
@@ -71,10 +71,10 @@ export const errorsHandler = (
     }
 
     // 7. Последний fallback
-    toast.error(t('something-went-wrong') || 'Что-то пошло не так')
+    toast.error(t('errors.something-went-wrong'))
     return
   }
 
   // 8. Любая другая неизвестная ошибка
-  toast.error(t('something-went-wrong') || 'Неизвестная ошибка')
+  toast.error(t('errors.something-went-wrong'))
 }

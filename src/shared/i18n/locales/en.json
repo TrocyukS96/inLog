@@ -120,7 +120,15 @@
         "workplace": "Workplace",
         "experience-years": "Experience years",
         "in-organization-since": "In organization since",
-        "joined-at": "Joined at"
+        "joined-at": "Joined at",
+        "connection-with": "Connection with",
+        "name-in-russian": "Name (Russian)",
+        "name-in-english": "Name (English)",
+        "enter-name-in-russian": "Enter name (Russian)",
+        "enter-name-in-english": "Enter name (English)",
+        "select-connections": "Select connections",
+        "enter-name": "Enter name",
+        "nothing-found": "Nothing found"
     },
 
     "notice-list": {
@@ -155,7 +163,13 @@
         "adding-file": "Adding file",
         "deleting-file": "Deleting file",
         "changing-password": "Changing password",
-        "mail-to-change-password-has-been-sent": "Mail to change password has been sent successfully"
+        "mail-to-change-password-has-been-sent": "Mail to change password has been sent successfully",
+        "creating-node": "Creating node",
+        "updating-node": "Updating node",
+        "deleting-node": "Deleting node",
+        "node-created": "Node has been created successfully",
+        "node-updated": "Node has been updated successfully",
+        "node-deleted": "Node has been deleted successfully"
     },
 
     "buttons": {
@@ -178,7 +192,10 @@
         "kanban": "Kanban",
         "saving": "Saving...",
         "change-password": "Change password",
-        "sending": "Sending..."
+        "sending": "Sending...",
+        "add-column": "Add column",
+        "add-row": "Add row",
+        "add-tab": "Add tab"
     },
 
 
@@ -206,12 +223,18 @@
         "no-task-selected": "No task selected",
         "template-not-found": "Template not found",
         "task-not-found": "Task not found",
-        "template-not-selected": "Template not selected"
+        "template-not-selected": "Template not selected",
+        "no-data": "No data",
+        "something-went-wrong": "Something went wrong",
+        "network-error": "Network error",
+        "fill-field-in-russian": "Fill the field in Russian",
+        "fill-field-in-english": "Fill the field in English"
     },
 
     "sidebar": {
         "dashboard": "Dashboard",
         "scheduler": "Scheduler",
+        "admin-panel": "Admin panel",
         "settings": "Settings",
         "geo-mechanics": "Geo mechanics",
         "tasks": "Tasks",
@@ -331,6 +354,44 @@
         "personal-information": "Personal information",
         "tap-button-to-change-password": "If you want to change your password, please click the button on the right",
         "password-security-description": "For the security of your account, it is recommended to change your password periodically"
+    },
+
+    "admin-page": {
+        "admin-panel": "Admin panel",
+        "constructor": "Constructor",   
+        "edit-node": "Edit node",
+        "delete-node": "Delete node",
+        "confirm-delete": "Confirm delete",
+        "delete-node-confirmation": "Are you sure you want to delete this node?",
+        "table": "Table",
+        "no-entity-selected": "No entity selected",
+        "no-nodes-available": "No nodes available",
+        "create-node": "Create node",
+        "tabs": "Tabs",
+        "no-tabs-available": "No tabs available",
+        "create-tab": "Create tab",
+        "create-new-tab": "Create new tab",
+        "edit-tab": "Edit tab",
+        "delete-tab": "Delete tab",
+        "add-tab": "Add tab",
+        "delete-node-title": "Delete node",
+        "delete-node-warning": "Are you sure you want to delete this node?"
+    },
+
+    "geo-mechanics-page": {
+        "geo-mechanics": "Geo mechanics",
+        "graphics": "Graphics",
+        "create-geo-mechanics": "Create geo mechanics",
+        "delete-geo-mechanics": "Delete geo mechanics",
+        "edit-geo-mechanics": "Edit geo mechanics",
+        "geo-mechanics-absent-message": "Geo mechanics not found",
+        "geo-mechanics-details": "Geo mechanics details",
+        "loading-geo-mechanics-details": "Loading geo mechanics details",
+        "vertical-graphics": "Vertical graphics",
+        "horizontal-graphics": "Horizontal graphics",
+        "single-track-graphics": "Single track graphics",
+        "double-track-graphics": "Double track graphics"
+        
     },
 
     "comments-entity": {
