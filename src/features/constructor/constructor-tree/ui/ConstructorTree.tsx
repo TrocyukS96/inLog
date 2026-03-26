@@ -5,11 +5,12 @@ import {
     type FeatureImplementation
 } from '@headless-tree/core'
 import { useTree } from '@headless-tree/react'
-import { FolderTree } from 'lucide-react'
-import { memo, useCallback, useMemo, useState } from 'react'
+import { ChevronsUpDown, FolderTree } from 'lucide-react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { AdminPanelNode, AdminPanelNodeRequest } from '../../../../entities/admin/model/types'
 import { cn } from '../../../../shared/lib/utils'
+import { Button } from '../../../../shared/ui/button'
 import {
     Dialog,
     DialogContent,
@@ -18,17 +19,16 @@ import {
     DialogHeader,
     DialogTitle,
 } from '../../../../shared/ui/dialog'
-import { Button } from '../../../../shared/ui/button'
 import { ConstructorTreeNode } from './ConstructorTreeNode'
 import TreeNodeFormDialog from './TreeNodeFormDialog'
 
 type TreeNodeData = number
 
 interface Props {
-    data: AdminPanelNode[]
+    nodes: AdminPanelNode[]
     mode?: 'single' | 'multiple'
     selectedIds?: number[]
-    onSelect?: (selectedIds: number[], selectedNodes: AdminPanelNode[]) => void
+    onSelect?: (nodeId: number) => void
     onEdit?: (node: AdminPanelNode, body: AdminPanelNodeRequest) => void
     onDelete?: (node: AdminPanelNode) => void
     onCreate?: (body: AdminPanelNodeRequest) => void
@@ -36,7 +36,7 @@ interface Props {
 }
 
 const ConstructorTree = ({
-    data,
+    nodes = [],
     mode = 'single',
     // selectedIds = [],
     onSelect,
@@ -47,6 +47,28 @@ const ConstructorTree = ({
 }: Props) => {
     const { t, i18n } = useTranslation()
     const currentLang = i18n.language === 'ru' ? 'ru' : 'en'
+
+    const [currentNodes, setCurrentNodes] = useState<AdminPanelNode[]>(nodes)
+    const [forceUpdateKey, setForceUpdateKey] = useState(0)
+    const [allExpanded, setAllExpanded] = useState(true)
+
+    useEffect(() => {
+        setCurrentNodes(nodes)
+        setForceUpdateKey(prev => prev + 1)
+    }, [nodes])
+
+    const { nodesMap, rootIds } = useMemo(() => {
+        const map = new Map<number, AdminPanelNode>()
+        currentNodes.forEach(node => {
+            map.set(node.id, node)
+        })
+
+        const roots = currentNodes
+            .filter(node => node.parent === null || !map.has(node.parent))
+            .map(node => node.id)
+
+        return { nodesMap: map, rootIds: roots }
+    }, [currentNodes])
 
     const [dialogState, setDialogState] = useState<{
         open: boolean
@@ -64,20 +86,6 @@ const ConstructorTree = ({
     }>({
         open: false,
     })
-
-    const nodesMap = useMemo(() => {
-        const map = new Map<number, AdminPanelNode>()
-        data.forEach(node => {
-            map.set(node.id, node)
-        })
-        return map
-    }, [data])
-
-    const rootIds = useMemo(() => {
-        return data
-            .filter(node => node.parent === null || !nodesMap.has(node.parent))
-            .map(node => node.id)
-    }, [data, nodesMap])
 
     const handleOpenCreateDialog = useCallback((parentNode?: AdminPanelNode) => {
         setDialogState({
@@ -115,13 +123,6 @@ const ConstructorTree = ({
         })
     }, [])
 
-    const handleConfirmDelete = useCallback(() => {
-        if (deleteDialogState.node) {
-            onDelete?.(deleteDialogState.node)
-            handleCloseDeleteDialog()
-        }
-    }, [onDelete, deleteDialogState.node, handleCloseDeleteDialog])
-
     const handleConfirmCreate = useCallback(async (formData: { name_ru: string; name_en: string; related_groups: string[] }) => {
         onCreate?.({
             name_ru: formData.name_ru,
@@ -131,7 +132,7 @@ const ConstructorTree = ({
             related_groups: formData.related_groups.map(Number) || [],
         })
         handleCloseDialog()
-    }, [onCreate, dialogState.parentNode])
+    }, [onCreate, dialogState.parentNode, handleCloseDialog])
 
     const handleConfirmEdit = useCallback(async (formData: { name_ru: string; name_en: string; related_groups: string[] }) => {
         if (dialogState.node) {
@@ -144,6 +145,50 @@ const ConstructorTree = ({
             handleCloseDialog()
         }
     }, [onEdit, dialogState.node, handleCloseDialog])
+
+    const handleConfirmDelete = useCallback(() => {
+        if (deleteDialogState.node) {
+            onDelete?.(deleteDialogState.node)
+            handleCloseDeleteDialog()
+        }
+    }, [onDelete, deleteDialogState.node, handleCloseDeleteDialog])
+
+    const toggleAllNodes = useCallback(() => {
+        if (allExpanded) {
+            collapseAllNodes()
+        } else {
+            expandAllNodes()
+        }
+    }, [allExpanded])
+
+    const getItemName = useCallback((item: any) => {
+        const node = nodesMap.get(item.getItemData())
+        if (!node) return ''
+        return currentLang === 'ru' ? node.name_ru : node.name_en
+    }, [nodesMap, currentLang])
+
+    const isItemFolder = useCallback((item: any) => {
+        const node = nodesMap.get(item.getItemData())
+        if (!node) return false
+        return currentNodes.some(child => child.parent === node.id)
+    }, [nodesMap, currentNodes])
+
+    const getChildren = useCallback((itemId: string) => {
+        if (itemId === '__root__') {
+            return rootIds.map(id => id.toString())
+        }
+        const nodeId = Number(itemId)
+        const children = currentNodes.filter(node => node.parent === nodeId)
+        return children.map(child => child.id.toString())
+    }, [currentNodes, rootIds])
+
+    const dataLoader = useMemo(() => ({
+        getItem: (itemId: string) => {
+            if (itemId === '__root__') return null as any
+            return Number(itemId) as TreeNodeData
+        },
+        getChildren,
+    }), [getChildren])
 
     const customClickBehavior: FeatureImplementation = useMemo(() => ({
         itemInstance: {
@@ -164,9 +209,8 @@ const ConstructorTree = ({
                     tree.setSelectedItems([selectedItemId])
                     item.setFocused()
 
-                    const selectedNode = nodesMap.get(Number(selectedItemId))
-                    if (selectedNode) {
-                        onSelect?.([selectedNode.id], [selectedNode])
+                    if (selectedItemId) {
+                        onSelect?.(Number(selectedItemId))
                     }
                 },
             }),
@@ -175,39 +219,41 @@ const ConstructorTree = ({
 
     const tree = useTree<TreeNodeData>({
         rootItemId: '__root__',
-        getItemName: (item) => {
-            const node = nodesMap.get(item.getItemData())
-            if (!node) return ''
-            return currentLang === 'ru' ? node.name_ru : node.name_en
-        },
-        isItemFolder: (item) => {
-            const node = nodesMap.get(item.getItemData())
-            if (!node) return false
-            return data.some(child => child.parent === node.id)
-        },
-        dataLoader: {
-            getItem: (itemId) => {
-                if (itemId === '__root__') return null as any
-                return Number(itemId) as TreeNodeData
-            },
-            getChildren: (itemId) => {
-                if (itemId === '__root__') {
-                    return rootIds.map(id => id.toString())
-                }
-                const nodeId = Number(itemId)
-                const children = data.filter(node => node.parent === nodeId)
-                return children.map(child => child.id.toString())
-            },
-        },
+        getItemName,
+        isItemFolder,
+        dataLoader,
         features: [
             syncDataLoaderFeature,
             selectionFeature,
             hotkeysCoreFeature,
             customClickBehavior,
         ],
+        setExpandedItems: (items) => {
+            setAllExpanded(items.length > 0)
+        },
     })
 
-    const allNodesCount = data.length
+    const expandAllNodes = useCallback(() => {
+        const allItems = tree.getItems()
+        allItems.forEach(item => {
+            if (item.isFolder() && !item.isExpanded()) {
+                item.expand()
+            }
+        })
+        setAllExpanded(true)
+    }, [tree])
+
+    const collapseAllNodes = useCallback(() => {
+        const allItems = tree.getItems()
+        allItems.forEach(item => {
+            if (item.isFolder() && item.isExpanded()) {
+                item.collapse()
+            }
+        })
+        setAllExpanded(false)
+    }, [tree])
+
+    const allNodesCount = currentNodes.length
 
     const handleToggle = useCallback((item: any) => {
         if (item.isExpanded()) {
@@ -215,11 +261,50 @@ const ConstructorTree = ({
         } else {
             item.expand()
         }
-    }, [])
+        setTimeout(() => {
+            const allItems = tree.getItems()
+            const allFoldersExpanded = allItems
+                .filter(item => item.isFolder())
+                .every(item => item.isExpanded())
+            setAllExpanded(allFoldersExpanded)
+        }, 0)
+    }, [tree])
+
+    useEffect(() => {
+        tree.rebuildTree()
+        if (allExpanded) {
+            setTimeout(() => {
+                expandAllNodes()
+            }, 0)
+        }
+    }, [forceUpdateKey, tree, allExpanded, expandAllNodes])
+
+    const hasFolders = useMemo(() => {
+        return currentNodes.some(node =>
+            currentNodes.some(child => child.parent === node.id)
+        )
+    }, [currentNodes])
 
     return (
         <>
             <div className={cn("w-full h-full", className)}>
+                {allNodesCount > 0 && hasFolders && (
+                    <div className="flex items-center gap-2 px-2 py-1 mb-2 border-b border-border/50">
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={toggleAllNodes}
+                            className="h-7 gap-1 text-xs"
+                            title={allExpanded ? t('buttons.collapse-all') : t('buttons.expand-all')}
+                        >
+                            <ChevronsUpDown className="h-3.5 w-3.5" />
+                            <span>
+                                {allExpanded ? t('buttons.collapse-all') : t('buttons.expand-all')}
+                            </span>
+                        </Button>
+                    </div>
+                )}
+
                 {allNodesCount === 0 ? (
                     <div className="h-full flex flex-col items-center justify-center py-12 text-center">
                         <FolderTree className="h-12 w-12 text-muted-foreground/50 mb-3" />
@@ -238,7 +323,7 @@ const ConstructorTree = ({
 
                             return (
                                 <ConstructorTreeNode
-                                    key={item.getId()}
+                                    key={`${item.getId()}-${forceUpdateKey}`}
                                     item={item}
                                     node={node}
                                     mode={mode}
@@ -258,7 +343,7 @@ const ConstructorTree = ({
                 mode={dialogState.mode}
                 node={dialogState.node}
                 parentNode={dialogState.parentNode}
-                allNodes={data}
+                allNodes={currentNodes}
                 onConfirm={dialogState.mode === 'create' ? handleConfirmCreate : handleConfirmEdit}
                 isLoading={false}
             />
@@ -270,7 +355,7 @@ const ConstructorTree = ({
                         <DialogDescription>
                             {deleteDialogState.node && (
                                 <p>
-                                        {t('admin-page.delete-node-warning')}
+                                    {t('admin-page.delete-node-warning')}
                                 </p>
                             )}
                         </DialogDescription>
@@ -292,4 +377,4 @@ const ConstructorTree = ({
     )
 }
 
-export default memo(ConstructorTree)
+export default ConstructorTree

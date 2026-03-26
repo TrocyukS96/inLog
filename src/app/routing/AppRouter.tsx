@@ -1,5 +1,7 @@
 import { useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { BrowserRouter, Navigate, Outlet, Route, Routes, useNavigate } from 'react-router-dom'
+import { toast } from 'sonner'
 import AdminPage from '../../pages/admin'
 import { AdminConstructorPage } from '../../pages/admin/admin-constructor'
 import CheckEmailPage from '../../pages/auth/check-email'
@@ -15,6 +17,7 @@ import TemplatesPage from '../../pages/dashboard/scheduler/templates'
 import SettingsPage from '../../pages/dashboard/settings'
 import OrganizationsAndProjectsPage from '../../pages/dashboard/settings/ogranizations-and-projects'
 import ProfilePage from '../../pages/dashboard/settings/profile'
+import { ACCESS_TOKEN } from '../../shared/config/constants'
 import { routes } from '../../shared/lib/routes'
 import { RootLayout } from '../../widgets/root-layout'
 
@@ -61,12 +64,16 @@ export function AppRouter() {
 }
 
 const ProtectedRoute = () => {
-  // const isAuth = useSelector(selectIsAuthenticated)
-  const isAuth = true
+  const token = localStorage.getItem(ACCESS_TOKEN)
+  const isAuth = !!token
+  const { t } = useTranslation()
   const navigate = useNavigate()
 
   useEffect(() => {
-    if (!isAuth) navigate(routes.login())
+    if (!isAuth) {
+      toast.error(t('errors.session-expired'))
+      navigate(routes.login())
+    }
   }, [isAuth])
 
   return isAuth ? <Outlet /> : null

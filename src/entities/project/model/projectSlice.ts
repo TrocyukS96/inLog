@@ -2,6 +2,7 @@ import { createApi } from "@reduxjs/toolkit/query/react";
 import { baseQuery } from "../../../shared/api/clientApi";
 import type { Project } from "./types";
 import type { MemberResponse, ProjectRequest } from "../../../shared/types/dto/project";
+import { errorsHandler } from "../../../shared/lib/errors-handler";
 
 export const projectApi = createApi({
     reducerPath: 'projectApi',
@@ -13,6 +14,13 @@ export const projectApi = createApi({
               url: 'projects/project/',
               params: params?.organization ? { organization: params.organization } : undefined,
             }),
+            async onQueryStarted(_, { queryFulfilled }) {
+              try {
+                  await queryFulfilled
+              } catch (error: any) {
+                  errorsHandler(error?.error)
+              }
+          },
             providesTags: ['Project'],
           }),
 
@@ -27,6 +35,13 @@ export const projectApi = createApi({
 
           getProjectById: builder.query<Project, number>({
             query: (id) => `projects/project/${id}/`,
+            async onQueryStarted(_, { queryFulfilled }) {
+              try {
+                  await queryFulfilled
+              } catch (error: any) {
+                  errorsHandler(error?.error)
+              }
+          },
             providesTags: (_result, _error, id) => [{ type: 'Project', id }],
           }),
 
@@ -51,6 +66,13 @@ export const projectApi = createApi({
           }),
           getProjectMembers: builder.query<MemberResponse[], number>({
             query: (id) => `projects/${id}/members/`,
+            async onQueryStarted(_, { queryFulfilled }) {
+              try {
+                  await queryFulfilled
+              } catch (error: any) {
+                  errorsHandler(error?.error)
+              }
+          },
           }),
     }),
 })

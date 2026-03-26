@@ -20,6 +20,7 @@ export interface AdminPanelField {
 
 export interface AdminPanelNodeTab {
     id?: number
+    group: number
     name_en: string
     name_ru: string
     related_structure_elements?: number[]
@@ -55,10 +56,10 @@ export interface AdminPanelNodeRequest {
     parent?: number
     related_groups?: number[]
     pre_made_structure_elements?: {
-        id?:number
+        id?: number
         name_en: string
         name_ru: string
-        related_structure_elements?:number[]
+        related_structure_elements?: number[]
     }[]
 }
 
@@ -73,26 +74,33 @@ export interface AdminPanelColumn {
 }
 
 export interface AdminPanelGroup {
+    // id: number
+    // name_en: string
+    // name_ru: string
+    // organization: number
+    // parent: number
+    // related_groups: number[]
+    pre_made_structure_elements?: AdminPanelNodeTab[]
+
+    // columns?: AdminPanelTableColumn[]
+
+    // nestLevel?: number //добавил для удобства вывода в tree и подсчета уровня вложенности
+    // entityType?: 'group' | 'tab' | 'field' //добавил для удобства составления отчета
+
+    // structure_element_fields?: AdminPanelField[]
+
+    group: number
     id: number
     name_en: string
     name_ru: string
-    organization: number
-    parent: number
-    related_groups: number[]
-    pre_made_structure_elements?: AdminPanelNodeTab[]
-
-    columns?: AdminPanelTableColumn[]
-
-    nestLevel?: number //добавил для удобства вывода в tree и подсчета уровня вложенности
-    entityType?: 'group' | 'tab' | 'field' //добавил для удобства составления отчета
-
-    structure_element_fields?: AdminPanelField[]
+    structure_element: number
+    type: 'string' | 'integer' | 'date' | 'file'
 }
 
 export interface AdminPanelGroupRequest {
     name_en: string
     name_ru: string
-    structure_element?:number
-    group?:number
-    type:string
+    structure_element?: number
+    group?: number
+    type: string
 }

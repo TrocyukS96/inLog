@@ -1,5 +1,44 @@
-
-
+import { format } from 'date-fns'
+import { enUS, ru } from 'date-fns/locale'
+import {
+  AlertCircle,
+  Calendar,
+  Edit,
+  File,
+  FileSpreadsheet,
+  Hash,
+  MoreHorizontal,
+  Plus,
+  Trash2,
+  Type,
+  Upload,
+  X as XIcon
+} from 'lucide-react'
+import { useEffect, useRef, useState, useCallback } from 'react'
+import { useTranslation } from 'react-i18next'
+import type { AdminPanelGroup } from '../../../../entities/admin/model/types'
+import { DATE_VIEW_FORMAT } from '../../../../shared/config/constants'
+import { cn, formatFileName } from '../../../../shared/lib/utils'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '../../../../shared/ui/alert-dialog'
+import { Button } from '../../../../shared/ui/button'
+import { DatePicker } from '../../../../shared/ui/date-picker'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '../../../../shared/ui/dropdown-menu'
+import { Input } from '../../../../shared/ui/input'
+import { Popover, PopoverContent, PopoverTrigger } from '../../../../shared/ui/popover'
 import {
   Table,
   TableBody,
@@ -8,23 +47,14 @@ import {
   TableHeader,
   TableRow,
 } from '../../../../shared/ui/table'
-import { Button } from '../../../../shared/ui/button'
-import { Calendar, FileText, FileSpreadsheet, Hash, Plus } from 'lucide-react'
-import { Trash2 } from 'lucide-react'
-import { useTranslation } from 'react-i18next'
-import { useState } from 'react'
-import { format } from 'date-fns'
-import { Popover, PopoverContent, PopoverTrigger } from '../../../../shared/ui/popover'
-import { DatePicker } from '../../../../shared/ui/date-picker'
-import { Input } from '../../../../shared/ui/input'
-import { ru } from 'date-fns/locale'
-import { enUS } from 'date-fns/locale'
-import { cn } from '../../../../shared/lib/utils'
-import { Save, X, Edit } from 'lucide-react'
-import { Textarea } from '../../../../shared/ui/textarea'
-import type { AdminPanelNode } from '../../../../entities/admin/model/types'
+import ConstructorTableEditingRow from './ConstructorTableEditingRow'
+import ConstructorTableFormDialog from './ConstructorTableFormDialog'
 
-export type ColumnType = 'text' | 'number' | 'date' | 'file'
+export interface ColumnFormData {
+  titleEn: string
+  titleRu: string
+  inputType: AdminPanelGroup['type']
+}
 
 export interface ColumnConfig {
   key: string
@@ -32,9 +62,17 @@ export interface ColumnConfig {
     en: string
     ru: string
   }
-  dataIndex: string
-  inputType: ColumnType
+  inputType: AdminPanelGroup['type']
   width?: number
+}
+
+export interface FileData {
+  id: string
+  name: string
+  size: number
+  type: string
+  url?: string
+  file?: File
 }
 
 export interface DataItem {
@@ -43,38 +81,104 @@ export interface DataItem {
 }
 
 interface Props {
-  node: AdminPanelNode
   initialColumns?: ColumnConfig[]
-  initialData?: DataItem[]
+  onCreate?: (column: ColumnConfig) => void
+  onDelete?: (columnKey: string) => void
+  onEdit?: (column: ColumnConfig) => void
+  onDataChange?: (data: DataItem[]) => void
 }
 
-const ConstructorTable = ({ initialColumns, initialData }: Props) => {
+const ConstructorTable = (props: Props) => {
+  const { initialColumns, onCreate, onDelete, onEdit, onDataChange } = props
   const { t, i18n } = useTranslation()
   const currentLang = i18n.language === 'ru' ? 'ru' : 'en'
 
   const dateLocale = currentLang === 'ru' ? ru : enUS
 
   const [columns, setColumns] = useState<ColumnConfig[]>(initialColumns || [])
-  const [data, setData] = useState<DataItem[]>(initialData || [])
+  const [data, setData] = useState<DataItem[]>([])
   const [editingKey, setEditingKey] = useState<string | null>(null)
   const [editValues, setEditValues] = useState<Record<string, any>>({})
+  const [editErrors, setEditErrors] = useState<Record<string, string>>({})
+  const fileInputRefs = useRef<Record<string, HTMLInputElement | null>>({})
+
+  const [isColumnDialogOpen, setIsColumnDialogOpen] = useState(false)
+  const [isDeleteAlertOpen, setIsDeleteAlertOpen] = useState(false)
+  const [selectedColumn, setSelectedColumn] = useState<ColumnConfig | null>(null)
+  const [isEditingColumn, setIsEditingColumn] = useState(false)
+
+  const getDefaultValueForColumn = useCallback((inputType: AdminPanelGroup['type']): any => {
+    switch (inputType) {
+      case 'integer':
+        return 0
+      case 'date':
+        return null
+      case 'file':
+        return null
+      default:
+        return ''
+    }
+  }, [])
+
+  useEffect(() => {
+    if (!initialColumns) return
+
+    const oldColumnsMap = new Map(columns.map(col => [col.key, col]))
+    const newColumnsMap = new Map(initialColumns.map(col => [col.key, col]))
+
+    const columnsChanged =
+      initialColumns.length !== columns.length ||
+      initialColumns.some(col => !oldColumnsMap.has(col.key)) ||
+      columns.some(col => !newColumnsMap.has(col.key))
+
+    if (!columnsChanged) return
+
+    setColumns(initialColumns)
+
+    if (data.length > 0) {
+      const updatedData = data.map(row => {
+        const newRow = { ...row }
+
+        initialColumns.forEach(newCol => {
+          if (!oldColumnsMap.has(newCol.key)) {
+            newRow[newCol.key] = getDefaultValueForColumn(newCol.inputType)
+          }
+        })
+
+        Object.keys(newRow).forEach(key => {
+          if (key !== 'key' && !newColumnsMap.has(key)) {
+            delete newRow[key]
+          }
+        })
+
+        return newRow
+      })
+      setData(updatedData)
+    }
+  }, [initialColumns, columns, data, getDefaultValueForColumn])
+
+  useEffect(() => {
+    if (onDataChange) {
+      onDataChange(data)
+    }
+  }, [data, onDataChange])
 
   const formatDate = (date: Date | string | null) => {
     if (!date) return ''
     const dateObj = typeof date === 'string' ? new Date(date) : date
-    return format(dateObj, 'dd.MM.yyyy', { locale: dateLocale })
+    return format(dateObj, DATE_VIEW_FORMAT, { locale: dateLocale })
   }
 
-  const getColumnIcon = (type: ColumnType) => {
+  const getTypeIcon = (type: AdminPanelGroup['type'], className = "h-4 w-4") => {
     switch (type) {
-      case 'number':
-        return <Hash className="h-3 w-3" />
+      case 'integer':
+        return <Hash className={className} />
       case 'date':
-        return <Calendar className="h-3 w-3" />
+        return <Calendar className={className} />
       case 'file':
-        return <FileText className="h-3 w-3" />
+        return <File className={className} />
       default:
-        return null
+        return <Type className={className} />
     }
   }
 
@@ -86,73 +190,224 @@ const ConstructorTable = ({ initialColumns, initialData }: Props) => {
   }
 
   const deleteColumn = (columnKey: string) => {
-    if (columns.length <= 1) {
-      return
-    }
-    setColumns(columns.filter((col) => col.key !== columnKey))
+    const updatedColumns = columns.filter((col) => col.key !== columnKey)
+    setColumns(updatedColumns)
+
+    const updatedData = data.map(row => {
+      const newRow = { ...row }
+      delete newRow[columnKey]
+      return newRow
+    })
+    setData(updatedData)
+    onDelete?.(columnKey)
   }
 
-  const addColumn = () => {
+  const openDeleteColumnAlert = (column: ColumnConfig) => {
+    setSelectedColumn(column)
+    setIsDeleteAlertOpen(true)
+  }
+
+  const confirmDeleteColumn = () => {
+    if (selectedColumn) {
+      deleteColumn(selectedColumn.key)
+      setIsDeleteAlertOpen(false)
+      setSelectedColumn(null)
+    }
+  }
+
+  const openAddColumnDialog = () => {
+    setIsEditingColumn(false)
+    setSelectedColumn(null)
+    setIsColumnDialogOpen(true)
+  }
+
+  const openEditColumnDialog = (column: ColumnConfig) => {
+    setIsEditingColumn(true)
+    setSelectedColumn(column)
+    setIsColumnDialogOpen(true)
+  }
+
+  const handleColumnSubmit = (formData: ColumnFormData) => {
+    if (isEditingColumn && selectedColumn) {
+      const updatedColumn: ColumnConfig = {
+        ...selectedColumn,
+        title: {
+          en: formData.titleEn,
+          ru: formData.titleRu,
+        },
+        inputType: formData.inputType,
+      }
+
+      const updatedColumns = columns.map(col =>
+        col.key === selectedColumn.key ? updatedColumn : col
+      )
+      setColumns(updatedColumns)
+
+      onEdit?.(updatedColumn)
+    } else {
+      const newColumn: ColumnConfig = {
+        key: Date.now().toString(),
+        title: {
+          en: formData.titleEn,
+          ru: formData.titleRu,
+        },
+        inputType: formData.inputType,
+        width: 150,
+      }
+
+      const updatedColumns = [...columns, newColumn]
+      setColumns(updatedColumns)
+
+      if (data.length > 0) {
+        const updatedData = data.map(row => ({
+          ...row,
+          [newColumn.key]: getDefaultValueForColumn(newColumn.inputType)
+        }))
+        setData(updatedData)
+      }
+
+      onCreate?.(newColumn)
+    }
   }
 
   const cancelEdit = () => {
     setEditingKey(null)
     setEditValues({})
+    setEditErrors({})
   }
 
   const startEdit = (record: DataItem) => {
     const values: Record<string, any> = {}
     columns.forEach((col) => {
-      values[col.dataIndex] = record[col.dataIndex] || ''
+      const value = record[col.key]
+      if (col.inputType === 'file' && value) {
+        values[col.key] = { ...value }
+      } else {
+        values[col.key] = value !== undefined && value !== null ? value : ''
+      }
     })
     setEditValues(values)
+    setEditErrors({})
     setEditingKey(record.key)
   }
 
+  const validateEditValue = (column: ColumnConfig, value: any): string => {
+    if (column.inputType === 'integer') {
+      if (value !== '' && isNaN(Number(value))) {
+        return t('validation.invalid-number')
+      }
+    }
+    return ''
+  }
+
   const saveEdit = (key: string) => {
+    const newErrors: Record<string, string> = {}
+    let hasErrors = false
+
+    Object.keys(editValues).forEach((columnKey) => {
+      const column = columns.find(col => col.key === columnKey)
+      if (column) {
+        const error = validateEditValue(column, editValues[columnKey])
+        if (error) {
+          newErrors[columnKey] = error
+          hasErrors = true
+        }
+      }
+    })
+
+    if (hasErrors) {
+      setEditErrors(newErrors)
+      return
+    }
+
     const newData = data.map((item) => {
       if (item.key === key) {
-        return { ...item, ...editValues }
+        const updatedItem = { ...item }
+
+        Object.keys(editValues).forEach((columnKey) => {
+          const column = columns.find(col => col.key === columnKey)
+
+          if (column?.inputType === 'integer') {
+            const value = editValues[columnKey]
+            updatedItem[columnKey] = value !== '' && value !== null && value !== undefined
+              ? Number(value)
+              : 0
+          } else if (column?.inputType === 'file') {
+            updatedItem[columnKey] = editValues[columnKey]
+          } else {
+            updatedItem[columnKey] = editValues[columnKey]
+          }
+        })
+
+        return updatedItem
       }
       return item
     })
     setData(newData)
     setEditingKey(null)
     setEditValues({})
+    setEditErrors({})
   }
 
-  const updateEditValue = (dataIndex: string, value: any) => {
-    setEditValues((prev) => ({ ...prev, [dataIndex]: value }))
+  const updateEditValue = (columnKey: string, value: any) => {
+    setEditValues((prev) => ({ ...prev, [columnKey]: value }))
+    if (editErrors[columnKey]) {
+      setEditErrors((prev) => ({ ...prev, [columnKey]: '' }))
+    }
+  }
+
+  const handleFileUpload = (columnKey: string, file: File) => {
+    const fileData: FileData = {
+      id: Date.now().toString(),
+      name: file.name,
+      size: file.size,
+      type: file.type,
+      file: file,
+      url: URL.createObjectURL(file)
+    }
+    updateEditValue(columnKey, fileData)
+  }
+
+  const removeFile = (columnKey: string) => {
+    updateEditValue(columnKey, null)
   }
 
   const addRow = () => {
     const newKey = Date.now().toString()
     const newRow: DataItem = { key: newKey }
+
     columns.forEach((col) => {
-      if (col.inputType === 'number') {
-        newRow[col.dataIndex] = 0
-      } else if (col.inputType === 'date') {
-        newRow[col.dataIndex] = null
-      } else {
-        newRow[col.dataIndex] = ''
-      }
+      newRow[col.key] = getDefaultValueForColumn(col.inputType)
     })
+
     setData([...data, newRow])
     startEdit(newRow)
   }
 
   const renderEditCell = (column: ColumnConfig, record: DataItem) => {
-    const value = editValues[column.dataIndex] ?? record[column.dataIndex]
+    const value = editValues[column.key] !== undefined
+      ? editValues[column.key]
+      : record[column.key]
+    const error = editErrors[column.key]
 
     switch (column.inputType) {
-      case 'number':
+      case 'integer':
         return (
-          <Input
-            type="number"
-            value={value || ''}
-            onChange={(e) => updateEditValue(column.dataIndex, e.target.value)}
-            className="h-8"
-          />
+          <div className="space-y-1 min-w-[150px]">
+            <Input
+              type="number"
+              value={value || ''}
+              onChange={(e) => updateEditValue(column.key, e.target.value)}
+              placeholder={t('fields.enter-number')}
+              className={cn("h-8", error && "border-destructive")}
+            />
+            {error && (
+              <p className="text-xs text-destructive flex items-center gap-1">
+                <AlertCircle className="h-3 w-3" />
+                {error}
+              </p>
+            )}
+          </div>
         )
       case 'date':
         return (
@@ -160,47 +415,89 @@ const ConstructorTable = ({ initialColumns, initialData }: Props) => {
             <PopoverTrigger asChild>
               <Button
                 variant="outline"
-                className="h-8 w-full justify-start text-left font-normal"
+                className={cn(
+                  "h-8 w-full justify-start text-left font-normal",
+                  error && "border-destructive"
+                )}
               >
-                {value ? formatDate(value) : <span>{t('select-date')}</span>}
+                {value ? formatDate(value) : <span>{t('fields.select-date')}</span>}
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-auto p-0">
               <DatePicker
                 value={value ? new Date(value) : undefined}
-                onChange={(date) => updateEditValue(column.dataIndex, date)}
+                onChange={(date) => updateEditValue(column.key, date)}
               />
             </PopoverContent>
           </Popover>
         )
       case 'file':
         return (
-          <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" className="h-8">
-              <Plus className="h-3 w-3 mr-1" />
-              {t('upload-file')}
-            </Button>
-            {value && (
-              <span className="text-xs text-muted-foreground truncate max-w-[150px]">
-                {value.name || value}
-              </span>
+          <div className="flex flex-col gap-2 min-w-[150px]">
+            {value ? (
+              <div className="h-8 flex items-center justify-between gap-2 p-2 border border-border rounded-md">
+                <div className="flex items-center gap-2 flex-1 min-w-0">
+                  <span className="text-sm truncate">{value.name}</span>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => removeFile(column.key)}
+                  className="h-6 w-6 flex-shrink-0"
+                >
+                  <XIcon className="h-3 w-3" />
+                </Button>
+              </div>
+            ) : (
+              <div className="flex flex-col gap-2 min-w-[150px]">
+                <input
+                  type="file"
+                  ref={(el) => {
+                    if (el) fileInputRefs.current[column.key] = el
+                  }}
+                  onChange={(e) => {
+                    const file = e.target.files?.[0]
+                    if (file) {
+                      handleFileUpload(column.key, file)
+                    }
+                  }}
+                  className="hidden"
+                />
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => fileInputRefs.current[column.key]?.click()}
+                  className="h-8"
+                >
+                  <Upload className="h-3 w-3 mr-1" />
+                  {t('buttons.upload-file')}
+                </Button>
+              </div>
             )}
           </div>
         )
       default:
         return (
-          <Textarea
-            value={value || ''}
-            onChange={(e) => updateEditValue(column.dataIndex, e.target.value)}
-            className="min-h-[60px] resize-y"
-            placeholder={t('enter-text')}
-          />
+          <div className="space-y-1 min-w-[150px]">
+            <Input
+              value={value || ''}
+              onChange={(e) => updateEditValue(column.key, e.target.value)}
+              className={cn("h-8", error && "border-destructive")}
+              placeholder={t('fields.enter-text')}
+            />
+            {error && (
+              <p className="text-xs text-destructive flex items-center gap-1">
+                <AlertCircle className="h-3 w-3" />
+                {error}
+              </p>
+            )}
+          </div>
         )
     }
   }
 
   const renderViewCell = (column: ColumnConfig, record: DataItem) => {
-    const value = record[column.dataIndex]
+    const value = record[column.key]
 
     if (!value && value !== 0) {
       return <span className="text-muted-foreground/50">—</span>
@@ -208,21 +505,33 @@ const ConstructorTable = ({ initialColumns, initialData }: Props) => {
 
     switch (column.inputType) {
       case 'date':
-        return <span>{formatDate(value)}</span>
-      case 'number':
-        return <span>{value}</span>
+        return <span className="text-sm truncate min-w-[150px]">{formatDate(value)}</span>
+      case 'integer':
+        return <span className="text-sm truncate min-w-[150px]">{value}</span>
       case 'file':
         return (
-          <div className="flex items-center gap-2">
-            <FileText className="h-4 w-4 text-muted-foreground" />
-            <span className="text-sm truncate max-w-[150px]">
-              {typeof value === 'object' ? value.name : value}
-            </span>
+          <div className="flex items-center gap-2 min-w-[150px]">
+            {value.url ? (
+              <a
+                href={value.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sm text-primary hover:underline truncate min-w-[150px]"
+                onClick={(e) => e.stopPropagation()}
+                title={value.name}
+              >
+                {formatFileName(value.name)}
+              </a>
+            ) : (
+              <span className="text-sm truncate min-w-[150px]" title={value.name}>
+                {formatFileName(value.name)}
+              </span>
+            )}
           </div>
         )
       default:
         return (
-          <div className="whitespace-pre-wrap break-words max-w-[300px]">
+          <div className="whitespace-pre-wrap break-words min-w-[150px]">
             {value}
           </div>
         )
@@ -230,7 +539,6 @@ const ConstructorTable = ({ initialColumns, initialData }: Props) => {
   }
 
   const isEditing = (key: string) => editingKey === key
-
 
   return (
     <div className="w-full">
@@ -245,21 +553,39 @@ const ConstructorTable = ({ initialColumns, initialData }: Props) => {
                   className="h-10"
                 >
                   <div className="flex items-center justify-between gap-2">
-                    <div className="flex items-center gap-1.5">
-                      {getColumnIcon(column.inputType)}
+                    <div className="flex items-center gap-2">
                       <span className="font-medium text-sm">
                         {column.title[currentLang]}
                       </span>
+                      <div className="flex items-center text-muted-foreground/60 ml-1">
+                        {getTypeIcon(column.inputType, "h-3 w-3")}
+                      </div>
                     </div>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-6 w-6 opacity-0 group-hover:opacity-100 hover:bg-destructive/10 hover:text-destructive"
-                      onClick={() => deleteColumn(column.key)}
-                      disabled={columns.length <= 1}
-                    >
-                      <Trash2 className="h-3 w-3" />
-                    </Button>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-6 w-6"
+                        >
+                          <MoreHorizontal className="h-3 w-3" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem className="" onClick={() => openEditColumnDialog(column)}>
+                          <Edit className="h-3 w-3 mr-2" />
+                          {t('buttons.edit')}
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() => openDeleteColumnAlert(column)}
+                          className="text-destructive focus:text-destructive"
+                          // disabled={columns.length <= 1}
+                        >
+                          <Trash2 className="h-3 w-3 mr-2" />
+                          {t('buttons.delete')}
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </div>
                 </TableHead>
               ))}
@@ -267,7 +593,7 @@ const ConstructorTable = ({ initialColumns, initialData }: Props) => {
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={addColumn}
+                  onClick={openAddColumnDialog}
                   className="h-8"
                 >
                   <Plus className="h-3 w-3 mr-1" />
@@ -286,7 +612,7 @@ const ConstructorTable = ({ initialColumns, initialData }: Props) => {
                   <div className="flex flex-col items-center gap-2">
                     <FileSpreadsheet className="h-8 w-8 opacity-50" />
                     <span>{t('errors.no-data')}</span>
-                    <Button variant="outline" size="sm" onClick={addRow}>
+                    <Button variant="outline" size="sm" onClick={addRow} disabled={columns.length === 0}>
                       <Plus className="h-3 w-3 mr-1" />
                       {t('buttons.add-row')}
                     </Button>
@@ -297,70 +623,19 @@ const ConstructorTable = ({ initialColumns, initialData }: Props) => {
               data.map((record) => {
                 const editing = isEditing(record.key)
                 return (
-                  <TableRow
+                  <ConstructorTableEditingRow
                     key={record.key}
-                    className={cn(
-                      "hover:bg-muted/30 transition-colors",
-                      editing && "bg-muted/20"
-                    )}
-                  >
-                    {columns.map((column) => (
-                      <TableCell
-                        key={column.key}
-                        style={{ minWidth: column.width || 150 }}
-                        className="py-2"
-                      >
-                        {editing
-                          ? renderEditCell(column, record)
-                          : renderViewCell(column, record)}
-                      </TableCell>
-                    ))}
-                    <TableCell className="py-2">
-                      <div className="flex items-center gap-1">
-                        {editing ? (
-                          <>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => saveEdit(record.key)}
-                              className="h-7 w-7 text-green-600 hover:text-green-700 hover:bg-green-50"
-                            >
-                              <Save className="h-3.5 w-3.5" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={cancelEdit}
-                              className="h-7 w-7 text-muted-foreground hover:text-destructive"
-                            >
-                              <X className="h-3.5 w-3.5" />
-                            </Button>
-                          </>
-                        ) : (
-                          <>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => startEdit(record)}
-                              className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity"
-                              disabled={!!editingKey}
-                            >
-                              <Edit className="h-3.5 w-3.5" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => deleteRow(record.key)}
-                              className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity text-destructive hover:text-destructive"
-                              disabled={!!editingKey}
-                            >
-                              <Trash2 className="h-3.5 w-3.5" />
-                            </Button>
-                          </>
-                        )}
-                      </div>
-                    </TableCell>
-                  </TableRow>
+                    editing={editing}
+                    record={record}
+                    columns={columns}
+                    saveEdit={saveEdit}
+                    cancelEdit={cancelEdit}
+                    startEdit={startEdit}
+                    deleteRow={deleteRow}
+                    renderEditCell={renderEditCell}
+                    renderViewCell={renderViewCell}
+                    disabled={!!editingKey}
+                  />
                 )
               })
             )}
@@ -381,6 +656,31 @@ const ConstructorTable = ({ initialColumns, initialData }: Props) => {
           </Button>
         </div>
       )}
+
+      <ConstructorTableFormDialog
+        open={isColumnDialogOpen}
+        onOpenChange={setIsColumnDialogOpen}
+        onSubmit={handleColumnSubmit}
+        initialData={selectedColumn}
+        isEditing={isEditingColumn}
+      />
+
+      <AlertDialog open={isDeleteAlertOpen} onOpenChange={setIsDeleteAlertOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t('admin-page.delete-group-title')}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {t('admin-page.delete-group-warning')}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{t('buttons.cancel')}</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDeleteColumn} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              {t('buttons.delete')}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }

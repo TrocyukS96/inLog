@@ -128,7 +128,17 @@
         "enter-name-in-english": "Enter name (English)",
         "select-connections": "Select connections",
         "enter-name": "Enter name",
-        "nothing-found": "Nothing found"
+        "nothing-found": "Nothing found",
+        "column-type": "Column type",
+        "select-column-type": "Select column type",
+        "text": "Text",
+        "number": "Number",
+        "file": "File",
+        "select-date": "Select date",
+        "enter-text": "Enter text",
+        "enter-number": "Enter number",
+        "enter-date": "Enter date",
+        "enter-file": "Enter file"
     },
 
     "notice-list": {
@@ -169,7 +179,20 @@
         "deleting-node": "Deleting node",
         "node-created": "Node has been created successfully",
         "node-updated": "Node has been updated successfully",
-        "node-deleted": "Node has been deleted successfully"
+        "node-deleted": "Node has been deleted successfully",
+        "group-created": "Group has been created successfully",
+        "group-updated": "Group has been updated successfully",
+        "group-deleted": "Group has been deleted successfully",
+        "updating-group": "Updating group",
+        "creating-group": "Creating group",
+        "deleting-group": "Deleting group",
+        "adding-node-tab": "Adding node tab",
+        "updating-node-tab": "Updating node tab",
+        "deleting-node-tab": "Deleting node tab",
+        "node-tab-created": "Node tab has been created successfully",
+        "node-tab-updated": "Node tab has been updated successfully",
+        "node-tab-deleted": "Node tab has been deleted successfully",
+        "node-tab-added": "Node tab has been added successfully"
     },
 
     "buttons": {
@@ -195,11 +218,16 @@
         "sending": "Sending...",
         "add-column": "Add column",
         "add-row": "Add row",
-        "add-tab": "Add tab"
+        "add-tab": "Add tab",
+        "refresh": "Refresh",
+        "upload-file": "Upload file",
+        "collapse-all": "Collapse all",
+        "expand-all": "Expand all"
     },
 
 
     "errors": {
+        "session-expired": "Session expired",
         "email-not-found": "Email not found",
         "error-logout": "An error occurred while logging out",
         "error-deleting-organization": "An error occurred while deleting the organization",
@@ -227,8 +255,7 @@
         "no-data": "No data",
         "something-went-wrong": "Something went wrong",
         "network-error": "Network error",
-        "fill-field-in-russian": "Fill the field in Russian",
-        "fill-field-in-english": "Fill the field in English"
+        "error-loading-node": "An error occurred while loading the node"
     },
 
     "sidebar": {
@@ -375,7 +402,11 @@
         "delete-tab": "Delete tab",
         "add-tab": "Add tab",
         "delete-node-title": "Delete node",
-        "delete-node-warning": "Are you sure you want to delete this node?"
+        "delete-node-warning": "Are you sure you want to delete this node?",
+        "delete-group-title": "Delete group",
+        "delete-group-warning": "Are you sure you want to delete this group?",
+        "delete-tab-title": "Delete tab",
+        "delete-tab-warning": "Are you sure you want to delete tab \"{{tabName}}\"?"
     },
 
     "geo-mechanics-page": {
@@ -432,7 +463,8 @@
 
 
     "common": {
-        "load-more": "Load more"
+        "load-more": "Load more",
+        "loading": "Loading..."
     }
 
 

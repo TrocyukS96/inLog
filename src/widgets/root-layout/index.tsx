@@ -17,8 +17,6 @@ export function RootLayout() {
   const navigate = useNavigate()
   const [verifyToken] = useVerifyTokenMutation()
 
-  
-
   const fetchVerifyToken = async (token: string) => {
     try {
        await verifyToken({ token }).unwrap()

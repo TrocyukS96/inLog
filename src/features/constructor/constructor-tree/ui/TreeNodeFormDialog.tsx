@@ -32,7 +32,7 @@ interface Props {
     mode: 'create' | 'edit'
     node?: AdminPanelNode
     parentNode?: AdminPanelNode
-    allNodes: AdminPanelNode[] // Все узлы для вычисления связей
+    allNodes: AdminPanelNode[]
     onConfirm: (data: {
         name_ru: string
         name_en: string
@@ -113,14 +113,6 @@ const TreeNodeFormDialog = ({
         return result
     }, [allNodes, currentLang, open, node, parentNode, mode])
 
-
-    console.log({
-        connectionsOptions,
-        connectionValueList,
-        node,
-        parentNode,
-    })
-
     useEffect(() => {
         if (!open) return
 
@@ -132,7 +124,6 @@ const TreeNodeFormDialog = ({
 
             const targetNode = node || parentNode
 
-            // Инициализация связанных групп
             const initialGroups: Set<string> = new Set()
             if (targetNode.parent) {
                 if (parentNode) {
@@ -149,10 +140,9 @@ const TreeNodeFormDialog = ({
             setConnectionValueList(Array.from(initialGroups))
 
         } else if (mode === 'create') {
-            // Для создания используем данные родителя
             setFormData({
-                name_ru: parentNode?.[`name_${currentLang}`] || '',
-                name_en: parentNode?.[`name_${currentLang}`] || '',
+                name_ru: '',
+                name_en: '',
             })
             if (parentNode) {
                 setConnectionValueList([parentNode.id.toString()])
@@ -223,7 +213,6 @@ const TreeNodeFormDialog = ({
                     </div>
                 </div>
 
-                {/* Связи с узлами */}
                 {connectionsOptions.length > 0 && (
                     <div className="space-y-2">
                         <Label>

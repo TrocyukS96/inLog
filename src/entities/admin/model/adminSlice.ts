@@ -1,19 +1,34 @@
 import { createApi } from "@reduxjs/toolkit/query/react"
 import { baseQuery } from '../../../shared/api/clientApi'
 import type { AdminPanelGroup, AdminPanelGroupRequest, AdminPanelNode, AdminPanelNodeRequest, AdminPanelNodeTab } from "./types"
+import { errorsHandler } from "../../../shared/lib/errors-handler"
 
 export const adminApi = createApi({
     reducerPath: 'adminApi',
     baseQuery,
-    tagTypes: ['Admin'],
+    tagTypes: ['Nodes','Node','NodeTabs','NodeGroups'],
     endpoints: (builder) => ({
         getAdminPanelNodes: builder.query<AdminPanelNode[], { organizationId: number }>({
             query: ({ organizationId }) => `organizations/${organizationId}/structure-element-group/`,
-            providesTags: ['Admin']
+            async onQueryStarted(_, { queryFulfilled }) {
+                try {
+                    await queryFulfilled
+                } catch (error: any) {
+                    errorsHandler(error?.error)
+                }
+            },
+            providesTags: ['Nodes']
         }),
         getAdminPanelNodeById: builder.query<AdminPanelNode, { organizationId: number, nodeId: number }>({
             query: ({ organizationId, nodeId }) => `organizations/${organizationId}/structure-element-group/${nodeId}/`,
-            providesTags: ['Admin']
+            async onQueryStarted(_, { queryFulfilled }) {
+                try {
+                    await queryFulfilled
+                } catch (error: any) {
+                    errorsHandler(error?.error)
+                }
+            },
+            providesTags: ['Node']
         }),
         addAdminPanelNode: builder.mutation<AdminPanelNode, { organizationId: number, body: AdminPanelNodeRequest }>({
             query: ({ organizationId, body }) => ({
@@ -21,7 +36,7 @@ export const adminApi = createApi({
                 method: 'POST',
                 body,
             }),
-            invalidatesTags: ['Admin']
+            invalidatesTags: ['Nodes','Node']
         }),
         updateAdminPanelNode: builder.mutation<AdminPanelNode, { organizationId: number, nodeId: number, body: AdminPanelNodeRequest }>({
             query: ({ organizationId, nodeId, body }) => ({
@@ -29,53 +44,92 @@ export const adminApi = createApi({
                 method: 'PATCH',
                 body,
             }),
-            invalidatesTags: ['Admin']
+            invalidatesTags: ['Nodes','Node']
         }),
         deleteAdminPanelNode: builder.mutation<void, { organizationId: number, nodeId: number }>({
-            query: ({ organizationId, nodeId }) => `organizations/${organizationId}/structure-element-group/${nodeId}/`,
-            invalidatesTags: ['Admin']
+            query: ({ organizationId, nodeId }) => ({
+                url: `organizations/${organizationId}/structure-element-group/${nodeId}/`,
+                method: 'DELETE',
+            }),
+            invalidatesTags: ['Nodes']
         }),
 
         getAdminPanelNodeTabs: builder.query<AdminPanelNodeTab[], { organizationId: number }>({
             query: ({ organizationId }) => `organizations/${organizationId}/structure-element/`,
-            providesTags: ['Admin']
+            async onQueryStarted(_, { queryFulfilled }) {
+                try {
+                    await queryFulfilled
+                } catch (error: any) {
+                    errorsHandler(error?.error)
+                }
+            },
+            providesTags: ['NodeTabs','Node']
         }),
-        updateAdminPanelNodeTabs: builder.mutation<AdminPanelNodeTab, { organizationId: number, body: AdminPanelNodeTab }>({
+        addAdminPanelNodeTab: builder.mutation<AdminPanelNodeTab, { organizationId: number, body: AdminPanelNodeTab  }>({
+            query: ({ organizationId, body }) => ({
+                url: `organizations/${organizationId}/structure-element/`,
+                method: 'POST',
+                body: { ...body, organizationId },
+            }),
+            invalidatesTags: ['NodeTabs','Node']
+        }),
+        updateAdminPanelNodeTab: builder.mutation<AdminPanelNodeTab, { organizationId: number, body: {
+            id: number
+            name_en: string
+            name_ru: string
+            group: number
+            structure_elements: { id: number, name_en: string, name_ru: string }[]
+        } }>({
             query: ({ organizationId, body }) => ({
                 url: `organizations/${organizationId}/structure-element/multiple-update/`,
                 method: 'PATCH',
                 body: { ...body, organizationId },
             }),
-            invalidatesTags: ['Admin']
+            invalidatesTags: ['NodeTabs','Node']
         }),
         deleteAdminPanelNodeTab: builder.mutation<void, { organizationId: number, tabId: number }>({
             query: ({ organizationId, tabId }) => ({
                 url: `organizations/${organizationId}/structure-element/${tabId}/`,
                 method: 'DELETE',
             }),
-            invalidatesTags: ['Admin']
+            invalidatesTags: ['NodeTabs','Node']
         }),
         getAdminPanelGroups: builder.query<AdminPanelGroup[], { group?: number, structure_element?: number, organizationId?: number }>({
             query: ({ group, structure_element, organizationId }) => ({
                 url: `organizations/${organizationId}/structure-element-field/`,
                 params: { group, structure_element },
             }),
-            providesTags: ['Admin']
+            async onQueryStarted(_, { queryFulfilled }) {
+                try {
+                    await queryFulfilled
+                } catch (error: any) {
+                    errorsHandler(error?.error)
+                }
+            },
+            providesTags: ['NodeGroups']
         }),
         addAdminPanelGroup: builder.mutation<AdminPanelGroup, { organizationId: number, body: AdminPanelGroupRequest }>({
             query: ({ organizationId, body }) => ({
                 url: `organizations/${organizationId}/structure-element-field/`,
                 method: 'POST',
-                body,
+                body: { ...body, organizationId },
             }),
-            invalidatesTags: ['Admin']
+            invalidatesTags: ['NodeGroups','Node']
+        }),
+        updateAdminPanelGroup: builder.mutation<AdminPanelGroup, { organizationId: number, groupId: number, body: AdminPanelGroupRequest }>({
+            query: ({ organizationId, groupId, body }) => ({
+                url: `organizations/${organizationId}/structure-element-field/${groupId}/`,
+                method: 'PATCH',
+                body: { ...body, organizationId },
+            }),
+            invalidatesTags: ['NodeGroups','Node']
         }),
         deleteAdminPanelGroup: builder.mutation<void, { organizationId: number, groupId: number }>({
             query: ({ organizationId, groupId }) => ({
                 url: `organizations/${organizationId}/structure-element-field/${groupId}/`,
                 method: 'DELETE',
             }),
-            invalidatesTags: ['Admin']
+            invalidatesTags: ['NodeGroups','Node']
         }),
     })
 })
@@ -87,9 +141,11 @@ export const {
     useUpdateAdminPanelNodeMutation,
     useDeleteAdminPanelNodeMutation,
     useGetAdminPanelNodeTabsQuery,
-    useUpdateAdminPanelNodeTabsMutation,
+    useAddAdminPanelNodeTabMutation,
+    useUpdateAdminPanelNodeTabMutation,
     useDeleteAdminPanelNodeTabMutation,
     useGetAdminPanelGroupsQuery,
     useAddAdminPanelGroupMutation,
-    useDeleteAdminPanelGroupMutation
+    useDeleteAdminPanelGroupMutation,
+    useUpdateAdminPanelGroupMutation
 } = adminApi;

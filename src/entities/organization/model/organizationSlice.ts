@@ -2,6 +2,7 @@ import { createApi } from "@reduxjs/toolkit/query/react"
 import { baseQuery } from "../../../shared/api/clientApi"
 import type { OrganizationRequest, OrganizationResponse } from "../../../shared/types/dto/organization"
 import type { Organization } from "./types"
+import { errorsHandler } from "../../../shared/lib/errors-handler"
 
 export const organizationApi = createApi({
     reducerPath: 'organizationApi',
@@ -19,6 +20,13 @@ export const organizationApi = createApi({
                 address: el?.address,
                 id: el?.id,
               })) as Organization[]
+            },
+            async onQueryStarted(_, { queryFulfilled }) {
+                try {
+                    await queryFulfilled
+                } catch (error: any) {
+                    errorsHandler(error?.error)
+                }
             },
             providesTags: ['Organization'],
           }),

@@ -2,6 +2,7 @@ import { createApi } from "@reduxjs/toolkit/query/react";
 import { baseQuery } from "../../../shared/api/clientApi";
 import type { TagsResponse, TaskCreate, TaskUpdate } from "../../../shared/types/dto/task";
 import type { Status, Task, TasksFilterParams } from "./types";
+import { errorsHandler } from "../../../shared/lib/errors-handler";
 
 export const taskApi = createApi({
     reducerPath: 'taskApi',
@@ -32,6 +33,13 @@ export const taskApi = createApi({
             query: ({ projectId, taskSlug }) => ({
                 url: `projects/${projectId}/tasks/task/${taskSlug}/`,
             }),
+            async onQueryStarted(_, { queryFulfilled }) {
+                try {
+                    await queryFulfilled
+                } catch (error: any) {
+                    errorsHandler(error?.error)
+                }
+            },
             providesTags: ['Task'],
         }),
         
@@ -45,6 +53,13 @@ export const taskApi = createApi({
                 url: `projects/${projectId}/tasks/task/`,
                 params: { ...params },
             }),
+            async onQueryStarted(_, { queryFulfilled }) {
+                try {
+                    await queryFulfilled
+                } catch (error: any) {
+                    errorsHandler(error?.error)
+                }
+            },
         }),
 
         updateTask: builder.mutation<Task, { projectId: number; taskSlug: string; data: { id?: number, parent?: number } & Partial<TaskUpdate> }>({
@@ -113,9 +128,23 @@ export const taskApi = createApi({
 
         getStatuses: builder.query<Status[], { projectId: number }>({
             query: ({ projectId }) => `projects/${projectId}/tasks/status/`,
+            async onQueryStarted(_, { queryFulfilled }) {
+                try {
+                    await queryFulfilled
+                } catch (error: any) {
+                    errorsHandler(error?.error)
+                }
+            },
         }),
         getTaskTags: builder.query<TagsResponse, { projectId: number, limit?: number, is_orphan?: boolean }>({
             query: ({ projectId, limit, is_orphan }) => `projects/${projectId}/tasks/tag/?limit=${limit}&is_orphan=${is_orphan}`,
+            async onQueryStarted(_, { queryFulfilled }) {
+                try {
+                    await queryFulfilled
+                } catch (error: any) {
+                    errorsHandler(error?.error)
+                }
+            },
         }),
         addTaskTag: builder.mutation<Task, { projectId: number, data: { name: string } }>({
             query: ({ projectId, data }) => ({

@@ -1,6 +1,8 @@
 import { fetchBaseQuery } from "@reduxjs/toolkit/query"
 import { ACCESS_TOKEN } from "../config/constants"
 import { routes } from "../lib/routes"
+import { toast } from "sonner"
+import { t } from "i18next"
 
 export const baseQueryStart = fetchBaseQuery({
     baseUrl: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/',
@@ -27,11 +29,15 @@ export const baseQueryStart = fetchBaseQuery({
     const result = await baseQueryStart(args, api, extraOptions)
   
     if (result.error && result.error.status === 401) {
+
+      console.log(result.error,'--result.error')
   
       if (!isRedirecting) {
         isRedirecting = true
   
         localStorage.removeItem(ACCESS_TOKEN)
+
+        toast.error(t('errors.session-expired'))
   
         window.location.replace(routes.login())
       }

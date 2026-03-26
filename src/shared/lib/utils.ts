@@ -26,3 +26,25 @@ export const getPriorityColorStyle = (priority: TaskPriority,type: 'background' 
     }
   }
 }
+
+export const formatFileName = (fileName: string, maxLength: number = 30): string => {
+  if (fileName.length <= maxLength) return fileName
+  
+  const lastDotIndex = fileName.lastIndexOf('.')
+  
+  if (lastDotIndex === -1) {
+    return fileName.slice(0, maxLength - 3) + '...'
+  }
+  
+  const name = fileName.slice(0, lastDotIndex)
+  const extension = fileName.slice(lastDotIndex)
+  
+  const maxNameLength = maxLength - extension.length - 3
+  
+  if (maxNameLength <= 0) {
+    return `...${extension}`
+  }
+  
+  const truncatedName = name.slice(0, maxNameLength)
+  return `${truncatedName}...${extension}`
+}

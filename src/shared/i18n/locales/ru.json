@@ -125,7 +125,17 @@
         "enter-name-in-english": "Введите название (английский)",
         "select-connections": "Выберите связи",
         "enter-name": "Введите название",
-        "nothing-found": "Ничего не найдено"
+        "nothing-found": "Ничего не найдено",
+        "column-type": "Тип колонки",
+        "select-column-type": "Выберите тип колонки",
+        "text": "Текст",
+        "number": "Число",
+        "file": "Файл",
+        "select-date": "Выберите дату",
+        "enter-text": "Введите текст",
+        "enter-number": "Введите число",
+        "enter-date": "Введите дату",
+        "enter-file": "Выберите файл"
     },
     "notice-list": {
         "resend-letter-if-didnt-get-mail": "Если письмо не пришло, проверьте папку \"Спам\" или нажмите кнопку ниже",
@@ -165,8 +175,20 @@
         "deleting-node": "Удаление узла",
         "node-created": "Узел успешно создан",
         "node-updated": "Узел успешно обновлен",
-        "node-deleted": "Узел успешно удален"
-        
+        "node-deleted": "Узел успешно удален",
+        "group-created": "Группа успешно создана",
+        "group-updated": "Группа успешно обновлена",
+        "group-deleted": "Группа успешно удалена",
+        "updating-group": "Обновление группы",
+        "creating-group": "Создание группы",
+        "deleting-group": "Удаление группы",
+        "adding-node-tab": "Добавление вкладки",
+        "updating-node-tab": "Обновление вкладки",
+        "deleting-node-tab": "Удаление вкладки",
+        "node-tab-created": "Вкладка успешно создана",
+        "node-tab-updated": "Вкладка успешно обновлена",
+        "node-tab-deleted": "Вкладка успешно удалена",
+        "node-tab-added": "Вкладка успешно добавлена"        
     },
     "buttons": {
         "cancel": "Отменить",
@@ -190,11 +212,17 @@
         "change-password": "Изменить пароль",
         "sending": "Отправка...",
         "add-column": "Добавить колонку",
+        "edit-column": "Редактировать колонку",
         "add-row": "Добавить строку",
-        "add-tab": "Добавить вкладку"
+        "add-tab": "Добавить вкладку",
+        "refresh": "Обновить",
+        "upload-file": "Загрузить файл",
+        "collapse-all": "Свернуть все",
+        "expand-all": "Развернуть все"
     },
     "errors": {
         "email-not-found": "Email не найден",
+        "session-expired": "Сессия истекла",
         "error-logout": "Произошла ошибка при выходе",
         "error-deleting-organization": "Произошла ошибка при удалении организации",
         "error-deleting-project": "Произошла ошибка при удалении проекта",
@@ -221,8 +249,7 @@
         "no-data": "Нет данных",
         "something-went-wrong": "Что-то пошло не так",
         "network-error": "Ошибка сети",
-        "fill-field-in-russian": "Заполните поле на русском языке",
-        "fill-field-in-english": "Заполните поле на английском языке"
+        "error-loading-node": "Произошла ошибка при загрузке узла"
     },
     "sidebar": {
         "dashboard": "Главная",
@@ -367,7 +394,11 @@
         "delete-tab": "Удалить вкладку",
         "add-tab": "Добавить вкладку",
         "delete-node-title": "Удалить узел",
-        "delete-node-warning": "Вы уверены, что хотите удалить этот узел?"
+        "delete-node-warning": "Вы уверены, что хотите удалить этот узел?",
+        "delete-group-title": "Удалить группу",
+        "delete-group-warning": "Вы уверены, что хотите удалить эту группу?",
+        "delete-tab-title": "Удалить вкладку",
+        "delete-tab-warning": "Вы уверены, что хотите удалить вкладку \"{{tabName}}\"?"
     },
 
     "geo-mechanics-page": {
@@ -423,7 +454,8 @@
       },
 
     "common": {
-        "load-more": "Загрузить больше"
+        "load-more": "Загрузить больше",
+        "loading": "Загрузка..."
     }
 
 
