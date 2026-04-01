@@ -139,10 +139,20 @@
         "enter-text": "Enter text",
         "enter-number": "Enter number",
         "enter-date": "Enter date",
-        "enter-file": "Enter file"
+        "enter-file": "Enter file",
+        "file-size": "File size",
+        "upload-date": "Upload date",
+        "type": "Type",
+        "id": "ID",
+        "unknown-size": "Unknown size",
+        "unknown-date": "Unknown date",
+        "minutes-ago": "minutes ago",
+        "hours-ago": "hours ago",
+        "days-ago": "days ago"
     },
 
     "notice-list": {
+        "loading-task": "Loading task...",
         "resend-letter-if-didnt-get-mail": "If the letter did not arrive, check the \"Spam\" folder or click the button below",
         "send-mail-repeatedly": "Send email again",
         "resend-email-if-didnt-get-mail": "If the letter did not arrive, check the \"Spam\" folder or request a resend",
@@ -193,7 +203,8 @@
         "node-tab-created": "Node tab has been created successfully",
         "node-tab-updated": "Node tab has been updated successfully",
         "node-tab-deleted": "Node tab has been deleted successfully",
-        "node-tab-added": "Node tab has been added successfully"
+        "node-tab-added": "Node tab has been added successfully",
+        "saving-task-data": "Saving task data"
     },
 
     "buttons": {

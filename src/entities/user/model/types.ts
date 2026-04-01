@@ -138,6 +138,7 @@ export interface Avatar {
     size?: number
     mimeType?: string
     createdAt?: string
+    created_at?: string
     task?:number
     filename?:string
     file?:string

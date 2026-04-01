@@ -20,6 +20,7 @@ interface Props {
         organizationId: number
         type: 'group' | 'structure_element'
     }
+    isShowTitle?: boolean
 }
 
 export interface ColumnConfig {
@@ -32,7 +33,7 @@ export interface ColumnConfig {
     width?: number
 }
 
-const ConstructorTableWrapper = ({ data }: Props) => {
+const ConstructorTableWrapper = ({ data,isShowTitle = true }: Props) => {
     const { t } = useTranslation()
     const { data: groups } = useGetAdminPanelGroupsQuery({
         [data.type]: data.entityId,
@@ -105,7 +106,7 @@ const ConstructorTableWrapper = ({ data }: Props) => {
 
     return (
         <div >
-            <h4 className="text-sm font-semibold mb-2">{t('admin-page.table')}</h4>
+            {isShowTitle && <h4 className="text-sm font-semibold mb-2">{t('admin-page.table')}</h4>}
             <ConstructorTable
                 initialColumns={(groups || []).map((group: AdminPanelGroup) => ({
                     key: group.id.toString(),

@@ -108,14 +108,16 @@ const ConstructorNodeDetails = (props: Props) => {
                 <AccordionItem value="table">
                     <AccordionTrigger>{t('admin-page.table')}</AccordionTrigger>
                     <AccordionContent>
-                        <ConstructorTableWrapper data={
-                            {
-                                entityId: currentNode?.id || 0,
-                                name_en: currentNode?.name_en || '',
-                                name_ru: currentNode?.name_ru || '',
-                                organizationId: currentNode?.organization || 0,
-                                type: 'group'
-                            }} />
+                        <ConstructorTableWrapper
+                            isShowTitle={false}
+                            data={
+                                {
+                                    entityId: currentNode?.id || 0,
+                                    name_en: currentNode?.name_en || '',
+                                    name_ru: currentNode?.name_ru || '',
+                                    organizationId: currentNode?.organization || 0,
+                                    type: 'group'
+                                }} />
 
                     </AccordionContent>
                 </AccordionItem>

@@ -145,7 +145,10 @@ const TaskDetails = ({ task, tags: existingTags, taskSlug, statuses, members }: 
       return
     }
 
+    let toastId: string | number | undefined;
+
     try {
+      toastId = toast.loading(t('notice-list.saving-task-data'))
       await updateTask({
         projectId: Number(projectId),
         taskSlug: taskSlug || '',
@@ -157,13 +160,15 @@ const TaskDetails = ({ task, tags: existingTags, taskSlug, statuses, members }: 
               : value,
         } as TaskUpdate,
       }).unwrap()
-
+      toast.success(t('notice-list.task-data-saved-successfully'))
       form.setValue(field, value, {
         shouldDirty: false,
       })
     } catch (error) {
       errorsHandler(error, t)
       form.setValue(field, previous)
+    } finally {
+      toast.dismiss(toastId)
     }
   }
 
@@ -541,7 +546,10 @@ const TaskDetails = ({ task, tags: existingTags, taskSlug, statuses, members }: 
       return
     }
 
+    let toastId: string | number | undefined;
+
     try {
+      toastId = toast.loading(t('notice-list.adding-file'))
       const newFile = await createTaskFile({
         projectId: Number(projectId),
         taskSlug: taskSlug || '',
@@ -557,10 +565,13 @@ const TaskDetails = ({ task, tags: existingTags, taskSlug, statuses, members }: 
             files: [...(task.files || []), newFile],
           },
         }).unwrap()
+        toast.success(t('notice-list.file-added-successfully'))
       }
       dispatch(taskApi.util.invalidateTags(['Task']))
     } catch (error) {
       errorsHandler(error, t)
+    } finally {
+      toast.dismiss(toastId)
     }
   }
 
@@ -571,7 +582,10 @@ const TaskDetails = ({ task, tags: existingTags, taskSlug, statuses, members }: 
       return
     }
 
+    let toastId: string | number | undefined;
+
     try {
+      toastId = toast.loading(t('notice-list.deleting-file'))
       await deleteTaskFile({
         projectId: Number(projectId),
         taskSlug: taskSlug || '',
@@ -586,9 +600,12 @@ const TaskDetails = ({ task, tags: existingTags, taskSlug, statuses, members }: 
           files: task.files?.filter((file) => file.id !== fileId),
         },
       }).unwrap()
+      toast.success(t('notice-list.file-deleted-successfully'))
       dispatch(taskApi.util.invalidateTags(['Task']))
     } catch (error) {
       errorsHandler(error, t)
+    } finally {
+      toast.dismiss(toastId)
     }
   }
 
@@ -905,6 +922,8 @@ const TaskDetails = ({ task, tags: existingTags, taskSlug, statuses, members }: 
                       file: file.file ?? '',
                       filename: file.filename ?? '',
                       size: file.size,
+                      created_at: file.created_at ?? '',
+                      mime_type: file.mimeType ?? '',
                     }))} onUpload={addFile} onDelete={deleteFile} />
                   </AccordionContent>
                 </AccordionItem>

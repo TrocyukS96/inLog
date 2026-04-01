@@ -136,9 +136,19 @@
         "enter-text": "Введите текст",
         "enter-number": "Введите число",
         "enter-date": "Введите дату",
-        "enter-file": "Выберите файл"
+        "enter-file": "Выберите файл",
+        "file-size": "Размер файла",
+        "upload-date": "Дата загрузки",
+        "type": "Тип",
+        "id": "ID",
+        "unknown-size": "Неизвестный размер",
+        "unknown-date": "Неизвестная дата",
+        "minutes-ago": "минут назад",
+        "hours-ago": "часов назад",
+        "days-ago": "дней назад"
     },
     "notice-list": {
+        "loading-task": "Загрузка задачи...",
         "resend-letter-if-didnt-get-mail": "Если письмо не пришло, проверьте папку \"Спам\" или нажмите кнопку ниже",
         "resend-email-if-didnt-get-mail": "Если письмо не пришло, проверьте папку \"Спам\" или запросите повторную отправку",
         "send-mail-repeatedly": "Отправить письмо повторно",
@@ -189,7 +199,8 @@
         "node-tab-created": "Вкладка успешно создана",
         "node-tab-updated": "Вкладка успешно обновлена",
         "node-tab-deleted": "Вкладка успешно удалена",
-        "node-tab-added": "Вкладка успешно добавлена"        
+        "node-tab-added": "Вкладка успешно добавлена",
+        "saving-task-data": "Сохранение данных задачи"
     },
     "buttons": {
         "cancel": "Отменить",

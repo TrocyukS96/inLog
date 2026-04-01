@@ -111,7 +111,7 @@ const handleCopyLink = () => {
   return (
     <>
       <div className={cn(
-        "flex items-center justify-between p-3 rounded-lg border bg-card hover:bg-accent/5 transition-colors group",
+        "flex items-center justify-between p-3 rounded-lg border border-border bg-card hover:bg-accent/5 transition-colors group",
         subtask.completed && "opacity-70"
       )}>
         <div className="flex items-center gap-3 flex-1 min-w-0">

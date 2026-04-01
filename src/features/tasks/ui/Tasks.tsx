@@ -49,7 +49,7 @@ export default function Tasks({ type = 'tasks-page' }: { type?: 'tasks-page' | '
 
     }, { skip: !projectId })
 
-    const { data: taskData, isFetching: taskFetching } = useGetTaskQuery({
+    const { data: taskData, isFetching: taskFetching, isLoading: taskLoading } = useGetTaskQuery({
         projectId: Number(projectId),
         taskSlug: selectedTaskSlug || '',
     }, { skip: !projectId || !selectedTaskSlug })
@@ -142,6 +142,19 @@ export default function Tasks({ type = 'tasks-page' }: { type?: 'tasks-page' | '
         } as TasksFilterParams)
     }, [debouncedSearchValue])
 
+    useEffect(() => {
+        let toastId: string | number | undefined
+        if (taskFetching) {
+            toastId = toast.loading(t('notice-list.loading-task'))
+        }else{
+            toast.dismiss(toastId)
+        }
+
+        return () => {
+            toast.dismiss(toastId)
+        }
+    }, [taskFetching])
+
     const renderTaskDetails = () => {
         if (!selectedTaskSlug || !taskData) {
             return <div className="flex items-center justify-center h-full text-muted-foreground">
@@ -151,7 +164,7 @@ export default function Tasks({ type = 'tasks-page' }: { type?: 'tasks-page' | '
                 </div>
             </div>
         }
-        if (taskFetching) {
+        if (taskLoading) {
             return <div className="flex items-center justify-center h-full text-muted-foreground">
                 <Loader2 className="h-8 w-8 animate-spin text-primary" />
             </div>
@@ -181,7 +194,7 @@ export default function Tasks({ type = 'tasks-page' }: { type?: 'tasks-page' | '
                             </h1>
                             <Dialog open={createModalOpen} onOpenChange={setCreateModalOpen}>
                                 <DialogTrigger asChild>
-                                    <Button size="sm">
+                                    <Button size="sm" disabled={tasksLoading || taskFetching || !projectId}>
                                         <Plus className="h-4 w-4 mr-2" />
                                         {isTemplates ? t(`templates-page.create-template`) : t(`tasks-page.create-task`)}
                                     </Button>
@@ -204,7 +217,7 @@ export default function Tasks({ type = 'tasks-page' }: { type?: 'tasks-page' | '
                                     onChange={handleSearch}
                                     className="w-full pl-9 pr-8"
                                     placeholder={t('fields.search')}
-                                    disabled={tasksLoading || taskFetching || tasksData?.results?.length === 0}
+                                    disabled={tasksLoading || taskFetching || tasksData?.results?.length === 0 || !projectId}
                                 />
                                 {searchValue && (
                                     <X
@@ -225,13 +238,13 @@ export default function Tasks({ type = 'tasks-page' }: { type?: 'tasks-page' | '
                                     placeholder={t('fields.date-range')}
                                     onChange={(range) => handleFilterChange(range, 'date')}
                                     className="flex-1"
-                                    disabled={tasksLoading || taskFetching || tasksData?.results?.length === 0}
+                                    disabled={tasksLoading || taskFetching || tasksData?.results?.length === 0 || !projectId}
                                 />
 
                                 <Button
                                     variant="outline"
                                     size="icon"
-                                    disabled={tasksLoading || taskFetching || tasksData?.results?.length === 0}
+                                    disabled={tasksLoading || taskFetching || tasksData?.results?.length === 0 || !projectId}
                                     onClick={() => setFilterParams({
                                         ...(filterParams ?? {}),
                                         ordering: filterParams.ordering === '-created_at' ? 'created_at' : '-created_at'
@@ -246,41 +259,42 @@ export default function Tasks({ type = 'tasks-page' }: { type?: 'tasks-page' | '
                             </div>
                         </div>
                     </div>
-
-                    {tasksData?.results && tasksData.results.length > 0 ? (
-                        <TasksList
-                            tasks={tasksData.results}
-                            selectedTaskSlug={selectedTaskSlug || undefined}
-                            selectTask={handleSelectTask}
-                            deleteTask={handleDeleteTask}
-                            createTemplate={createTemplate}
-                            changePagination={handlePaginationChange}
-                            isLoading={tasksLoading || tasksFetching}
-                            pagination={{
-                                limit: Number(filterParams.limit) || 10,
-                                offset: Number(filterParams.offset) || 0,
-                                total: tasksData.count
-                            }}
-                        />
-                    ) : (
-                        <div className="text-center py-12 text-muted-foreground">
-                            {isTemplates ? t(`templates-page.templates-absent-message`) : t(`tasks-page.tasks-absent-message`)}
-                            {(filterParams.created_at__range || filterParams.name__icontains) && (
-                                <div className="mt-4">
-                                    <Button
-                                        variant="outline"
-                                        size="sm"
-                                        onClick={() => {
-                                            setFilterParams({ limit: 10, offset: 0 })
-                                            setSearchValue('')
-                                        }}
-                                    >
-                                        {t('fields.clear-filters')}
-                                    </Button>
-                                </div>
-                            )}
-                        </div>
-                    )}
+                    <TasksList
+                        tasks={tasksData?.results || []}
+                        selectedTaskSlug={selectedTaskSlug || undefined}
+                        selectTask={handleSelectTask}
+                        deleteTask={handleDeleteTask}
+                        createTemplate={createTemplate}
+                        changePagination={handlePaginationChange}
+                        isFetching={tasksFetching}
+                        isLoading={tasksLoading}
+                        pagination={{
+                            limit: Number(filterParams.limit) || 10,
+                            offset: Number(filterParams.offset) || 0,
+                            total: tasksData?.count || 0
+                        }}
+                    />
+                    {
+                        (tasksData?.results && tasksData.results.length === 0 && !tasksLoading && !tasksFetching) && (
+                            <div className="text-center py-12 text-muted-foreground">
+                                {isTemplates ? t(`templates-page.templates-absent-message`) : t(`tasks-page.tasks-absent-message`)}
+                                {(filterParams.created_at__range || filterParams.name__icontains) && (
+                                    <div className="mt-4">
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            onClick={() => {
+                                                setFilterParams({ limit: 10, offset: 0 })
+                                                setSearchValue('')
+                                            }}
+                                        >
+                                            {t('fields.clear-filters')}
+                                        </Button>
+                                    </div>
+                                )}
+                            </div>
+                        )
+                    }
                 </div>
             </ResizablePanel>
 

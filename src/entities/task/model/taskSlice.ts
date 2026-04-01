@@ -7,7 +7,7 @@ import { errorsHandler } from "../../../shared/lib/errors-handler";
 export const taskApi = createApi({
     reducerPath: 'taskApi',
     baseQuery,
-    tagTypes: ['Task'],
+    tagTypes: ['Tasks', 'Task'],
     endpoints: (builder) => ({
         getTasks: builder.query<{
             count: number
@@ -26,7 +26,7 @@ export const taskApi = createApi({
             //           { type: 'Task', id: 'LIST' },
             //         ]
             //       : [{ type: 'Task', id: 'LIST' }],
-            providesTags: ['Task'],
+            providesTags: ['Tasks'],
         }),
 
         getTask: builder.query<Task, { projectId: number; taskSlug: string }>({
@@ -68,7 +68,31 @@ export const taskApi = createApi({
                 method: 'PATCH',
                 body: data,
             }),
-            // invalidatesTags: (_, __, { taskSlug }) => [{ type: 'Task', id: taskSlug }],
+            async onQueryStarted({ taskSlug }, { dispatch, queryFulfilled, getState }) {
+                try {
+                    const { data: updatedTask } = await queryFulfilled;
+                    
+                    const state = getState();
+                    const allQueries = Object.values(state.taskApi.queries);
+                    
+                    const getTasksQueries = allQueries.filter(
+                        (query: any) => query?.endpointName === 'getTasks'
+                    );
+                    
+                    getTasksQueries.forEach((query: any) => {
+                        dispatch(
+                            taskApi.util.updateQueryData('getTasks', query.originalArgs, (draft) => {
+                                const index = draft.results.findIndex(task => task.slug === taskSlug);
+                                if (index !== -1) {
+                                    draft.results[index] = updatedTask;
+                                }
+                            })
+                        );
+                    });
+                } catch (error) {
+                    console.error('Error:', error);
+                }
+            },
             invalidatesTags: ['Task'],
         }),
 
@@ -88,7 +112,6 @@ export const taskApi = createApi({
                 url: `projects/${projectId}/tasks/task/${taskSlug}/doer/${doerId}/`,
                 method: 'DELETE',
             }),
-            // invalidatesTags: (_, __, { taskSlug }) => [{ type: 'Task', id: taskSlug }],
         }),
         AddTaskSupervisor: builder.mutation<Task, { projectId: number; taskSlug: string; data: { user: number } }>({
             query: ({ projectId, taskSlug, data }) => ({
@@ -99,7 +122,6 @@ export const taskApi = createApi({
                     project: projectId,
                 },
             }),
-            // invalidatesTags: (_, __, { taskSlug }) => [{ type: 'Task', id: taskSlug }],
         }),
         deleteTaskSupervisor: builder.mutation<Task, { projectId: number; taskSlug: string, supervisorId: number }>({
             query: ({ projectId, taskSlug, supervisorId }) => ({
@@ -114,8 +136,7 @@ export const taskApi = createApi({
                 method: 'POST',
                 body: data,
             }),
-            // invalidatesTags: (_, __, { projectId }) => [{ type: 'Task', id: projectId }],
-            invalidatesTags: ['Task'],
+            invalidatesTags: ['Tasks'],
         }),
 
         deleteTask: builder.mutation<void, { projectId: number; taskSlug: string }>({

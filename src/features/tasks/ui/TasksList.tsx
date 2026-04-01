@@ -1,6 +1,6 @@
 import { Card } from '../../../shared/ui/card'
 
-import { useCallback, useEffect, useRef } from 'react'
+import { memo, useCallback, useEffect, useRef } from 'react'
 import { TaskCard, TaskCardSkeleton } from '../../../entities/task'
 import type { Task } from '../../../entities/task/model/types'
 import { cn } from '../../../shared/lib/utils'
@@ -8,6 +8,7 @@ import { ScrollArea } from '../../../shared/ui/scroll-area'
 
 interface Props {
   tasks: Task[]
+  isFetching: boolean
   isLoading: boolean
   selectedTaskSlug?: string
   selectTask: (task: Task) => void
@@ -26,6 +27,7 @@ const TASKS_LIST_HEIGHT = 'h-[calc(100vh-64px-16px-36px-16px-36px-32px-116px)]'
 
 const TasksList = ({
   tasks,
+  isFetching,
   isLoading,
   selectedTaskSlug,
   selectTask,
@@ -48,6 +50,8 @@ const TasksList = ({
       // })
     }
   }, [hasMore, tasks.length, pagination.total, pagination.limit, changePagination])
+
+  console.log(isFetching, isLoading, 'isFetching, isLoading')
 
   useEffect(() => {
     if (observerRef.current) {
@@ -78,19 +82,19 @@ const TasksList = ({
       }
     }
   }, [hasMore, tasks.length, pagination.total, loadMore])
-
+  
   return (
     <Card className="px-4 border-none bg-transparent">
 
       <ScrollArea className={cn("flex flex-col gap-2", TASKS_LIST_HEIGHT)}>
-        {isLoading && (
+        {(isFetching || isLoading) && (
           <div className="w-full h-full flex items-center flex-col gap-2  text-muted-foreground">
             {Array.from({ length: 10 }).map((_, index) => (
               <TaskCardSkeleton key={index} />
             ))}
           </div>
         )}
-        {!isLoading && tasks.map((task, index) => {
+        {(!isLoading && !isFetching) && tasks.map((task, index) => {
           const isLastElement = index === tasks.length - 1
 
           return (
@@ -110,7 +114,7 @@ const TasksList = ({
           )
         })}
 
-        {!isLoading && hasMore && tasks.length < pagination.total && (
+        {(!isLoading && !isFetching) && hasMore && tasks.length < pagination.total && (
           <div className="flex justify-center p-4">
             <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-gray-900" />
           </div>
@@ -120,4 +124,4 @@ const TasksList = ({
   )
 }
 
-export default TasksList
+export default memo(TasksList)
