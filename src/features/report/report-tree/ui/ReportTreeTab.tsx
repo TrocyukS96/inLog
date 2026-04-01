@@ -77,11 +77,11 @@ const ReportTreeTab = ({
         <div className="space-y-2">
             <h4 className="text-sm font-semibold flex items-center gap-2">
                 <LinkIcon className="h-3 w-3" />
-                {t('admin-page.related-tabs')}
+                {t('admin-page.related-tabs', 'Связанные табы')}
             </h4>
             <div className="grid gap-1">
                 {connectionTabs.map((conn) => (
-                    <Badge key={conn.id} className="bg-accent text-xs py-1 px-2 rounded-lg">
+                    <Badge key={conn.id} className=" text-xs py-1 px-2 rounded-lg">
                         {currentLang === 'ru' ? conn.name_ru : conn.name_en}
                     </Badge>
                 ))}

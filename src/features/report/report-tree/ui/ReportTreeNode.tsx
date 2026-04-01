@@ -235,7 +235,7 @@ const ReportTreeNode = ({
                     className="mt-1 mb-2 space-y-3 border-l-2 border-border/50 ml-4 pl-4"
                 >
                     {tabs.length > 0 && (
-                        <div className="space-y-1">
+                        <div className="space-y-1 border-border border rounded-lg p-2 bg-card/50">
                             <h6 className="text-[10px] uppercase font-bold text-muted-foreground/70 mb-2">
                                 {t('admin-page.tabs')}
                             </h6>
@@ -260,7 +260,7 @@ const ReportTreeNode = ({
 
                     {/* Рендер колонок без привязки к вкладкам */}
                     {orphanColumns.length > 0 && (
-                        <div className="space-y-1">
+                        <div className="space-y-1 border-border border rounded-lg p-2 bg-card/50">
                             <h6 className="text-[10px] uppercase font-bold text-muted-foreground/70 mb-2">
                                 {t('admin-page.columns')}
                             </h6>
