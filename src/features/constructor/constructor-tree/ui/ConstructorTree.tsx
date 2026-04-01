@@ -21,6 +21,7 @@ import {
 } from '../../../../shared/ui/dialog'
 import { ConstructorTreeNode } from './ConstructorTreeNode'
 import TreeNodeFormDialog from './TreeNodeFormDialog'
+import { ScrollArea } from '../../../../shared/ui/scroll-area'
 
 type TreeNodeData = number
 
@@ -313,28 +314,30 @@ const ConstructorTree = ({
                         </p>
                     </div>
                 ) : (
-                    <div {...tree.getContainerProps()} className="space-y-0.5">
-                        {tree.getItems().map((item: any) => {
-                            const nodeId = item.getItemData()
-                            const node = nodesMap.get(nodeId)
-                            const level = item.getItemMeta().level
+                    <ScrollArea className="h-full overflow-y-auto max-h-[calc(100vh-180px)]">
+                        <div {...tree.getContainerProps()} className="space-y-0.5 h-full">
+                            {tree.getItems().map((item: any) => {
+                                const nodeId = item.getItemData()
+                                const node = nodesMap.get(nodeId)
+                                const level = item.getItemMeta().level
 
-                            if (!node) return null
+                                if (!node) return null
 
-                            return (
-                                <ConstructorTreeNode
-                                    key={`${item.getId()}-${forceUpdateKey}`}
-                                    item={item}
-                                    node={node}
-                                    mode={mode}
-                                    onToggle={handleToggle}
-                                    onEdit={() => handleOpenEditDialog(node)}
-                                    onDelete={level > 0 ? () => handleOpenDeleteDialog(node) : undefined}
-                                    onCreate={() => handleOpenCreateDialog(node)}
-                                />
-                            )
-                        })}
-                    </div>
+                                return (
+                                    <ConstructorTreeNode
+                                        key={`${item.getId()}-${forceUpdateKey}`}
+                                        item={item}
+                                        node={node}
+                                        mode={mode}
+                                        onToggle={handleToggle}
+                                        onEdit={() => handleOpenEditDialog(node)}
+                                        onDelete={level > 0 ? () => handleOpenDeleteDialog(node) : undefined}
+                                        onCreate={() => handleOpenCreateDialog(node)}
+                                    />
+                                )
+                            })}
+                        </div>
+                    </ScrollArea>
                 )}
             </div>
             <TreeNodeFormDialog

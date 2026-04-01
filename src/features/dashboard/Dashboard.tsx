@@ -1,15 +1,15 @@
 'use client'
 import {
-    ChevronRight,
-    FolderKanban,
-    ListTodo
-  } from 'lucide-react'
-  import { Link } from 'react-router-dom'
+  ChevronRight,
+  FolderKanban,
+  ListTodo
+} from 'lucide-react'
+import { Link } from 'react-router-dom'
   
-  import { Button } from '../../shared/ui/button'
-  import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../shared/ui/card'
-import { useTranslation } from 'react-i18next'
+  import { useTranslation } from 'react-i18next'
 import { routes } from '../../shared/lib/routes'
+import { Button } from '../../shared/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '../../shared/ui/card'
 
 
 const Dashboard = () => {
@@ -21,9 +21,6 @@ const Dashboard = () => {
           <CardTitle className="text-3xl font-bold text-primary">
             {t('dashboard-page.welcome')}
           </CardTitle>
-          <CardDescription className="text-lg mt-2">
-            {t('dashboard-page.description')}
-          </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           <p className="text-muted-foreground leading-relaxed">

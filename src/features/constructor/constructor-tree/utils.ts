@@ -1,4 +1,4 @@
-import type { AdminPanelNode } from "../../../entities/admin/model/types"
+import type { AdminPanelNode, AdminPanelNodeTab } from "../../../entities/admin/model/types"
 
 export const getSelectedEntities = (
     prevSelected: AdminPanelNode[],
@@ -28,28 +28,87 @@ export const findAllParentNodes = (
     return result
 }
 
-export const findRelativeTabsInNodes = (
-    nodes: AdminPanelNode[],
+export const findRelativeNodesInNodes = (
+    nodes: AdminPanelNode[] = [],
     nodeId: number | null,
-) => {
-    const result: AdminPanelNode[] = []
-    let targetEntity = null as null | AdminPanelNode
+): Array<AdminPanelNode & { nestLevel: number }> => {
+    const result: Array<AdminPanelNode & { nestLevel: number }> = []
+    let targetNode = null as null | AdminPanelNode & { nestLevel: number }
 
-    nodes?.forEach((node: AdminPanelNode) => {
+    nodes.forEach((node: AdminPanelNode) => {
         const parentNodes = findAllParentNodes(nodes, node.id);
-        const item = { ...node, nestLevel: parentNodes ? parentNodes.length : 0 }
+        const item: AdminPanelNode & { nestLevel: number } = { ...node, nestLevel: parentNodes ? parentNodes.length : 0 }
 
         if (item.id === nodeId) {
-            targetEntity = item
+            targetNode = item
         }
 
         result.push(item)
         //возвращает массив дочерних узлов
     })
 
-    if (targetEntity && targetEntity.nestLevel && result.length > 0) {
-        return result.filter(item => item.nestLevel && item.nestLevel <= targetEntity?.nestLevel!)
+    if (targetNode && targetNode.nestLevel && result.length > 0) {
+        return result.filter(item => item.nestLevel && item.nestLevel <= targetNode?.nestLevel!)
     } else return []
 
-   //эта функция возвращает массив родительских узлов
+   //эта функция возвращает массив узлов, которые находятся на одном уровне или ниже, чем узел с id nodeId
+}
+
+export const getConnectionTabsOptions = (
+    nodes: Array<AdminPanelNode> = [],
+    nodeId: number,
+    // tabId: number,
+    language: 'en' | 'ru',
+):Array<{
+    label: string
+    value: string
+    fixed: boolean
+}> => {
+    const relativeNodes = findRelativeNodesInNodes(nodes, nodeId)
+    const options:Array<{
+        label: string
+        value: string 
+        fixed: boolean
+    }> = []
+
+    if (relativeNodes && relativeNodes.length > 0) {
+        relativeNodes.forEach((node: AdminPanelNode & { nestLevel: number }) => {
+            if (
+                node.pre_made_structure_elements &&
+                node.pre_made_structure_elements.length > 0
+            ) {
+                node.pre_made_structure_elements.forEach((tab) => {
+                    options.push({
+                        label: `${node[`name_${language}`]} — ${
+                            tab[`name_${language}`]
+                        }`,
+                        value: tab.id!.toString(),
+                        // fixed: item.id === nodeId,
+                        fixed: false,
+                    })
+                })
+            }
+        })
+       return options
+    } else return []
+}
+
+export const findAllRelativeTabs = (
+    nodes: AdminPanelNode[],
+    tab: AdminPanelNodeTab,
+) => {
+    const result: AdminPanelNodeTab[] = []
+    if(tab.related_structure_elements && tab.related_structure_elements.length > 0) {
+        nodes.forEach((node) => {
+            if(node.pre_made_structure_elements && node.pre_made_structure_elements.length > 0) {
+                node.pre_made_structure_elements.forEach((tabElement) => {
+                    if(tab.related_structure_elements && tab.related_structure_elements.includes(tabElement.id!)) {
+                        result.push(tabElement)
+                    }
+                })
+            }
+        })
+    }
+
+    return result
 }

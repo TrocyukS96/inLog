@@ -2,6 +2,8 @@ import { useTranslation } from 'react-i18next'
 import { Button } from '../../shared/ui/button'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../../shared/ui/dropdown-menu'
 import { UserMenu } from './ui/UserMenu'
+import { useUpdateUserSettingsMutation } from '../../entities/user/model/userSlice'
+import { errorsHandler } from '../../shared/lib/errors-handler'
 
 export function Header() {
   const { t } = useTranslation()
@@ -40,17 +42,27 @@ export function Header() {
 }
 
 function LanguageSwitcher() {
-  const { i18n } = useTranslation()
+  const { i18n, t } = useTranslation()
+  const [updateUserSettings] = useUpdateUserSettingsMutation()
 
   const currentLanguage = i18n.language === 'en' ? 'EN' : 'RU'
+
+  const changeLanguage = async (lang: string) => {
+    try {
+      await updateUserSettings({ language: lang }).unwrap()
+      i18n.changeLanguage(lang)
+    } catch (error) {
+      errorsHandler(error, t)
+    }
+  }
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="outline">{currentLanguage}</Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent>
-        <DropdownMenuItem onClick={() => i18n.changeLanguage('en')}>EN</DropdownMenuItem>
-        <DropdownMenuItem onClick={() => i18n.changeLanguage('ru')}>RU</DropdownMenuItem>
+        <DropdownMenuItem className={currentLanguage === 'RU' ? 'bg-accent' : ''} onClick={() => changeLanguage('ru')}>RU</DropdownMenuItem>
+        <DropdownMenuItem className={currentLanguage === 'EN' ? 'bg-accent' : ''} onClick={() => changeLanguage('en')}>EN</DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   )

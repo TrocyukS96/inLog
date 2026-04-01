@@ -1,6 +1,6 @@
 import { createApi } from "@reduxjs/toolkit/query/react"
 import { baseQuery } from '../../../shared/api/clientApi'
-import type { AdminPanelGroup, AdminPanelGroupRequest, AdminPanelNode, AdminPanelNodeRequest, AdminPanelNodeTab } from "./types"
+import type { AdminPanelGroup, AdminPanelGroupRequest, AdminPanelNode, AdminPanelNodeRequest, AdminPanelNodeTab, AdminPanelReport, AdminPanelReportRequest } from "./types"
 import { errorsHandler } from "../../../shared/lib/errors-handler"
 
 export const adminApi = createApi({
@@ -44,7 +44,7 @@ export const adminApi = createApi({
                 method: 'PATCH',
                 body,
             }),
-            invalidatesTags: ['Nodes','Node']
+            invalidatesTags: ['Node']
         }),
         deleteAdminPanelNode: builder.mutation<void, { organizationId: number, nodeId: number }>({
             query: ({ organizationId, nodeId }) => ({
@@ -78,12 +78,13 @@ export const adminApi = createApi({
             name_en: string
             name_ru: string
             group: number
+            related_structure_elements?: number[]
             structure_elements: { id: number, name_en: string, name_ru: string }[]
         } }>({
             query: ({ organizationId, body }) => ({
                 url: `organizations/${organizationId}/structure-element/multiple-update/`,
                 method: 'PATCH',
-                body: { ...body, organizationId },
+                body: { ...body, organizationId, related_structure_elements: body.related_structure_elements || [] },
             }),
             invalidatesTags: ['NodeTabs','Node']
         }),
@@ -131,6 +132,13 @@ export const adminApi = createApi({
             }),
             invalidatesTags: ['NodeGroups','Node']
         }),
+        generateReport: builder.mutation<AdminPanelReport[], { organizationId: number, body: AdminPanelReportRequest[] }>({
+            query: ({ organizationId, body }) => ({
+                url: `organizations/${organizationId}/get-combined-constructor-data/`,
+                method: 'POST',
+                body,
+            }),
+        }),
     })
 })
 
@@ -147,5 +155,6 @@ export const {
     useGetAdminPanelGroupsQuery,
     useAddAdminPanelGroupMutation,
     useDeleteAdminPanelGroupMutation,
-    useUpdateAdminPanelGroupMutation
+    useUpdateAdminPanelGroupMutation,
+    useGenerateReportMutation
 } = adminApi;

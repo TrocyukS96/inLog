@@ -42,6 +42,7 @@ export const routes = {
     admin: {
       list: () => '/admin',
       constructor: () => '/admin/constructor',
+      reports: () => '/admin/reports',
     },
 
     settings: {

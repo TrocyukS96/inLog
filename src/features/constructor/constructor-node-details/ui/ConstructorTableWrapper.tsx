@@ -2,13 +2,18 @@
 
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
-import { useAddAdminPanelGroupMutation, useDeleteAdminPanelGroupMutation, useGetAdminPanelGroupsQuery, useUpdateAdminPanelGroupMutation } from "../../../../entities/admin/model/adminSlice";
+import {
+    useAddAdminPanelGroupMutation,
+    useDeleteAdminPanelGroupMutation,
+    useGetAdminPanelGroupsQuery,
+    useUpdateAdminPanelGroupMutation
+} from "../../../../entities/admin/model/adminSlice";
 import type { AdminPanelGroup } from "../../../../entities/admin/model/types";
 import { errorsHandler } from "../../../../shared/lib/errors-handler";
 import ConstructorTable from "../../constructor-table/ui/ConstructorTable";
 
 interface Props {
-    data:{
+    data: {
         entityId: number
         name_en: string
         name_ru: string
@@ -72,7 +77,7 @@ const ConstructorTableWrapper = ({ data }: Props) => {
                     name_ru: column.title.ru,
                     // structure_element: node.id, 
                     [data.type]: data.entityId,
-                    type:column.inputType
+                    type: column.inputType
                 }
             }).unwrap()
             toast.success(t('notice-list.group-created'))
@@ -97,23 +102,25 @@ const ConstructorTableWrapper = ({ data }: Props) => {
             toast.dismiss(toastId)
         }
     }
-   
 
     return (
-        <ConstructorTable
-            initialColumns={(groups || []).map((group: AdminPanelGroup) => ({
-                key: group.id.toString(),
-                title: {
-                    en: group.name_en,
-                    ru: group.name_ru,
-                },
-                inputType: group.type,
-                width: 100,
-            }))}
-            onCreate={onCreate}
-            onDelete={onDelete}
-            onEdit={onEdit}
-        />
+        <div >
+            <h4 className="text-sm font-semibold mb-2">{t('admin-page.table')}</h4>
+            <ConstructorTable
+                initialColumns={(groups || []).map((group: AdminPanelGroup) => ({
+                    key: group.id.toString(),
+                    title: {
+                        en: group.name_en,
+                        ru: group.name_ru,
+                    },
+                    inputType: group.type,
+                    width: 100,
+                }))}
+                onCreate={onCreate}
+                onDelete={onDelete}
+                onEdit={onEdit}
+            />
+        </div>
     )
 }
 

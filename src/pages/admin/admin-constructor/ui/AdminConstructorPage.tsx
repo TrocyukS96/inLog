@@ -16,7 +16,7 @@ const AdminConstructorPage = () => {
     const [searchParams] = useSearchParams()
     const currentOrgId = Number(searchParams.get('org'))
 
-    const { data: adminPanelNodes, isLoading: isLoadingAdminPanelNodes } = useGetAdminPanelNodesQuery(
+    const { data: adminPanelNodes, isLoading: isLoadingAdminPanelNodes,isFetching: isFetchingAdminPanelNodes } = useGetAdminPanelNodesQuery(
         { organizationId: currentOrgId },
         { skip: !currentOrgId }
     )
@@ -27,9 +27,6 @@ const AdminConstructorPage = () => {
     const [addAdminPanelNodeTabMutation] = useAddAdminPanelNodeTabMutation()
     const [updateAdminPanelNodeTabMutation] = useUpdateAdminPanelNodeTabMutation()
     const [deleteAdminPanelNodeTabMutation] = useDeleteAdminPanelNodeTabMutation()
-
-
-    console.log(adminPanelNodes, '--adminPanelNodes')
 
     const handleSelectEntity = useCallback((nodeId: number) => {
         setSelectedNodeId(nodeId)
@@ -83,6 +80,7 @@ const AdminConstructorPage = () => {
     const handleAddNodeTab = async (body: {
         name_en: string
         name_ru: string
+        related_structure_elements?: number[]
     }) => {
         if (!currentOrgId) return
 
@@ -95,6 +93,7 @@ const AdminConstructorPage = () => {
                     name_en: body.name_en,
                     name_ru: body.name_ru,
                     group: selectedNodeId || 0,
+                    related_structure_elements: body.related_structure_elements || [],
                 }
             }).unwrap()
             toast.success(t('notice-list.node-tab-added'))
@@ -109,6 +108,7 @@ const AdminConstructorPage = () => {
         id: number
         name_en: string
         name_ru: string
+        related_structure_elements?: number[]
     }) => {
         if (!currentOrgId) return
 
@@ -117,20 +117,23 @@ const AdminConstructorPage = () => {
         try {
             toastId = toast.loading(t('notice-list.updating-node-tab')) as string
             const node = adminPanelNodes?.find(node => node.id === selectedNodeId)
+
+            const validNodeTabs = (() => {
+                const targetTab = node?.pre_made_structure_elements?.find(element => element.id === tab.id)
+                if(targetTab){
+                    return node?.pre_made_structure_elements?.map(element => element.id === tab.id ? tab : element)
+                }else{
+                    return [...(node?.pre_made_structure_elements || []), tab]
+                }
+            })()
             await updateAdminPanelNodeTabMutation({
                 organizationId: currentOrgId, body: {
                     id: tab.id,
                     group: selectedNodeId || 0,
                     name_en: tab.name_en,
                     name_ru: tab.name_ru,
-                    structure_elements: [
-                        ...(node?.pre_made_structure_elements || []),
-                        {
-                            id: tab.id,
-                            name_en: tab.name_en,
-                            name_ru: tab.name_ru,
-                        }
-                    ] as { id: number, name_en: string, name_ru: string }[]
+                    related_structure_elements: tab.related_structure_elements || [],
+                    structure_elements: validNodeTabs as { id: number, name_en: string, name_ru: string }[],
                 }
             }).unwrap()
 
@@ -162,6 +165,21 @@ const AdminConstructorPage = () => {
         }
     }
 
+    const handleUpdateNode = async (node: AdminPanelNode) => {
+        if (!currentOrgId) return
+
+        let toastId: string | undefined
+        try {
+            toastId = toast.loading(t('notice-list.updating-node')) as string
+            await updateAdminPanelNodeMutation({ organizationId: currentOrgId, nodeId: node.id, body: node }).unwrap()
+            toast.success(t('notice-list.node-updated'))
+        } catch (error) {
+            errorsHandler(error, t)
+        } finally {
+            toast.dismiss(toastId)
+        }
+    }
+
     return (
         <ResizablePanelGroup
             className="h-fit rounded-lg border border-border "
@@ -171,12 +189,18 @@ const AdminConstructorPage = () => {
                 defaultSize={100}
             >
                 <div className="p-4 h-full w-full">
-                    {isLoadingAdminPanelNodes ? (
-                        <div className="flex items-center justify-center h-full">
+                    {isLoadingAdminPanelNodes || isFetchingAdminPanelNodes ? (
+                        <div className="flex items-center justify-center h-full w-full">
                             <Loader2 className="h-4 w-4 animate-spin" />
                         </div>
+                    ) : (!isLoadingAdminPanelNodes && adminPanelNodes?.length === 0) ? (
+                        <div className="flex items-center justify-center h-full w-full">
+                            <p className="text-sm text-muted-foreground">
+                                {t('admin-page.no-nodes-available')}
+                            </p>
+                        </div>
                     ) : (
-                        <div>
+                        <div className="w-full h-full">
                             <ConstructorTree
                                 nodes={adminPanelNodes || []}
                                 onSelect={handleSelectEntity}
@@ -184,31 +208,6 @@ const AdminConstructorPage = () => {
                                 onDelete={handleDeleteEntity}
                                 onCreate={handleCreateEntity}
                             />
-                            {/* <div className="mt-4 h-200">
-                                <ScrollArea
-                                    className="h-full">
-                                    {adminPanelNodes?.map((node) => (
-                                        <Card className="mt-2 cursor-pointer hover:bg-accent/50 transition-colors" key={node.id}>
-                                            <div className=" p-4 flex items-center justify-between">
-                                                <div className="flex items-center gap-2">
-                                                    <div className="text-sm font-medium">{node.name_ru}</div>
-                                                </div>
-                                                <Button variant="outline" size="sm" onClick={() => handleDeleteEntity(node)}>
-                                                    <Trash2 className="h-4 w-4" />
-                                                </Button>
-                                            </div>
-                                        </Card>
-                                    ))}
-                                </ScrollArea>
-                            </div> */}
-                        </div>
-
-                    )}
-                    {(!isLoadingAdminPanelNodes && adminPanelNodes?.length === 0) && (
-                        <div className="flex items-center justify-center h-full">
-                            <p className="text-sm text-muted-foreground">
-                                {t('admin-page.no-nodes-available')}
-                            </p>
                         </div>
                     )}
                 </div>
@@ -231,9 +230,10 @@ const AdminConstructorPage = () => {
                     {selectedNodeId && (
                         <ConstructorNodeDetails
                             nodeId={selectedNodeId || 0}
-                            handleAddNodeTab={handleAddNodeTab}
-                            handleUpdateNodeTab={handleUpdateNodeTab}
-                            handleDeleteNodeTab={handleDeleteNodeTab}
+                            addTab={handleAddNodeTab}
+                            updateTab={handleUpdateNodeTab}
+                            deleteTab={handleDeleteNodeTab}
+                            updateNode={handleUpdateNode}
                         />
                     )}
                 </div>

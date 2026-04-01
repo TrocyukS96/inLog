@@ -68,9 +68,6 @@ export function Sidebar() {
     return location.pathname === path
   },[location.pathname])
 
-  console.log(getIsActive(routes.admin.list()),'-----> getIsActive admin list')
-  console.log(getIsActive(routes.settings.list()),'-----> getIsActive settings list')
-
   const getLinkClassName = (path: string) => {
     return cn(`p-2 h-9 w-9 flex items-center justify-center rounded-lg transition-colors hover:bg-accent hover:text-accent-foreground ${getIsActive(path) ? 'bg-accent' : ''}`)
   }

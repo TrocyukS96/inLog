@@ -78,7 +78,7 @@ export function MultiSelect({
     onValueChange?.(newValue)
   }
 
-  const handleRemove = (optionValue: string, event: React.MouseEvent) => {
+  const handleRemove = (optionValue: string, event: React.MouseEvent | React.KeyboardEvent) => {
     event.stopPropagation()
     const option = options.find(opt => opt.value === optionValue)
     
@@ -100,6 +100,13 @@ export function MultiSelect({
     return option?.fixed === true
   }
 
+  const handleKeyDown = (e: React.KeyboardEvent, optionValue: string) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault()
+      handleRemove(optionValue, e)
+    }
+  }
+
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
@@ -108,32 +115,39 @@ export function MultiSelect({
           role="combobox"
           aria-expanded={open}
           className={cn(
-            "w-full justify-between h-auto min-h-10 px-2 py-0",
+            "w-full justify-between h-auto min-h-10 py-2 px-2",
             disabled && "cursor-not-allowed",
             className
           )}
           disabled={disabled}
         >
-          <div className="h-full flex flex-wrap gap-1 flex-1 mr-2">
+          <div className="flex flex-wrap gap-1 flex-1 mr-2">
             {value.length > 0 ? (
               value.map((itemValue) => {
                 const isFixed = isOptionFixed(itemValue)
                 return (
                   <Badge
                     key={itemValue}
-                    // variant={isFixed ? "default" : "secondary"}
-                    className=""
+                    variant={isFixed ? "secondary" : "default"}
+                    className="gap-1"
                   >
                     {getOptionLabel(itemValue)}
                     {!isFixed && (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-4 w-4 p-0 ml-1 hover:bg-transparent"
+                      <span
+                        role="button"
+                        tabIndex={0}
+                        className={cn(
+                          "h-4 w-4 p-0 inline-flex items-center justify-center rounded-sm",
+                          "hover:bg-accent hover:text-accent-foreground",
+                          "focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
+                          "cursor-pointer"
+                        )}
                         onClick={(e) => handleRemove(itemValue, e)}
+                        onKeyDown={(e) => handleKeyDown(e, itemValue)}
+                        aria-label={`Remove ${getOptionLabel(itemValue)}`}
                       >
                         <X className="h-3 w-3" />
-                      </Button>
+                      </span>
                     )}
                   </Badge>
                 )
@@ -171,18 +185,14 @@ export function MultiSelect({
                         "mr-2 flex h-4 w-4 items-center justify-center rounded-sm border",
                         isSelected
                           ? "bg-primary border-primary text-popover-foreground"
-                          : "border-muted-foreground/20",
-                        // isFixed && "bg-primary/20 border-primary/50"
+                          : "border-muted-foreground/20"
                       )}
                     >
                       {isSelected && (
                         <Check className="h-3 w-3" />
                       )}
                     </div>
-                    <span className={cn(
-                      "flex-1",
-                      // isFixed && "text-muted-foreground"
-                    )}>
+                    <span className="flex-1">
                       {renderOption ? renderOption(option) : option.label}
                     </span>
                   </CommandItem>

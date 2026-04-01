@@ -64,7 +64,7 @@ export function PasswordRecoveryForm() {
     <div className="space-y-8">
       <div className="text-center">
         <h2 className="text-3xl font-bold tracking-tight text-foreground">
-          {t('password-recovery')}
+          {t('auth.password-recovery')}
         </h2>
       </div>
 
@@ -81,7 +81,7 @@ export function PasswordRecoveryForm() {
                     <Input
                       {...field}
                       type="email"
-                      placeholder={t('email')}
+                      placeholder={t('fields.email')}
                       className="pl-10 h-12 text-base"
                       autoComplete="email"
                       disabled={isLoading}
@@ -101,10 +101,10 @@ export function PasswordRecoveryForm() {
             {isLoading ? (
               <>
                 <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                {t('loading')}
+                {t('buttons.loading')}
               </>
             ) : (
-              t('continue')
+              t('buttons.continue')
             )}
           </Button>
 

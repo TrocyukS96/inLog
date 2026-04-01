@@ -14,6 +14,7 @@
         "we-sent-you-email-with-confirmation": "Мы отправили вам электронное письмо с подтверждением на",
         "your-email": "вашу электронную почту",
         "password-recovery": "Восстановление пароля",
+        "password": "Пароль",
         "reset-password": "Сброс пароля",
         "instruction-sent-to-address": "Инструкция по сбросу пароля отправлена на адрес",
         "send-instruction-one-more-time": "Отправить инструкцию еще раз",
@@ -218,7 +219,12 @@
         "refresh": "Обновить",
         "upload-file": "Загрузить файл",
         "collapse-all": "Свернуть все",
-        "expand-all": "Развернуть все"
+        "expand-all": "Развернуть все",
+        "create-report": "Создать отчет",
+        "select-all": "Выбрать все",
+        "previous": "Предыдущая",
+        "next": "Следующая",
+        "close": "Закрыть"
     },
     "errors": {
         "email-not-found": "Email не найден",
@@ -279,7 +285,7 @@
     "dashboard-page": {
         "title": "Главная",
         "welcome": "Добро пожаловать в inLog",
-        "description": "Лабораторная информационная система для управления исследованиями керна и данными скважин",
+        "description": "ИТ платформа автоматической обработки геофизической информации на основе ИИ",
         "organizations": "Организации",
         "organizations-description": "Управление организациями",
         "projects": "Проекты",
@@ -378,6 +384,7 @@
     "admin-page": {
         "admin-panel": "Админ панель",
         "constructor": "Конструктор",
+        "reports": "Отчеты",
         "edit-node": "Редактировать узел",
         "delete-node": "Удалить узел",
         "confirm-delete": "Подтверждение удаления",
@@ -398,7 +405,19 @@
         "delete-group-title": "Удалить группу",
         "delete-group-warning": "Вы уверены, что хотите удалить эту группу?",
         "delete-tab-title": "Удалить вкладку",
-        "delete-tab-warning": "Вы уверены, что хотите удалить вкладку \"{{tabName}}\"?"
+        "delete-tab-warning": "Вы уверены, что хотите удалить вкладку \"{{tabName}}\"?" ,
+        "columns": "Колонки",
+        "relatives": "Связанные узлы",
+        "no-relatives": "Нет связанных узлов",
+        "total-records": "Всего записей",
+        "showing": "Показано",
+        "of": "из",
+        "records": "записей",
+        "no-data": "Нет данных для отображения",
+        "related-tabs": "Связанные табы",
+        "related-nodes": "Связанные узлы",
+        "choose-related-tabs": "Выберите связанные табы",
+        "choose-related-nodes": "Выберите связанные узлы"
     },
 
     "geo-mechanics-page": {

@@ -29,3 +29,6 @@ export const priorityColorStyles = {
 }
 
 export const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.bmp', '.webp', '.svg', '.ico', '.tiff', '.tif', '.heic', '.heif']
+
+export const APP_LANGUAGE_KEY = 'app-language'
+export const I18NEXT_LANGUAGE_KEY = 'i18nextLng'

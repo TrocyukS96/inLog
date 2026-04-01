@@ -28,6 +28,7 @@ export interface AdminPanelNodeTab {
     columns?: AdminPanelTableColumn[]
     nestLevel?: number //добавил для удобства вывода в tree и подсчета уровня вложенности
     entityType?: 'group' | 'tab' | 'field' //добавил для удобства составления отчета
+    parent_node?: number  //добавил для удобства составления отчета
 
     structure_element_fields?: AdminPanelField[]
 }
@@ -43,7 +44,7 @@ export interface AdminPanelNode {
 
     columns?: AdminPanelTableColumn[]
 
-    nestLevel?: number //добавил для удобства вывода в tree и подсчета уровня вложенности
+    // nestLevel?: number //добавил для удобства вывода в tree и подсчета уровня вложенности
     entityType?: 'group' | 'tab' | 'field' //добавил для удобства составления отчета
 
     structure_element_fields?: AdminPanelField[]
@@ -95,6 +96,9 @@ export interface AdminPanelGroup {
     name_ru: string
     structure_element: number
     type: 'string' | 'integer' | 'date' | 'file'
+    parent_node?: number  //добавил для удобства составления отчета
+    parent_tab?: number  //добавил для удобства составления отчета
+
 }
 
 export interface AdminPanelGroupRequest {
@@ -104,3 +108,44 @@ export interface AdminPanelGroupRequest {
     group?: number
     type: string
 }
+
+export interface AdminPanelReportRequest {
+    group?: number
+    fields: number[]
+    element?:number
+}
+
+export type AdminPanelReport = {
+    id?: number
+    structure_element: number
+    type: 'group' | 'element'
+    data: {
+        id: number;
+        name_en: string;
+        name_ru: string;
+        objects: Array<{
+            id: number;
+            data: Record<string, {
+                type: AdminPanelGroup['type'];
+                value: string;
+            }>;
+        }>;
+        organization: number;
+        parent: number;
+        related_groups: number[];
+        requested_fields: Array<{
+            group: number;
+            id: number;
+            name_en: string;
+            name_ru: string;
+            structure_element: number;
+            type: string;
+        }>;
+    }
+}
+
+export type AdminPanelReportTable = Record<string, Array<{
+    value: string
+    type: string
+    id: number
+}>>

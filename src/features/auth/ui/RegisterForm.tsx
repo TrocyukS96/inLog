@@ -14,8 +14,7 @@ import {
     Dialog,
     DialogContent,
     DialogFooter,
-    DialogHeader,
-    DialogTitle,
+    DialogHeader
 } from '../../../shared/ui/dialog'
 import {
     Form,
@@ -102,7 +101,7 @@ export function RegisterForm({ onSuccess }: RegisterFormProps = {}) {
             <div className="space-y-8">
                 <div className="text-center">
                     <h2 className="text-3xl font-bold tracking-tight text-foreground">
-                        {t('registration')}
+                        {t('auth.registration')}
                     </h2>
                 </div>
 
@@ -120,7 +119,7 @@ export function RegisterForm({ onSuccess }: RegisterFormProps = {}) {
                                             <Input
                                                 {...field}
                                                 type="email"
-                                                placeholder={t('email')}
+                                                placeholder={t('fields.email')}
                                                 className="pl-10 h-12 text-base"
                                                 autoComplete="email"
                                                 disabled={isLoading}
@@ -143,7 +142,7 @@ export function RegisterForm({ onSuccess }: RegisterFormProps = {}) {
                                             <Input
                                                 {...field}
                                                 type={showPassword1 ? 'text' : 'password'}
-                                                placeholder={t('fields.password')}
+                                                placeholder={t('auth.password')}
                                                 className="pl-10 pr-10 h-12 text-base"
                                                 autoComplete="new-password"
                                                 disabled={isLoading}
@@ -294,16 +293,16 @@ export function RegisterForm({ onSuccess }: RegisterFormProps = {}) {
             <Dialog open={modalOpen} onOpenChange={setModalOpen}>
                 <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
                     <DialogHeader>
-                        <DialogTitle>
-                            {modalType === 'terms' ? t('auth.policy-agree.rules-of-use') : t('auth.policy-agree.privacy-policy')}
-                        </DialogTitle>
+                        {/* <DialogTitle>
+                            {modalType === 'terms' ? t('auth.policy-agree.rules-of-use-title') : t('auth.policy-agree.privacy-policy-title')}
+                        </DialogTitle> */}
                     </DialogHeader>
                     <div className="p-4">
                         <TermsAndPolicy type={modalType} />
                     </div>
                     <DialogFooter>
                         <Button onClick={() => setModalOpen(false)}>
-                            {t('close')}
+                            {t('buttons.close')}
                         </Button>
                     </DialogFooter>
                 </DialogContent>

@@ -73,9 +73,6 @@ const OrgProjectSelector = ({
         setSearchParams(params, { replace: true })
     }, [currentOrgId, currentProjectId, searchParams, setSearchParams])
 
-    console.log('organizations-->', organizations)
-    console.log('projects-->', projects)
-
     // Форма организации
     if (orgsLoading || projectsLoading) {
         return (

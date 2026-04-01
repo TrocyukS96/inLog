@@ -1,10 +1,10 @@
 'use client'
 
 import { MoreHorizontal, Pencil, Plus, Trash2 } from 'lucide-react'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useSearchParams } from 'react-router-dom'
-import type { AdminPanelNodeTab } from '../../../../entities/admin/model/types'
+import type { AdminPanelNode, AdminPanelNodeTab } from '../../../../entities/admin/model/types'
 import { Button } from '../../../../shared/ui/button'
 import {
     Dialog,
@@ -28,32 +28,45 @@ import { Input } from '../../../../shared/ui/input'
 import { Label } from '../../../../shared/ui/label'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../../../shared/ui/tabs'
 import ConstructorTableWrapper from './ConstructorTableWrapper'
+import ConstructorTabsConnections from './ConstructorTabsConnections'
 
 interface Props {
-    tabs: AdminPanelNodeTab[]
-    handleAddNodeTab: (body: {
+    node?: AdminPanelNode
+    addTab: (body: {
         name_en: string
         name_ru: string
+        related_structure_elements?: number[]
     }) => void
-    handleUpdateNodeTab: (tab: {
+    updateTab: (tab: {
         id: number
         name_en: string
         name_ru: string
+        related_structure_elements?: number[]
     }) => void
-    handleDeleteNodeTab: (tabId: number) => void
+    deleteTab: (tabId: number) => void
 }
 
-const ConstructorTabs = ({ tabs, handleAddNodeTab, handleUpdateNodeTab, handleDeleteNodeTab }: Props) => {
+const ConstructorTabs = ({ node, addTab, updateTab, deleteTab }: Props) => {
     const { t, i18n } = useTranslation()
     const currentLang = i18n.language === 'ru' ? 'ru' : 'en'
     const [searchParams] = useSearchParams()
     const organizationId = Number(searchParams.get('org'))
+    const [tabs, setTabs] = useState<AdminPanelNodeTab[]>([])
+
+    useEffect(() => {
+        if (node?.pre_made_structure_elements) {
+            setTabs(node?.pre_made_structure_elements?.map((tab: AdminPanelNodeTab, i: number, arr: AdminPanelNodeTab[]) =>
+                tab.id ? tab : { ...tab, id: i === 0 ? 0 : arr[i - 1]?.id! + 1 }) || [])
+        }else{
+            setTabs([])
+        }
+    }, [node?.pre_made_structure_elements])
 
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
     const [isEditModalOpen, setIsEditModalOpen] = useState(false)
     const [isDeleteAlertOpen, setIsDeleteAlertOpen] = useState(false)
     const [selectedTab, setSelectedTab] = useState<AdminPanelNodeTab | null>(null)
-    
+
     const [formData, setFormData] = useState({ ru: '', en: '' })
 
     const handleOpenCreateModal = () => {
@@ -88,7 +101,7 @@ const ConstructorTabs = ({ tabs, handleAddNodeTab, handleUpdateNodeTab, handleDe
             // Можно добавить валидацию и тост
             return
         }
-        handleAddNodeTab({
+        addTab({
             name_en: formData.en,
             name_ru: formData.ru,
         })
@@ -99,7 +112,7 @@ const ConstructorTabs = ({ tabs, handleAddNodeTab, handleUpdateNodeTab, handleDe
         if (!selectedTab || !formData.ru || !formData.en) {
             return
         }
-        handleUpdateNodeTab({
+        updateTab({
             id: selectedTab.id!,
             name_en: formData.en,
             name_ru: formData.ru,
@@ -107,9 +120,18 @@ const ConstructorTabs = ({ tabs, handleAddNodeTab, handleUpdateNodeTab, handleDe
         handleCloseModals()
     }
 
+    const handleChangeTabConnections = (tab: AdminPanelNodeTab) => {
+        updateTab({
+            id: tab.id!,
+            name_en: tab.name_en,
+            name_ru: tab.name_ru,
+            related_structure_elements: tab.related_structure_elements || [],
+        })
+    }
+
     const handleDeleteTab = () => {
         if (selectedTab) {
-            handleDeleteNodeTab(selectedTab.id!)
+            deleteTab(selectedTab.id!)
             handleCloseModals()
         }
     }
@@ -139,7 +161,6 @@ const ConstructorTabs = ({ tabs, handleAddNodeTab, handleUpdateNodeTab, handleDe
                                     <span className="hidden sm:inline">{tab[`name_${currentLang}`]}</span>
                                 </TabsTrigger>
 
-                                {/* Меню вынесено отдельно, позиционируется поверх таба */}
                                 <div className="absolute right-1 top-1/2 -translate-y-[42%]">
                                     <DropdownMenu>
                                         <DropdownMenuTrigger asChild>
@@ -183,7 +204,13 @@ const ConstructorTabs = ({ tabs, handleAddNodeTab, handleUpdateNodeTab, handleDe
 
                     {tabs.map((tab) => (
                         <TabsContent key={tab.id} value={tab.id!.toString()}>
-                            <div className="p-4">
+                            <div className="p-4 flex flex-col gap-6">
+                                <ConstructorTabsConnections
+                                    node={node}
+                                    tab={tab}
+                                    organizationId={organizationId}
+                                    onChange={handleChangeTabConnections}
+                                />
                                 <ConstructorTableWrapper
                                     data={{
                                         entityId: tab.id!,
@@ -301,7 +328,7 @@ const ConstructorTabs = ({ tabs, handleAddNodeTab, handleUpdateNodeTab, handleDe
                         <AlertDialogCancel onClick={handleCloseModals}>
                             {t('buttons.cancel')}
                         </AlertDialogCancel>
-                        <AlertDialogAction 
+                        <AlertDialogAction
                             onClick={handleDeleteTab}
                             className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                         >

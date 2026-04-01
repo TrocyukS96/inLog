@@ -82,11 +82,12 @@ export const SubTask = ({
     const currentUrl = new URL(window.location.href)
     const orgParam = currentUrl.searchParams.get('org')
     const projectParam = currentUrl.searchParams.get('project')
-    const taskPath = `/scheduler/tasks/${subtask.slug}`
+    const taskPath = `/scheduler/tasks/`
     const link = new URL(window.location.origin)
     link.pathname = taskPath
     if (orgParam) link.searchParams.set('org', orgParam)
     if (projectParam) link.searchParams.set('project', projectParam)
+    if (subtask.slug) link.searchParams.set('task', subtask.slug)
     return link.toString()
   }
 

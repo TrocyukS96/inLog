@@ -18,6 +18,10 @@ const AdminPage = () => {
             label: t('admin-page.constructor'),
             href: routes.admin.constructor(),
         },
+        {
+            label: t('admin-page.reports'),
+            href: routes.admin.reports(),
+        },
     ]
 
 

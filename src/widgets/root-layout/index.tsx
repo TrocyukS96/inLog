@@ -13,7 +13,7 @@ import { useTranslation } from 'react-i18next'
 import { Loader2 } from 'lucide-react'
 
 export function RootLayout() {
-  const { i18n, t} = useTranslation()
+  const { t} = useTranslation()
   const navigate = useNavigate()
   const [verifyToken] = useVerifyTokenMutation()
 
@@ -52,27 +52,15 @@ export function RootLayout() {
     }
   }, [])
 
-  useEffect(() => {
-    if (user) {
-      i18n.changeLanguage(user.settings.language || 'ru')
-    }
-  }, [user, i18n])
-
   const verifyAndRedirect = useCallback(() => {
     const token = localStorage.getItem(ACCESS_TOKEN)
     if (isUserLoading || isOrgsLoading || isProjectsLoading || !token) return
 
     if (userError) {
-      console.log(userError,'-----> userError')
       toast.error(t('errors.error-loading-user'))
       navigate(routes.login())
       return
     }
-
-    // if ( organizations && organizations?.length === 0) {
-    //   navigate(routes.organizations.new())
-    //   return
-    // }
 
     if ( projects && projects?.length === 0) {
       navigate(routes.settings.organizationsAndProjects())

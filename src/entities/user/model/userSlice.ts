@@ -2,6 +2,7 @@ import { createApi } from '@reduxjs/toolkit/query/react'
 import type { User, UserFile, UserSettings } from './types'
 import type { SocialName } from '../../../shared/types/enums'
 import { baseQuery } from '../../../shared/api/clientApi'
+import i18next from 'i18next'
 
 export const userApi = createApi({
   reducerPath: 'userApi',
@@ -10,7 +11,20 @@ export const userApi = createApi({
   endpoints: (builder) => ({
     getMe: builder.query<User, void>({
       query: () => 'users/me/',
-      providesTags: ['User']
+      providesTags: ['User'],
+      async onQueryStarted(_, { queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled
+          
+          if (data?.settings?.language) {
+            const userLang = data.settings.language
+            
+            await i18next.changeLanguage(userLang)
+            
+          }
+        } catch (error) {
+        }
+      },
     }),
 
     updateMe: builder.mutation<User, FormData>({

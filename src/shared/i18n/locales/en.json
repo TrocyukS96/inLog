@@ -13,6 +13,7 @@
         "check-email-please": "Check your email",
         "we-sent-you-email-with-confirmation": "We sent you an email with confirmation to",
         "your-email": "your email",
+        "password": "Password",
         "reset-password": "Reset password",
         "instruction-sent-to-address": "An instruction to reset your password has been sent to your email",
         "send-instruction-one-more-time": "Send instruction one more time",
@@ -222,7 +223,12 @@
         "refresh": "Refresh",
         "upload-file": "Upload file",
         "collapse-all": "Collapse all",
-        "expand-all": "Expand all"
+        "expand-all": "Expand all",
+        "create-report": "Create report",
+        "select-all": "Select all",
+        "previous": "Previous",
+        "next": "Next",
+        "close": "Close"
     },
 
 
@@ -288,7 +294,7 @@
     "dashboard-page": {
         "title": "Dashboard",
         "welcome": "Welcome to inLog",
-        "description": "Laboratory information system for managing core and well data",
+        "description": "IT platform for automatic processing of geophysical information based on AI",
         "organizations": "Organizations",
         "organizations-description": "Manage organizations",
         "projects": "Projects",
@@ -386,6 +392,7 @@
     "admin-page": {
         "admin-panel": "Admin panel",
         "constructor": "Constructor",   
+        "reports": "Reports",
         "edit-node": "Edit node",
         "delete-node": "Delete node",
         "confirm-delete": "Confirm delete",
@@ -395,6 +402,7 @@
         "no-nodes-available": "No nodes available",
         "create-node": "Create node",
         "tabs": "Tabs",
+        "columns": "Columns",
         "no-tabs-available": "No tabs available",
         "create-tab": "Create tab",
         "create-new-tab": "Create new tab",
@@ -406,7 +414,18 @@
         "delete-group-title": "Delete group",
         "delete-group-warning": "Are you sure you want to delete this group?",
         "delete-tab-title": "Delete tab",
-        "delete-tab-warning": "Are you sure you want to delete tab \"{{tabName}}\"?"
+        "delete-tab-warning": "Are you sure you want to delete tab \"{{tabName}}\"?",
+        "relatives": "Relatives",
+        "no-relatives": "No relatives",
+        "total-records": "Total records",
+        "showing": "Showing",
+        "of": "of",
+        "records": "records",
+        "no-data": "No data",
+        "related-tabs": "Related tabs",
+        "related-nodes": "Related nodes",
+        "choose-related-tabs": "Choose related tabs",
+        "choose-related-nodes": "Choose related nodes"
     },
 
     "geo-mechanics-page": {

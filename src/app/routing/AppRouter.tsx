@@ -20,6 +20,7 @@ import ProfilePage from '../../pages/dashboard/settings/profile'
 import { ACCESS_TOKEN } from '../../shared/config/constants'
 import { routes } from '../../shared/lib/routes'
 import { RootLayout } from '../../widgets/root-layout'
+import { AdminReportsPage } from '../../pages/admin/admin-reports'
 
 export function AppRouter() {
   return (
@@ -47,6 +48,7 @@ export function AppRouter() {
               {/* <Route index element={<Navigate to={routes.admin.settings()} replace />} /> */}
               <Route index element={<Navigate to={routes.admin.constructor()} replace />} />
               <Route path={routes.admin.constructor()} element={<AdminConstructorPage />} />
+              <Route path={routes.admin.reports()} element={<AdminReportsPage />} />
             </Route>
             <Route path={routes.settings.list()} element={<SettingsPage />}  >
               <Route index element={<Navigate to={routes.settings.profile()} replace />} />

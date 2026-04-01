@@ -552,7 +552,7 @@ const ConstructorTable = (props: Props) => {
                   style={{ minWidth: column.width || 150 }}
                   className="h-10"
                 >
-                  <div className="flex items-center justify-between gap-2">
+                  <div className="w-fit flex items-center justify-between gap-2">
                     <div className="flex items-center gap-2">
                       <span className="font-medium text-sm">
                         {column.title[currentLang]}

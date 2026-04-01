@@ -1,3 +1,4 @@
+import { t, type TFunction } from 'i18next';
 import { toast } from 'sonner'
 
 // Тип для типичной ошибки от твоего бэкенда
@@ -15,12 +16,12 @@ function isRTKQueryError(error: unknown): error is { status: number; data: Backe
 
 export const errorsHandler = (
   error: unknown,
-  t: any = (key: string) => key // fallback, если t не передан
+  translFunc: TFunction<["translation", ...string[]], undefined> = t // fallback, если t не передан
 ) => {
 
   // 1. Сетевые ошибки или таймауты
   if (error instanceof Error && error.message === 'Network Error') {
-    toast.error(t('errors.network-error'))
+    toast.error(translFunc('errors.network-error'))
     return
   }
 
@@ -30,7 +31,7 @@ export const errorsHandler = (
 
     // Общие серверные ошибки без детализации
     if ([404, 500, 405].includes(Number(status)) && !data?.detail) {
-      toast.error(t('errors.server-error'))
+      toast.error(translFunc('errors.server-error'))
       return
     }
 
@@ -71,10 +72,10 @@ export const errorsHandler = (
     }
 
     // 7. Последний fallback
-    toast.error(t('errors.something-went-wrong'))
+    toast.error(translFunc('errors.something-went-wrong'))
     return
   }
 
   // 8. Любая другая неизвестная ошибка
-  toast.error(t('errors.something-went-wrong'))
+  toast.error(translFunc('errors.something-went-wrong'))
 }
