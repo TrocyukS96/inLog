@@ -1,4 +1,4 @@
-import { MoreHorizontal, Trash2 } from 'lucide-react'
+import { CheckCircle2, Circle, MoreHorizontal, Trash2 } from 'lucide-react'
 import { memo, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { cn, getPriorityColorStyle } from '../../../shared/lib/utils'
@@ -10,27 +10,34 @@ interface TaskCardProps {
     task: Task
     className?: string
     isDragging?: boolean
+    isActive?: boolean
     selectTask?: (task: Task) => void
     deleteTask?: (task: Task) => void
     createTemplate?: (task: Task) => void
-    isActive?: boolean
+    changeStatus?: (slug: string, status: 'completed' | 'incomplete') => void
 }
 
 const TaskCard = ({
     task,
     className = '',
     isDragging = false,
-    selectTask = () => {},
-    deleteTask = () => {},
+    selectTask = () => { },
+    deleteTask = () => { },
+    changeStatus = () => { },
     isActive = false,
 }: TaskCardProps) => {
     const { t } = useTranslation()
     const isTemplate = task.is_template
+    const isCompleted = task.status.name_en === 'Closed'
 
     const formattedDate = useMemo(() => {
         if (!task.due_date_end) return null;
         return new Date(task.due_date_end).toLocaleDateString();
     }, [task.due_date_end]);
+
+    const handleChangeStatus = () => {
+        changeStatus(task.slug, isCompleted ? 'incomplete' : 'completed')
+    }
 
     return (
         <div
@@ -40,52 +47,72 @@ const TaskCard = ({
                 getPriorityColorStyle(task.priority, 'border'),
                 className,
                 isActive
-                    ? "border-primary shadow-sm"
+                    ? "border-primary shadow-sm ring-2 ring-primary/20"
                     : "border-border hover:border-primary/50",
+                isCompleted && "bg-muted/30 hover:bg-muted/40"
             )}
         >
-            <div className='absolute left-0 top-0 bottom-0 w-2 rounded-l-lg' style={getPriorityColorStyle(task.priority, 'background')} />
+            <div
+                className='absolute left-0 top-0 bottom-0 w-2 rounded-l-lg'
+                style={getPriorityColorStyle(task.priority, 'background')}
+            />
 
-            <div className="flex items-center gap-4 flex-1 pl-3">
-                <div className="flex flex-col">
-                    <span className="font-medium text-foreground group-hover:text-primary transition-colors">
+            <div className="flex items-center gap-3 flex-1 pl-3">
+                {/* Статус иконка */}
+                <button
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        handleChangeStatus()
+                    }}
+                    className="flex-shrink-0 hover:scale-110 transition-transform cursor-pointer"
+                >
+                    {isCompleted ? (
+                        <CheckCircle2 className="h-5 w-5 text-green-500" />
+                    ) : (
+                        <Circle className="h-5 w-5 text-muted-foreground hover:text-blue-500" />
+                    )}
+                </button>
+
+                <div className="flex flex-col min-w-0 flex-1">
+                    <span className={cn(
+                        "font-medium group-hover:text-primary transition-colors",
+                        isCompleted && "line-through text-muted-foreground"
+                    )}>
                         {task.name}
                     </span>
-                    <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
-                    </div>
+
+                    {formattedDate && (
+                        <span className={cn(
+                            "text-xs text-muted-foreground",
+                            isCompleted && "line-through"
+                        )}>
+                            {formattedDate}
+                        </span>
+                    )}
                 </div>
             </div>
 
-            <div className="flex flex-col items-end">
-                {task.due_date_end && (
-                    <span className="text-base text-muted-foreground">
-                        {formattedDate}
-                    </span>
-                )}
+            <div className="flex items-center gap-2">
                 {!isDragging && (
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                             <Button
                                 variant="ghost"
                                 size="icon"
-                                className="transition-opacity"
+                                className="h-8 w-8"
                                 onClick={(e) => e.stopPropagation()}
                             >
                                 <MoreHorizontal className="h-4 w-4" />
                             </Button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="w-48">
+                        <DropdownMenuContent align="end">
                             <DropdownMenuItem
-                                className="text-destructive focus:text-destructive"
+                                className="text-destructive"
                                 onClick={() => deleteTask(task)}
                             >
                                 <Trash2 className="h-4 w-4 mr-2" />
                                 {isTemplate ? t('templates-page.delete-template') : t('tasks-page.delete-task')}
                             </DropdownMenuItem>
-                            {/* <DropdownMenuItem onClick={() => createTemplate(task)}>
-                            <Copy className="h-4 w-4 mr-2" />
-                            {isTemplates ? t('templates-page.create-template') : t('tasks-page.create-task')}
-                        </DropdownMenuItem> */}
                         </DropdownMenuContent>
                     </DropdownMenu>
                 )}

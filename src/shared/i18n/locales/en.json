@@ -148,7 +148,8 @@
         "unknown-date": "Unknown date",
         "minutes-ago": "minutes ago",
         "hours-ago": "hours ago",
-        "days-ago": "days ago"
+        "days-ago": "days ago",
+        "active-filters": "Active filters"
     },
 
     "notice-list": {
@@ -239,7 +240,8 @@
         "select-all": "Select all",
         "previous": "Previous",
         "next": "Next",
-        "close": "Close"
+        "close": "Close",
+        "reset": "Reset"
     },
 
 
@@ -364,7 +366,14 @@
         "kanban-board": "Kanban board",
         "kanban-board-description": "Kanban board for managing tasks",
         "no-statuses-selected": "No statuses",
-        "create-status-first": "Create first status"
+        "create-status-first": "Create first status",
+        "filter-tasks": "Filter tasks",
+        "task-type": "Task type",   
+        "select-task-type": "Select task type",
+        "parent-tasks": "Parent tasks",
+        "child-tasks": "Child tasks",
+        "completed-tasks": "Completed tasks",
+        "incomplete-tasks": "Incomplete tasks"
     },
     "templates-page": {
         "title": "Templates",

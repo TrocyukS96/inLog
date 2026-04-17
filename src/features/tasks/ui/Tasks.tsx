@@ -8,18 +8,16 @@ import { Button } from '../../../shared/ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '../../../shared/ui/dialog'
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '../../../shared/ui/resizable'
 
-import { useCreateTaskMutation, useDeleteTaskMutation, useGetStatusesQuery, useGetTaskQuery, useGetTasksQuery, useGetTaskTagsQuery } from '../../../entities/task/model/taskSlice'
+import { useCreateTaskMutation, useDeleteTaskMutation, useGetStatusesQuery, useGetTaskQuery, useGetTasksQuery, useGetTaskTagsQuery, useUpdateTaskMutation } from '../../../entities/task/model/taskSlice'
 
-import { format } from 'date-fns'
-import type { DateRange } from 'react-day-picker'
 import { useGetProjectMembersQuery } from '../../../entities/project/model/projectSlice'
 import type { Task, TasksFilterParams } from '../../../entities/task/model/types'
 import { TaskDetails } from '../../../features/task-details'
-import { DATE_REQUEST_FORMAT, DEBOUNCE_DELAY } from '../../../shared/config/constants'
+import { DEBOUNCE_DELAY } from '../../../shared/config/constants'
 import useDebounce from '../../../shared/lib/hooks/use-deboucne'
 import { Input } from '../../../shared/ui/input'
-import { RangePicker } from '../../../shared/ui/range-picker'
 import CreateTaskForm from './CreateTaskForm'
+import { TasksFilter, type TasksFilterValues } from './TasksFilter'
 import TasksList from './TasksList'
 
 export default function Tasks({ type = 'tasks-page' }: { type?: 'tasks-page' | 'templates-page' }) {
@@ -56,6 +54,7 @@ export default function Tasks({ type = 'tasks-page' }: { type?: 'tasks-page' | '
 
     const [deleteTask] = useDeleteTaskMutation()
     const [createTask] = useCreateTaskMutation()
+    const [updateTask] = useUpdateTaskMutation()
 
     const handleAddTask = async (name: string, priority: Task['priority']) => {
         if (!Number(projectId)) {
@@ -96,6 +95,30 @@ export default function Tasks({ type = 'tasks-page' }: { type?: 'tasks-page' | '
         setSearchParams(searchParams)
     }
 
+    const handleChangeTaskStatus = async(slug: string, status: 'completed' | 'incomplete') => {
+        const targetStatus = statuses?.find((st) => status === 'completed' ? st.name_en === 'Closed' : st.name_en === 'No status')
+        let toastId: string | number | undefined
+        try {
+            if(!targetStatus) {
+                toast.error(t('errors.status-not-found'))
+                return
+            }
+            toastId = toast.loading(t('notice-list.changing-task-status'))
+            await updateTask({
+                projectId: Number(projectId),
+                taskSlug: slug,
+                data: {
+                    status: targetStatus?.id
+                }
+            }).unwrap()
+            toast.success(t('notice-list.task-status-changed'))
+        } catch {
+            toast.error(t('errors.error-changing-task-status'))
+        } finally {
+            toast.dismiss(toastId)
+        }
+    }
+
     const handleDeleteTask = async (task: Task) => {
         try {
             await deleteTask({
@@ -117,18 +140,25 @@ export default function Tasks({ type = 'tasks-page' }: { type?: 'tasks-page' | '
         toast.info(t('notice-list.template-created-from-task'))
     }
 
-    const handleFilterChange = (value: DateRange | string | undefined, filterType: 'date' | 'search') => {
-        if (filterType === 'date') {
-            const created_at__range = value && typeof value === 'object'
-                ? format(value?.from || new Date(), DATE_REQUEST_FORMAT) + ',' + format(value?.to || new Date(), DATE_REQUEST_FORMAT)
-                : undefined
-            setFilterParams({
-                ...(filterParams ?? {}),
-                created_at__range: created_at__range
-            } as TasksFilterParams)
-        } else {
-            setSearchValue(value as string)
-        }
+    // const handleFilterChange = (value: DateRange | string | undefined, filterType: 'date' | 'search') => {
+    //     if (filterType === 'date') {
+    //         const created_at__range = value && typeof value === 'object'
+    //             ? format(value?.from || new Date(), DATE_REQUEST_FORMAT) + ',' + format(value?.to || new Date(), DATE_REQUEST_FORMAT)
+    //             : undefined
+    //         setFilterParams({
+    //             ...(filterParams ?? {}),
+    //             created_at__range: created_at__range
+    //         } as TasksFilterParams)
+    //     } else {
+    //         setSearchValue(value as string)
+    //     }
+    // }
+
+    const handleFilterChange = (filters: TasksFilterValues) => {
+        setFilterParams({
+            ...(filterParams ?? {}),
+            ...filters
+        } as TasksFilterParams)
     }
 
     const handlePaginationChange = (value: { limit: number; offset: number }) => {
@@ -146,7 +176,7 @@ export default function Tasks({ type = 'tasks-page' }: { type?: 'tasks-page' | '
         let toastId: string | number | undefined
         if (taskFetching) {
             toastId = toast.loading(t('notice-list.loading-task'))
-        }else{
+        } else {
             toast.dismiss(toastId)
         }
 
@@ -208,7 +238,7 @@ export default function Tasks({ type = 'tasks-page' }: { type?: 'tasks-page' | '
                             </Dialog>
                         </div>
 
-                        <div className="space-y-2">
+                        <div className="space-y-2 grid grid-cols-[1fr_auto] gap-1">
                             <div className="relative">
                                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                                 <Input
@@ -219,6 +249,7 @@ export default function Tasks({ type = 'tasks-page' }: { type?: 'tasks-page' | '
                                     placeholder={t('fields.search')}
                                     disabled={tasksLoading || taskFetching || tasksData?.results?.length === 0 || !projectId}
                                 />
+
                                 {searchValue && (
                                     <X
                                         className="absolute cursor-pointer right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground hover:text-foreground"
@@ -228,7 +259,7 @@ export default function Tasks({ type = 'tasks-page' }: { type?: 'tasks-page' | '
                             </div>
 
                             <div className="flex gap-2">
-                                <RangePicker
+                                {/* <RangePicker
                                     value={filterParams.created_at__range
                                         ? {
                                             from: new Date(filterParams.created_at__range.split(',')[0]),
@@ -239,8 +270,12 @@ export default function Tasks({ type = 'tasks-page' }: { type?: 'tasks-page' | '
                                     onChange={(range) => handleFilterChange(range, 'date')}
                                     className="flex-1"
                                     disabled={tasksLoading || taskFetching || tasksData?.results?.length === 0 || !projectId}
+                                /> */}
+                                <TasksFilter
+                                    onFilterChange={handleFilterChange}
+                                    disabled={tasksLoading || taskFetching || tasksData?.results?.length === 0 || !projectId}
+                                    onReset={() => setFilterParams({ limit: 10, offset: 0 })}
                                 />
-
                                 <Button
                                     variant="outline"
                                     size="icon"
@@ -265,6 +300,7 @@ export default function Tasks({ type = 'tasks-page' }: { type?: 'tasks-page' | '
                         selectTask={handleSelectTask}
                         deleteTask={handleDeleteTask}
                         createTemplate={createTemplate}
+                        changeTaskStatus={handleChangeTaskStatus}
                         changePagination={handlePaginationChange}
                         isFetching={tasksFetching}
                         isLoading={tasksLoading}

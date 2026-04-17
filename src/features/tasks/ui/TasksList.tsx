@@ -14,6 +14,7 @@ interface Props {
   selectTask: (task: Task) => void
   deleteTask: (task: Task) => void
   createTemplate: (task: Task) => void
+  changeTaskStatus: (slug: string, status: 'completed' | 'incomplete') => void
   changePagination: (params: { limit: number; offset: number }) => void
   pagination: {
     limit: number
@@ -33,6 +34,7 @@ const TasksList = ({
   selectTask,
   deleteTask,
   createTemplate,
+  changeTaskStatus,
   changePagination,
   pagination,
   hasMore = true
@@ -104,11 +106,12 @@ const TasksList = ({
             >
               <TaskCard
                 task={task}
+                className={!isLastElement ? 'mb-2' : ''}
+                isActive={selectedTaskSlug === task.slug}
                 selectTask={selectTask}
                 deleteTask={deleteTask}
                 createTemplate={createTemplate}
-                className={!isLastElement ? 'mb-2' : ''}
-                isActive={selectedTaskSlug === task.slug}
+                changeStatus={changeTaskStatus}
               />
             </div>
           )

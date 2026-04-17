@@ -145,7 +145,8 @@
         "unknown-date": "Неизвестная дата",
         "minutes-ago": "минут назад",
         "hours-ago": "часов назад",
-        "days-ago": "дней назад"
+        "days-ago": "дней назад",
+        "active-filters": "Активные фильтры"
     },
     "notice-list": {
         "loading-task": "Загрузка задачи...",
@@ -235,7 +236,8 @@
         "select-all": "Выбрать все",
         "previous": "Предыдущая",
         "next": "Следующая",
-        "close": "Закрыть"
+        "close": "Закрыть",
+        "reset": "Сбросить"
     },
     "errors": {
         "email-not-found": "Email не найден",
@@ -354,7 +356,14 @@
         "kanban-board": "Kanban доска",
         "kanban-board-description": "Kanban доска для управления задачами",
         "no-statuses-selected": "Нет статусов",
-        "create-status-first": "Создайте первый статус"
+        "create-status-first": "Создайте первый статус",
+        "filter-tasks": "Фильтры задач",
+        "task-type": "Тип задачи",
+        "select-task-type": "Выберите тип задачи",
+        "parent-tasks": "Родительские задачи",
+        "child-tasks": "Дочерние задачи",
+        "completed-tasks": "Выполненные задачи",
+        "incomplete-tasks": "Не выполненные задачи"
     },
 
     "templates-page": {
