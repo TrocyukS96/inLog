@@ -1,3 +1,11 @@
+.wx-gantt {
+  height: 100% !important;
+}
+
+.wx-gantt-table {
+  height: 100% !important;
+}
+
 .wx-gantt .wx-bar.wx-task.medium {
     background-color: var(--medium-priority);
 }

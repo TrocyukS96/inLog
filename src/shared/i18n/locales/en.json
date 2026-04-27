@@ -393,7 +393,8 @@
             "columns": {
                 "task": "Task",
                 "start": "Start",
-                "end": "End"
+                "end": "End",
+                "actions": "Actions"
             }
         }
     },

@@ -15,9 +15,17 @@ import type { RoadmapDetalizationMode } from '../model/types'
 import RoadmapControls from './RoadmapControls'
 import './TaskRoadmap.css'
 
-const CELL_WIDTH = 30
-const CELL_HEIGHT = 40
 const CONTAINER_HEIGHT = 'calc(100vh - 200px)'
+
+interface GanttTask {
+    id: number
+    text: string
+    start: Date
+    end: Date
+    parent?: number
+    type: string
+    open?: boolean
+}
 
 const scalePresets = {
     year: [
@@ -37,17 +45,28 @@ const scalePresets = {
     ],
 };
 
-const convertToGanttTasks = (tasks: Task[]) => {
-    return tasks
-        .filter(task => task.due_date_start && task.due_date_end)
-        .map(task => ({
-            id: task.id.toString(),
-            text: task.name,
-            start: new Date(task.due_date_start!),
-            end: new Date(task.due_date_end!),
-            type: task.priority || 'default',
-        }))
+const convertToGanttTasks = (tasks: Task[]): GanttTask[] => {
+    const validTasks = tasks.filter(task => {
+        if (!task.due_date_start || !task.due_date_end) return false
+        const start = new Date(task.due_date_start)
+        const end = new Date(task.due_date_end)
+        return start <= end
+    })
+
+    const mappedTasks = validTasks.map(task => ({
+        id: task.id,
+        text: task.name,
+        start: new Date(task.due_date_start!),
+        end: new Date(task.due_date_end!),
+        parent: task.parent || undefined,
+        type: task.parent ? (task.priority || 'task') : 'summary',
+        open: task.parent ? undefined : true,
+        // progress: 0,
+    }))
+
+    return mappedTasks
 }
+
 
 function TasksRoadmap() {
     const { t } = useTranslation()
@@ -64,7 +83,20 @@ function TasksRoadmap() {
         offset: 0
     })
 
+    const { data: tasksData, isLoading, isFetching } = useGetTasksQuery({
+        projectId: Number(projectId),
+        params: { is_template: false, ...filterParams },
+    }, { skip: !projectId })
+
+    const ganttTasks = useMemo(() => {
+        const tasks = convertToGanttTasks(tasksData?.results || [])
+        console.log('Parent tasks:', tasks.filter(t => t.type === 'summary').map(t => ({ id: t.id, text: t.text, hasChildren: tasks.some(child => child.parent === t.id) })))
+        console.log('Child tasks:', tasks.filter(t => t.parent).map(t => ({ id: t.id, text: t.text, parent: t.parent })))
+        return tasks
+    }, [tasksData?.results])
+
     const taskTypes = useMemo(() => [
+        { id: "summary", label: "Сводка" },
         { id: "task", label: "Задача" },
         { id: "critical", label: "Критическая" },
         { id: "important", label: "Важная" },
@@ -76,6 +108,7 @@ function TasksRoadmap() {
     const columns = useMemo(() => [
         {
             header: t('tasks-page.roadmap.columns.task'),
+            id: 'text',
             cell: (task: any) => (
                 <div className="text-sm max-w-[200px] truncate ">
                     {task?.row?.text}
@@ -104,42 +137,12 @@ function TasksRoadmap() {
         },
     ], [t])
 
-    const { data: tasksData, isLoading, isFetching } = useGetTasksQuery({
-        projectId: Number(projectId),
-        params: { is_template: false, ...filterParams },
-    }, { skip: !projectId })
-
     const handleFilterChange = (filters: Partial<TasksFilterParams>) => {
         setFilterParams({
             ...(filterParams ?? {}),
             ...filters
         } as Partial<TasksFilterParams>)
     }
-
-    // const dateFilteredTasks = useMemo((): Task[] => {
-    //     if (!tasksData?.results) return []
-
-    //     return tasksData.results.filter(task => {
-    //         if (!task.due_date_start || !task.due_date_end) return false
-
-    //         const start = new Date(task.due_date_start).getTime()
-    //         const end = new Date(task.due_date_end).getTime()
-
-    //         const from = dateFrom ? new Date(dateFrom).getTime() : null
-    //         const to = dateTo ? new Date(dateTo).getTime() : null
-
-    //         if (from && end < from) return false
-    //         if (to && start > to) return false
-
-    //         return true
-    //     }) as Task[]
-    // }, [tasksData, dateFrom, dateTo])
-
-
-    const ganttTasks = useMemo(
-        () => convertToGanttTasks(tasksData?.results || []),
-        [tasksData?.results]
-    )
 
     const ganttRange = useMemo(() => {
         if (!ganttTasks.length) return {}
@@ -177,8 +180,8 @@ function TasksRoadmap() {
                                     columns={columns}
                                     start={ganttRange.start}
                                     end={ganttRange.end}
-                                    cellWidth={CELL_WIDTH}
-                                    cellHeight={CELL_HEIGHT}
+                                    // cellWidth={CELL_WIDTH}
+                                    // cellHeight={CELL_HEIGHT}
                                     taskTypes={taskTypes}
                                 />
                             </GanttWrapper>
@@ -195,7 +198,7 @@ function TasksRoadmap() {
                         </div>
                     )
                 }
-                
+
             </div>
         </div>
     )
