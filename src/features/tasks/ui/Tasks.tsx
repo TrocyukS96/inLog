@@ -17,7 +17,8 @@ import { DEBOUNCE_DELAY } from '../../../shared/config/constants'
 import useDebounce from '../../../shared/lib/hooks/use-deboucne'
 import { Input } from '../../../shared/ui/input'
 import CreateTaskForm from './CreateTaskForm'
-import { TasksFilter, type TasksFilterValues } from './TasksFilter'
+import { TasksFilter } from './TasksFilter'
+import type { TasksFilterValues } from '../model/types'
 import TasksList from './TasksList'
 
 export default function Tasks({ type = 'tasks-page' }: { type?: 'tasks-page' | 'templates-page' }) {

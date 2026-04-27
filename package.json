@@ -33,6 +33,7 @@
     "@radix-ui/react-tooltip": "^1.2.8",
     "@reduxjs/toolkit": "^2.11.2",
     "@shadcn/ui": "^0.0.4",
+    "@svar-ui/react-gantt": "^2.6.1",
     "@tiptap/extension-color": "^3.20.1",
     "@tiptap/extension-font-family": "^3.20.1",
     "@tiptap/extension-placeholder": "^3.20.1",

@@ -149,7 +149,11 @@
         "minutes-ago": "minutes ago",
         "hours-ago": "hours ago",
         "days-ago": "days ago",
-        "active-filters": "Active filters"
+        "active-filters": "Active filters",
+        "filter-tasks": "Filter tasks",
+        "select-status": "Select status",
+        "all-statuses": "All statuses",
+        "all-priorities": "All priorities"
     },
 
     "notice-list": {
@@ -205,7 +209,9 @@
         "node-tab-updated": "Node tab has been updated successfully",
         "node-tab-deleted": "Node tab has been deleted successfully",
         "node-tab-added": "Node tab has been added successfully",
-        "saving-task-data": "Saving task data"
+        "saving-task-data": "Saving task data",
+        "task-status-changed": "Task status has been changed successfully",
+        "changing-task-status": "Changing task status"
     },
 
     "buttons": {
@@ -226,6 +232,7 @@
         "download": "Download",
         "list": "List",
         "kanban": "Kanban",
+        "roadmap": "Roadmap",
         "saving": "Saving...",
         "change-password": "Change password",
         "sending": "Sending...",
@@ -373,7 +380,22 @@
         "parent-tasks": "Parent tasks",
         "child-tasks": "Child tasks",
         "completed-tasks": "Completed tasks",
-        "incomplete-tasks": "Incomplete tasks"
+        "incomplete-tasks": "Incomplete tasks",
+
+        "roadmap": {
+            "no-tasks-with-dates": "No tasks with dates",
+            "no-tasks-with-filters": "No tasks with filters",
+            "days": "Days",
+            "weeks": "Weeks",
+            "months": "Months",
+            "years": "Years",
+
+            "columns": {
+                "task": "Task",
+                "start": "Start",
+                "end": "End"
+            }
+        }
     },
     "templates-page": {
         "title": "Templates",

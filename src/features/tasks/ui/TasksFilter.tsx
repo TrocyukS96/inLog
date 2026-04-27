@@ -1,8 +1,13 @@
 'use client'
 
+import { format } from 'date-fns'
+import { Filter } from 'lucide-react'
 import * as React from 'react'
-import { Filter, X } from 'lucide-react'
+import type { DateRange } from 'react-day-picker'
 import { useTranslation } from 'react-i18next'
+import { DATE_REQUEST_FORMAT } from '../../../shared/config/constants'
+import { cn } from '../../../shared/lib/utils'
+import { Badge } from '../../../shared/ui/badge'
 import { Button } from '../../../shared/ui/button'
 import {
     Dialog,
@@ -19,11 +24,6 @@ import {
     SelectTrigger,
     SelectValue,
 } from '../../../shared/ui/select'
-import { Badge } from '../../../shared/ui/badge'
-import { cn } from '../../../shared/lib/utils'
-import type { DateRange } from 'react-day-picker'
-import { format } from 'date-fns'
-import { DATE_REQUEST_FORMAT } from '../../../shared/config/constants'
 
 export type TaskTypeFilter = 'all' | 'parent' | 'child' | 'completed' | 'incomplete'
 
@@ -63,7 +63,6 @@ export function TasksFilter({
 
     const [isFilterActive, setIsFilterActive] = React.useState(false)
 
-    // Проверка, активны ли фильтры
     React.useEffect(() => {
         const hasActiveFilters = !!(
             localFilters.dateRange ||
@@ -109,30 +108,6 @@ export function TasksFilter({
             taskType: value as TaskTypeFilter,
         }))
     }
-
-    // Форматирование для отображения активного фильтра
-    const getActiveFilterLabel = () => {
-        const activeFilters: string[] = []
-
-        if (localFilters.dateRange?.from) {
-            const from = format(localFilters.dateRange.from, 'dd.MM.yy')
-            const to = localFilters.dateRange.to
-                ? format(localFilters.dateRange.to, 'dd.MM.yy')
-                : from
-            activeFilters.push(`${from} - ${to}`)
-        }
-
-        if (localFilters.taskType && localFilters.taskType !== 'all') {
-            const option = taskTypeOptions.find((opt) => opt.value === localFilters.taskType)
-            if (option) {
-                activeFilters.push(t(option.label))
-            }
-        }
-
-        return activeFilters
-    }
-
-    const activeFilters = getActiveFilterLabel()
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
