@@ -389,7 +389,7 @@
             "weeks": "Weeks",
             "months": "Months",
             "years": "Years",
-
+            "settings": "Settings",
             "columns": {
                 "task": "Task",
                 "start": "Start",
@@ -526,7 +526,9 @@
 
     "common": {
         "load-more": "Load more",
-        "loading": "Loading..."
+        "loading": "Loading...",
+        "columns": "Columns",
+        "show-table": "Show table"
     }
 
 

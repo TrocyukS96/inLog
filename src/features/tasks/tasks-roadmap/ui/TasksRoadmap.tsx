@@ -9,67 +9,18 @@ import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useSearchParams } from 'react-router-dom'
 import { useGetTasksQuery } from '../../../../entities/task/model/taskSlice'
-import type { Task, TasksFilterParams } from '../../../../entities/task/model/types'
+import type { TasksFilterParams } from '../../../../entities/task/model/types'
 import '../../../../shared/styles/index.css'
-import type { RoadmapDetalizationMode } from '../model/types'
+import type { RoadmapColumnOption, RoadmapDetalizationMode } from '../model/types'
 import RoadmapControls from './RoadmapControls'
 import './TaskRoadmap.css'
+import { convertToGanttTasks, getDefaultRoadmapColumns } from '../lib/roadmapHelpers'
+import { scalePresets, taskTypes } from '../lib/data'
 
 const CONTAINER_HEIGHT = 'calc(100vh - 200px)'
 
-interface GanttTask {
-    id: number
-    text: string
-    start: Date
-    end: Date
-    parent?: number
-    type: string
-    open?: boolean
-}
-
-const scalePresets = {
-    year: [
-        { unit: "year", step: 1, format: "%Y" },
-    ],
-    month: [
-        { unit: "month", step: 1, format: "%M %Y" },
-    ],
-    week: [
-        { unit: "month", step: 1, format: "%M %Y" },
-        { unit: "week", step: 1, format: "Week %W" },
-    ],
-    day: [
-        { unit: "month", step: 1, format: "%M %Y" },
-        { unit: "week", step: 1, format: "Week %W" },
-        { unit: "day", step: 1, format: "%d" },
-    ],
-};
-
-const convertToGanttTasks = (tasks: Task[]): GanttTask[] => {
-    const validTasks = tasks.filter(task => {
-        if (!task.due_date_start || !task.due_date_end) return false
-        const start = new Date(task.due_date_start)
-        const end = new Date(task.due_date_end)
-        return start <= end
-    })
-
-    const mappedTasks = validTasks.map(task => ({
-        id: task.id,
-        text: task.name,
-        start: new Date(task.due_date_start!),
-        end: new Date(task.due_date_end!),
-        parent: task.parent || undefined,
-        type: task.parent ? (task.priority || 'task') : 'summary',
-        open: task.parent ? undefined : true,
-        // progress: 0,
-    }))
-
-    return mappedTasks
-}
-
-
 function TasksRoadmap() {
-    const { t } = useTranslation()
+    const { t, i18n } = useTranslation()
     const { theme } = useTheme()
     const [searchParams] = useSearchParams()
 
@@ -83,66 +34,24 @@ function TasksRoadmap() {
         offset: 0
     })
 
+    const columns = useMemo(() => getDefaultRoadmapColumns(t), [t])
+
+    const [columnSettings, setColumnSettings] = useState<{ showTable: boolean; visibleColumns: RoadmapColumnOption[] }>({
+        showTable: true,
+        visibleColumns: columns.map(col => ({ id: col.id, label: col.header })),
+    })
+
     const { data: tasksData, isLoading, isFetching } = useGetTasksQuery({
         projectId: Number(projectId),
         params: { is_template: false, ...filterParams },
     }, { skip: !projectId })
 
     const ganttTasks = useMemo(() => {
-        const tasks = convertToGanttTasks(tasksData?.results || [])
-        console.log('Parent tasks:', tasks.filter(t => t.type === 'summary').map(t => ({ id: t.id, text: t.text, hasChildren: tasks.some(child => child.parent === t.id) })))
-        console.log('Child tasks:', tasks.filter(t => t.parent).map(t => ({ id: t.id, text: t.text, parent: t.parent })))
+        const tasks = convertToGanttTasks(tasksData?.results || [], i18n.language)
         return tasks
-    }, [tasksData?.results])
+    }, [tasksData?.results, i18n.language])
 
-    const taskTypes = useMemo(() => [
-        { id: "summary", label: "Сводка" },
-        { id: "task", label: "Задача" },
-        { id: "critical", label: "Критическая" },
-        { id: "important", label: "Важная" },
-        { id: "low", label: "Низкий приоритет" },
-        { id: "medium", label: "Средний приоритет" },
-        { id: "default", label: "Обычная" },
-    ], []);
 
-    const columns = useMemo(() => [
-        {
-            header: t('tasks-page.roadmap.columns.task'),
-            id: 'text',
-            cell: (task: any) => (
-                <div className="text-sm max-w-[200px] truncate ">
-                    {task?.row?.text}
-                </div>
-            ),
-        },
-        {
-            header: t('tasks-page.roadmap.columns.start'),
-            cell: (task: any) => (
-                <div className="text-sm">
-                    {task?.row?.start
-                        ? new Date(task.row.start).toLocaleDateString()
-                        : '-'}
-                </div>
-            ),
-        },
-        {
-            header: t('tasks-page.roadmap.columns.end'),
-            cell: (task: any) => (
-                <div className="text-sm">
-                    {task?.row?.end
-                        ? new Date(task.row.end).toLocaleDateString()
-                        : '-'}
-                </div>
-            ),
-        },
-    ], [t])
-
-    const handleFilterChange = (filters: Partial<TasksFilterParams>) => {
-        setFilterParams({
-            ...(filterParams ?? {}),
-            ...filters
-        } as Partial<TasksFilterParams>)
-    }
 
     const ganttRange = useMemo(() => {
         if (!ganttTasks.length) return {}
@@ -154,16 +63,29 @@ function TasksRoadmap() {
         }
     }, [ganttTasks, dateFrom, dateTo])
 
+    const filteredColumns = useMemo(() => {
+        if (!columnSettings.showTable) return []
+
+        return columns.filter(col =>
+            columnSettings.visibleColumns.some(c => c.id === col.id)
+        )
+    }, [columnSettings, columns])
+
     const GanttWrapper = theme === 'dark' ? WillowDark : Willow
 
     return (
         <div className="flex flex-col gap-4 pt-1">
             <RoadmapControls
                 disabled={isLoading || isFetching}
-                initialValues={filterParams}
+                initialValues={{
+                    limit: 100,
+                    offset: 0
+                }}
                 viewMode={viewMode}
+                columnSettings={columnSettings}
+                onChangeColumnSettings={setColumnSettings}
                 setViewMode={setViewMode}
-                onFilterChange={handleFilterChange}
+                onFilterChange={setFilterParams}
             />
 
             <div className="rounded-lg overflow-hidden overflow-y-auto"
@@ -171,17 +93,15 @@ function TasksRoadmap() {
             >
 
                 {
-                    (tasksData?.results?.length && tasksData?.results?.length > 0 && !isLoading && !isFetching) ? (
+                    ( ganttTasks.length > 0 && !isLoading && !isFetching) ? (
                         <Locale words={'ru'}>
                             <GanttWrapper>
                                 <Gantt
                                     tasks={ganttTasks}
                                     scales={scalePresets[viewMode as keyof typeof scalePresets]}
-                                    columns={columns}
+                                    columns={filteredColumns}
                                     start={ganttRange.start}
                                     end={ganttRange.end}
-                                    // cellWidth={CELL_WIDTH}
-                                    // cellHeight={CELL_HEIGHT}
                                     taskTypes={taskTypes}
                                 />
                             </GanttWrapper>

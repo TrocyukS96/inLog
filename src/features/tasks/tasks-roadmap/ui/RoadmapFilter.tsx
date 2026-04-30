@@ -1,10 +1,12 @@
 'use client'
 
+import { format } from 'date-fns'
 import { Filter } from 'lucide-react'
 import * as React from 'react'
+import type { DateRange } from 'react-day-picker'
 import { useTranslation } from 'react-i18next'
 import type { Status, TasksFilterParams } from '../../../../entities/task/model/types'
-import { priorityColors, priorityTypes } from '../../../../shared/config/constants'
+import { DATE_REQUEST_FORMAT, priorityColors, priorityTypes } from '../../../../shared/config/constants'
 import { cn } from '../../../../shared/lib/utils'
 import { Badge } from '../../../../shared/ui/badge'
 import { Button } from '../../../../shared/ui/button'
@@ -15,7 +17,7 @@ import {
     DialogTitle,
     DialogTrigger,
 } from '../../../../shared/ui/dialog'
-import { Input } from '../../../../shared/ui/input'
+import { RangePicker } from '../../../../shared/ui/range-picker'
 import {
     Select,
     SelectContent,
@@ -23,8 +25,6 @@ import {
     SelectTrigger,
     SelectValue,
 } from '../../../../shared/ui/select'
-import { RangePicker } from '../../../../shared/ui/range-picker'
-import type { DateRange } from 'react-day-picker'
 
 export interface RoadmapFilterParams extends Omit<TasksFilterParams, 'priority'> {
     priority?: TasksFilterParams['priority'] | 'all'
@@ -33,8 +33,8 @@ export interface RoadmapFilterParams extends Omit<TasksFilterParams, 'priority'>
 interface RoadmapFilterProps {
     statuses: Status[]
     onFilterChange: (filters: Partial<TasksFilterParams>) => void
-    onReset: () => void
     initialValues?: Partial<TasksFilterParams>
+    resetFilter: () => void
     disabled?: boolean
     className?: string
 }
@@ -42,8 +42,8 @@ interface RoadmapFilterProps {
 export function RoadmapFilter({
     statuses,
     onFilterChange,
-    onReset,
     initialValues = {},
+    resetFilter,
     disabled = false,
     className,
 }: RoadmapFilterProps) {
@@ -55,44 +55,31 @@ export function RoadmapFilter({
 
     React.useEffect(() => {
         const hasActiveFilters = !!(
-            localFilters.name__icontains ||
             (localFilters.priority && localFilters.priority !== 'all') ||
-            (localFilters.status && localFilters.status !== 'all')
+            (localFilters.status && localFilters.status !== 'all') ||
+            (localFilters.created_at__range && localFilters.created_at__range.from && localFilters.created_at__range.to)
         )
         setIsFilterActive(hasActiveFilters)
     }, [localFilters])
 
     const handleApply = () => {
-        onFilterChange(localFilters as Partial<TasksFilterParams>)
-        setOpen(false)
-    }
+            onFilterChange(
+                {
+                    ...localFilters,
+                    status: localFilters.status === 'all' ? undefined : localFilters.status,
+                    priority: localFilters.priority === 'all' ? undefined : localFilters.priority,
+                    created_at__range: localFilters.created_at__range ? [
+                        localFilters.created_at__range.from ? format(localFilters.created_at__range.from, DATE_REQUEST_FORMAT) : undefined,
+                        localFilters.created_at__range.to ? format(localFilters.created_at__range.to, DATE_REQUEST_FORMAT) : undefined,
+                    ] : undefined,
+                } as Partial<TasksFilterParams>)
+            setOpen(false)
+        }
 
     const handleReset = () => {
-        const resetFilters: Partial<TasksFilterParams> = {
-            name__icontains: '',
-            priority: undefined,
-            status: 'all',
-            created_at__range: undefined,
-        }
-        setLocalFilters(resetFilters)
-        onReset()
+        resetFilter()
+        setLocalFilters(initialValues)
         setOpen(false)
-    }
-
-    const handleCancel = () => {
-        setLocalFilters({
-            name__icontains: initialValues.name__icontains || '',
-            priority: initialValues.priority || 'all',
-            status: initialValues.status || 'all',
-        })
-        setOpen(false)
-    }
-
-    const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setLocalFilters((prev) => ({
-            ...prev,
-            search: e.target.value,
-        }))
     }
 
     const handlePriorityChange = (value: string) => {
@@ -112,7 +99,10 @@ export function RoadmapFilter({
     const handleDateRangeChange = (range: DateRange | undefined) => {
         setLocalFilters((prev) => ({
             ...prev,
-            dateRange: range,
+            created_at__range: range ? {
+                from: range.from ? format(range.from, DATE_REQUEST_FORMAT) : undefined,
+                to: range.to ? format(range.to, DATE_REQUEST_FORMAT) : undefined,
+            } : undefined,
         }))
     }
 
@@ -149,18 +139,6 @@ export function RoadmapFilter({
                 </DialogHeader>
 
                 <div className="space-y-4 py-4">
-                    <div className="space-y-2">
-                        <label className="text-sm font-medium">
-                            {t('fields.task-name')}
-                        </label>
-                        <Input
-                            value={localFilters.name__icontains}
-                            onChange={handleSearchChange}
-                            placeholder={t('fields.enter-task-name')}
-                            className="w-full"
-                        />
-                    </div>
-
                     <div className="space-y-2">
                         <label className="text-sm font-medium">
                             {t('fields.date-range')}
@@ -221,12 +199,6 @@ export function RoadmapFilter({
                 </div>
 
                 <div className="flex justify-end gap-2">
-                    <Button
-                        variant="outline"
-                        onClick={handleCancel}
-                    >
-                        {t('buttons.cancel')}
-                    </Button>
                     <Button
                         variant="outline"
                         onClick={handleReset}
