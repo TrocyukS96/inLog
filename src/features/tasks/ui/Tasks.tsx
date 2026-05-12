@@ -260,18 +260,6 @@ export default function Tasks({ type = 'tasks-page' }: { type?: 'tasks-page' | '
                             </div>
 
                             <div className="flex gap-2">
-                                {/* <RangePicker
-                                    value={filterParams.created_at__range
-                                        ? {
-                                            from: new Date(filterParams.created_at__range.split(',')[0]),
-                                            to: new Date(filterParams.created_at__range.split(',')[1])
-                                        }
-                                        : undefined}
-                                    placeholder={t('fields.date-range')}
-                                    onChange={(range) => handleFilterChange(range, 'date')}
-                                    className="flex-1"
-                                    disabled={tasksLoading || taskFetching || tasksData?.results?.length === 0 || !projectId}
-                                /> */}
                                 <TasksFilter
                                     onFilterChange={handleFilterChange}
                                     disabled={tasksLoading || taskFetching || tasksData?.results?.length === 0 || !projectId}

@@ -1,21 +1,26 @@
 'use client'
 
 import { Locale } from '@svar-ui/react-core'
+import type { IApi } from '@svar-ui/react-gantt'
 import { Gantt, Willow, WillowDark } from '@svar-ui/react-gantt'
 import "@svar-ui/react-gantt/all.css"
+import { formatDate } from 'date-fns'
 import { AlertCircle, Clock } from 'lucide-react'
 import { useTheme } from 'next-themes'
-import { useMemo, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { useDispatch } from 'react-redux'
 import { useSearchParams } from 'react-router-dom'
-import { useGetTasksQuery } from '../../../../entities/task/model/taskSlice'
+import { toast } from 'sonner'
+import { taskApi, useGetTasksQuery, useUpdateTaskMutation } from '../../../../entities/task/model/taskSlice'
 import type { TasksFilterParams } from '../../../../entities/task/model/types'
+import { DATE_REQUEST_FORMAT } from '../../../../shared/config/constants'
 import '../../../../shared/styles/index.css'
+import { scalePresets, taskTypes } from '../lib/data'
+import { convertToGanttTasks, getDefaultRoadmapColumns } from '../lib/roadmapHelpers'
 import type { RoadmapColumnOption, RoadmapDetalizationMode } from '../model/types'
 import RoadmapControls from './RoadmapControls'
 import './TaskRoadmap.css'
-import { convertToGanttTasks, getDefaultRoadmapColumns } from '../lib/roadmapHelpers'
-import { scalePresets, taskTypes } from '../lib/data'
 
 const CONTAINER_HEIGHT = 'calc(100vh - 200px)'
 
@@ -23,12 +28,13 @@ function TasksRoadmap() {
     const { t, i18n } = useTranslation()
     const { theme } = useTheme()
     const [searchParams] = useSearchParams()
-
     const projectId = searchParams.get('project')
     const dateFrom = searchParams.get('date_from')
     const dateTo = searchParams.get('date_to')
+    const [updateTask] = useUpdateTaskMutation()
+    const dispatch = useDispatch()
 
-    const [viewMode, setViewMode] = useState<RoadmapDetalizationMode>('day')
+    const [viewMode, setViewMode] = useState<RoadmapDetalizationMode>('week')
     const [filterParams, setFilterParams] = useState<Partial<TasksFilterParams>>({
         limit: 100,
         offset: 0
@@ -41,7 +47,9 @@ function TasksRoadmap() {
         visibleColumns: columns.map(col => ({ id: col.id, label: col.header })),
     })
 
-    const { data: tasksData, isLoading, isFetching } = useGetTasksQuery({
+    const refApi = useRef<IApi | null>(null);
+
+    const { data: tasksData, isLoading} = useGetTasksQuery({
         projectId: Number(projectId),
         params: { is_template: false, ...filterParams },
     }, { skip: !projectId })
@@ -50,7 +58,6 @@ function TasksRoadmap() {
         const tasks = convertToGanttTasks(tasksData?.results || [], i18n.language)
         return tasks
     }, [tasksData?.results, i18n.language])
-
 
 
     const ganttRange = useMemo(() => {
@@ -73,10 +80,32 @@ function TasksRoadmap() {
 
     const GanttWrapper = theme === 'dark' ? WillowDark : Willow
 
+    const handleUpdateTask = async (event: any) => {
+        debugger
+        let toastId: string | number | undefined;
+        try {
+            toastId = toast.loading(t('notice-list.saving-task-data'))
+            await updateTask({
+                projectId: Number(projectId),
+                taskSlug: event.task.slug,
+                data: {
+                    due_date_start: formatDate(event.task.start, DATE_REQUEST_FORMAT),
+                    due_date_end: formatDate(event.task.end, DATE_REQUEST_FORMAT),
+                }
+            }).unwrap()
+
+            dispatch(taskApi.util.invalidateTags(['Tasks']))
+        } catch (error) {
+            console.error('Failed to update task:', error)
+        } finally {
+            toast.dismiss(toastId)
+        }
+    }
+
     return (
         <div className="flex flex-col gap-4 pt-1">
             <RoadmapControls
-                disabled={isLoading || isFetching}
+                disabled={isLoading}
                 initialValues={{
                     limit: 100,
                     offset: 0
@@ -93,20 +122,22 @@ function TasksRoadmap() {
             >
 
                 {
-                    ( ganttTasks.length > 0 && !isLoading && !isFetching) ? (
+                    (ganttTasks.length > 0 && !isLoading) ? (
                         <Locale words={'ru'}>
                             <GanttWrapper>
                                 <Gantt
+                                    ref={refApi}
                                     tasks={ganttTasks}
                                     scales={scalePresets[viewMode as keyof typeof scalePresets]}
                                     columns={filteredColumns}
                                     start={ganttRange.start}
                                     end={ganttRange.end}
                                     taskTypes={taskTypes}
+                                    onUpdateTask={handleUpdateTask}
                                 />
                             </GanttWrapper>
                         </Locale>
-                    ) : (isLoading || isFetching) ? (
+                    ) : (isLoading) ? (
                         <div className="w-full h-full flex flex-col items-center justify-center gap-2">
                             <Clock className="h-8 w-8 animate-spin text-muted-foreground" />
                             <p className="text-sm text-muted-foreground">{t('common.loading')}</p>
