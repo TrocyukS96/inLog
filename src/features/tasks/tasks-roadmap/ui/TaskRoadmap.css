@@ -25,3 +25,20 @@
   .wx-gantt .wx-bar.wx-task.default {
     background-color: #6b7280;
   }
+
+  .wx-gantt .wx-progress-marker {
+    pointer-events: none;
+}
+
+.wx-gantt .wx-progress-marker,
+.wx-gantt .wx-progress-wrapper {
+    display: none !important;
+}
+
+.wx-gantt .wx-progress-marker {
+    pointer-events: none;
+}
+
+.wx-gantt .wx-progress-wrapper {
+    display: none !important;
+}

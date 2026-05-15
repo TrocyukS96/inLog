@@ -13,7 +13,7 @@ export const convertToGanttTasks = (tasks: Task[], language: string): GanttTask[
 
     const status = language === 'ru' ? 'name_ru' : 'name_en'
 
-    const mappedTasks = validTasks.map((task,i,array) => {
+    const mappedTasks = validTasks.map((task,_,array) => {
         const targetParent = array.find(t => t.id === task.parent)
         return {
             id: task.id,

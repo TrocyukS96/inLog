@@ -31,6 +31,7 @@ function TasksRoadmap() {
     const projectId = searchParams.get('project')
     const dateFrom = searchParams.get('date_from')
     const dateTo = searchParams.get('date_to')
+    const tooltipRef = useRef<IApi | undefined>(undefined);
     const [updateTask] = useUpdateTaskMutation()
     const dispatch = useDispatch()
 
@@ -49,7 +50,7 @@ function TasksRoadmap() {
 
     const refApi = useRef<IApi | null>(null);
 
-    const { data: tasksData, isLoading} = useGetTasksQuery({
+    const { data: tasksData, isLoading } = useGetTasksQuery({
         projectId: Number(projectId),
         params: { is_template: false, ...filterParams },
     }, { skip: !projectId })
@@ -81,7 +82,6 @@ function TasksRoadmap() {
     const GanttWrapper = theme === 'dark' ? WillowDark : Willow
 
     const handleUpdateTask = async (event: any) => {
-        debugger
         let toastId: string | number | undefined;
         try {
             toastId = toast.loading(t('notice-list.saving-task-data'))
