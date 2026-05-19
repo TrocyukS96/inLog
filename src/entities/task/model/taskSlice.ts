@@ -20,6 +20,36 @@ export const taskApi = createApi({
                 params: { ...params },
             }),
             providesTags: ['Tasks'],
+            transformResponse: (response: {
+                count: number
+                next: string | null
+                previous: string | null
+                results: Task[]
+            }, _, arg) => {
+                const taskType = arg.params.taskType;
+
+                if (!taskType) {
+                    return response;
+                }
+
+                const filteredResults = response.results.filter(task => {
+                    if (taskType === 'parent') {
+                        return task.parent === null;
+                    } else if (taskType === 'child') {
+                        return task.parent !== null;
+                    } else if (taskType === 'completed') {
+                        return task.status.name_en === 'Closed';
+                    } else if (taskType === 'incomplete') {
+                        return task.status.name_en === 'No status';
+                    }
+                });
+
+                return {
+                    ...response,
+                    count: filteredResults.length,
+                    results: filteredResults,
+                };
+            },
         }),
 
         getTask: builder.query<Task, { projectId: number; taskSlug: string }>({
@@ -35,7 +65,7 @@ export const taskApi = createApi({
             },
             providesTags: ['Task'],
         }),
-        
+
         getTaskByParams: builder.mutation<{
             count: number
             next: string | null
@@ -64,14 +94,14 @@ export const taskApi = createApi({
             async onQueryStarted({ taskSlug }, { dispatch, queryFulfilled, getState }) {
                 try {
                     const { data: updatedTask } = await queryFulfilled;
-                    
+
                     const state = getState();
                     const allQueries = Object.values(state.taskApi.queries);
-                    
+
                     const getTasksQueries = allQueries.filter(
                         (query: any) => query?.endpointName === 'getTasks'
                     );
-                    
+
                     getTasksQueries.forEach((query: any) => {
                         dispatch(
                             taskApi.util.updateQueryData('getTasks', query.originalArgs, (draft) => {
@@ -129,7 +159,7 @@ export const taskApi = createApi({
                 method: 'POST',
                 body: data,
             }),
-            invalidatesTags: ['Tasks','Task'],
+            invalidatesTags: ['Tasks', 'Task'],
         }),
 
         deleteTask: builder.mutation<void, { projectId: number; taskSlug: string }>({
