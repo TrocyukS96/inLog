@@ -150,11 +150,13 @@ export default function Tasks({ type = 'tasks-page' }: { type?: 'tasks-page' | '
             ...(filterParams ?? {}),
             ...filters
         } as TasksFilterParams)
+        searchParams.delete('task')
     }
 
     const handleResetFilters = () => {
         setFilterParams({ limit: 10000, offset: 0 })
         filterRef.current?.handleReset()
+        searchParams.delete('task')
     }
 
     const handlePaginationChange = (value: { limit: number; offset: number }) => {
@@ -280,46 +282,25 @@ export default function Tasks({ type = 'tasks-page' }: { type?: 'tasks-page' | '
                             </div>
                         </div>
                     </div>
-                    {
-                        tasksData?.results && tasksData.results.length > 0 && (
-                            <TasksList
-                                tasks={tasksData?.results || []}
-                                selectedTaskSlug={selectedTaskSlug || undefined}
-                                selectTask={handleSelectTask}
-                                deleteTask={handleDeleteTask}
-                                createTemplate={createTemplate}
-                                changeTaskStatus={handleChangeTaskStatus}
-                                changePagination={handlePaginationChange}
-                                isFetching={tasksFetching}
-                                isLoading={tasksLoading}
-                                pagination={{
-                                    limit: Number(filterParams.limit) || 10,
-                                    offset: Number(filterParams.offset) || 0,
-                                    total: tasksData?.count || 0
-                                }}
-                            />
-                        )
-                    }
-                    {
-                        (tasksData?.results && tasksData.results.length === 0 && !tasksLoading && !tasksFetching) && (
-                            <div className="pt-[68%] h-full">
-                                <div className="text-center text-muted-foreground">
-                                    {isTemplates ? t(`templates-page.templates-absent-message`) : t(`tasks-page.tasks-absent-message`)}
-                                    {Object.keys(filterParams).length > 2 && (
-                                        <div className="mt-2">
-                                            <Button
-                                                variant="outline"
-                                                size="sm"
-                                                onClick={handleResetFilters}
-                                            >
-                                                {t('fields.clear-filters')}
-                                            </Button>
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-                        )
-                    }
+                    <TasksList
+                        tasks={tasksData?.results || []}
+                        filterParams={filterParams}
+                        isTemplates={isTemplates}
+                        selectedTaskSlug={selectedTaskSlug || undefined}
+                        selectTask={handleSelectTask}
+                        deleteTask={handleDeleteTask}
+                        createTemplate={createTemplate}  
+                        changeTaskStatus={handleChangeTaskStatus}
+                        changePagination={handlePaginationChange}
+                        resetFilters={handleResetFilters}
+                        isFetching={tasksFetching}
+                        isLoading={tasksLoading}
+                        pagination={{
+                            limit: Number(filterParams.limit) || 10,
+                            offset: Number(filterParams.offset) || 0,
+                            total: tasksData?.count || 0
+                        }}
+                    />
                 </div>
             </ResizablePanel>
 

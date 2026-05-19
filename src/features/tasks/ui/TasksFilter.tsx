@@ -45,6 +45,7 @@ const taskTypeOptions: { value: TaskTypeFilter; label: string }[] = [
     { value: 'child', label: 'tasks-page.child-tasks' },
     { value: 'completed', label: 'tasks-page.completed-tasks' },
     { value: 'incomplete', label: 'tasks-page.incomplete-tasks' },
+    { value: 'all', label: 'tasks-page.all-tasks' },
 ]
 
 export const TasksFilter = React.forwardRef<{
@@ -60,7 +61,7 @@ export const TasksFilter = React.forwardRef<{
     const [open, setOpen] = React.useState(false)
     const [localFilters, setLocalFilters] = React.useState<TasksFilterValues>({
         dateRange: initialValues.dateRange,
-        taskType: initialValues.taskType,
+        taskType: initialValues.taskType || 'all',
     })
 
     const [isFilterActive, setIsFilterActive] = React.useState(false)

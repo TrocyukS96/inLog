@@ -19,47 +19,6 @@ export const taskApi = createApi({
                 url: `projects/${projectId}/tasks/task/`,
                 params: { ...params },
             }),
-            transformResponse: (response: {
-                count: number
-                next: string | null
-                previous: string | null
-                results: Task[]
-            }, _, arg) => {
-                const taskType = arg.params.taskType;
-
-                const changedResponse = {
-                    ...response,
-                    results: response.results.map((task,_,arr) => {
-                        const targetSubtasks = (task?.subtasks || []).map(subtask => subtask.id);
-                        return {
-                            ...task,
-                            subtasks: arr.filter(t => targetSubtasks.includes(t.id))
-                        }
-                    }),
-                };
-                
-                if (!taskType) {
-                    return changedResponse;
-                }
-        
-                const filteredResults = changedResponse.results.filter(task => {
-                    if(taskType === 'parent') {
-                        return task.parent === null;
-                    } else if(taskType === 'child') {
-                        return task.parent !== null;
-                    } else if(taskType === 'completed') {
-                        return task.status.name_en === 'Closed';
-                    } else if(taskType === 'incomplete') {
-                        return task.status.name_en === 'No status';
-                    }
-                });
-        
-                return {
-                    ...changedResponse,
-                    count: filteredResults.length,
-                    results: filteredResults,
-                };
-            },
             providesTags: ['Tasks'],
         }),
 
@@ -170,7 +129,7 @@ export const taskApi = createApi({
                 method: 'POST',
                 body: data,
             }),
-            invalidatesTags: ['Tasks'],
+            invalidatesTags: ['Tasks','Task'],
         }),
 
         deleteTask: builder.mutation<void, { projectId: number; taskSlug: string }>({
@@ -178,7 +137,7 @@ export const taskApi = createApi({
                 url: `projects/${projectId}/tasks/task/${taskSlug}/`,
                 method: 'DELETE',
             }),
-            // invalidatesTags: ['Task'],
+            invalidatesTags: ['Tasks','Task'],
         }),
 
         getStatuses: builder.query<Status[], { projectId: number }>({

@@ -371,6 +371,7 @@
         "child-tasks": "Дочерние задачи",
         "completed-tasks": "Выполненные задачи",
         "incomplete-tasks": "Не выполненные задачи",
+        "all-tasks": "Все задачи",
         "roadmap": {
             "no-tasks-with-dates": "Нет задач с датами",
             "no-tasks-with-filters": "Нет задач с фильтрами",

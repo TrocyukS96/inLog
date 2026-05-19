@@ -381,7 +381,7 @@
         "child-tasks": "Child tasks",
         "completed-tasks": "Completed tasks",
         "incomplete-tasks": "Incomplete tasks",
-
+        "all-tasks": "All tasks",
         "roadmap": {
             "no-tasks-with-dates": "No tasks with dates",
             "no-tasks-with-filters": "No tasks with filters",

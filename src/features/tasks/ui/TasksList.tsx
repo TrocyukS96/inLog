@@ -2,20 +2,25 @@ import { Card } from '../../../shared/ui/card'
 
 import { memo, useCallback, useEffect, useRef } from 'react'
 import { TaskCard, TaskCardSkeleton } from '../../../entities/task'
-import type { Task } from '../../../entities/task/model/types'
+import type { Task, TasksFilterParams } from '../../../entities/task/model/types'
 import { cn } from '../../../shared/lib/utils'
 import { ScrollArea } from '../../../shared/ui/scroll-area'
+import { useTranslation } from 'react-i18next'
+import { Button } from '../../../shared/ui/button'
 
 interface Props {
   tasks: Task[]
   isFetching: boolean
   isLoading: boolean
   selectedTaskSlug?: string
+  isTemplates: boolean
+  filterParams: Partial<TasksFilterParams>
   selectTask: (task: Task) => void
   deleteTask: (task: Task) => void
   createTemplate: (task: Task) => void
   changeTaskStatus: (slug: string, status: 'completed' | 'incomplete') => void
   changePagination: (params: { limit: number; offset: number }) => void
+  resetFilters: () => void
   pagination: {
     limit: number
     offset: number
@@ -24,22 +29,25 @@ interface Props {
   hasMore?: boolean
 }
 
-const TASKS_LIST_HEIGHT = 'h-[calc(100vh-64px-16px-36px-16px-36px-32px-116px)]'
+const TASKS_LIST_HEIGHT = 'h-[calc(100vh-280px)]'
 
 const TasksList = ({
   tasks,
   isFetching,
   isLoading,
+  isTemplates,
   selectedTaskSlug,
+  filterParams,
   selectTask,
   deleteTask,
   createTemplate,
   changeTaskStatus,
   changePagination,
+  resetFilters,
   pagination,
   hasMore = true
 }: Props) => {
-
+  const { t } = useTranslation()
   const observerRef = useRef<IntersectionObserver | null>(null)
   const lastTaskRef = useRef<HTMLDivElement | null>(null)
 
@@ -82,11 +90,32 @@ const TasksList = ({
       }
     }
   }, [hasMore, tasks.length, pagination.total, loadMore])
-  
+
+  if (tasks.length === 0 && !isLoading && !isFetching) {
+    return (
+      <div className="pt-[68%] h-full">
+        <div className="text-center text-muted-foreground">
+          {isTemplates ? t(`templates-page.templates-absent-message`) : t(`tasks-page.tasks-absent-message`)}
+          {Object.keys(filterParams).length > 2 && (
+            <div className="mt-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={resetFilters}
+              >
+                {t('fields.clear-filters')}
+              </Button>
+            </div>
+          )}
+        </div>
+      </div>
+    )
+  }
+
   return (
     <Card className="px-4 border-none bg-transparent">
 
-      <ScrollArea className={cn("flex flex-col gap-2", TASKS_LIST_HEIGHT)}>
+      <ScrollArea className={cn("flex flex-col gap-2 pr-3 -mr-3", TASKS_LIST_HEIGHT)}>
         {(isFetching || isLoading) && (
           <div className="w-full h-full flex items-center flex-col gap-2  text-muted-foreground">
             {Array.from({ length: 10 }).map((_, index) => (
