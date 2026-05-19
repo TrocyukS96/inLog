@@ -1,8 +1,6 @@
 export const ACCESS_TOKEN = 'token'
 export const REFRESH_TOKEN = 'refresh_token'
 
-export const TASK_STATUSES_STORAGE = 'task_statuses'
-
 export const DATE_REQUEST_FORMAT = 'yyyy-MM-dd'
 export const DATE_VIEW_FORMAT = 'dd.MM.yyyy'
 export const DEBOUNCE_DELAY = 500

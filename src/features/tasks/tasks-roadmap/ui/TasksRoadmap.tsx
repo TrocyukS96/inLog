@@ -31,7 +31,6 @@ function TasksRoadmap() {
     const projectId = searchParams.get('project')
     const dateFrom = searchParams.get('date_from')
     const dateTo = searchParams.get('date_to')
-    const tooltipRef = useRef<IApi | undefined>(undefined);
     const [updateTask] = useUpdateTaskMutation()
     const dispatch = useDispatch()
 

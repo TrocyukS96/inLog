@@ -21,7 +21,6 @@ import {
     AlertDialogTitle,
 } from '../../../shared/ui/alert-dialog'
 import { Button } from '../../../shared/ui/button'
-import { Checkbox } from '../../../shared/ui/checkbox'
 import {
     Dialog,
     DialogContent,
@@ -46,11 +45,10 @@ interface SubTaskProps {
     slug?: string
     completed?: boolean
   }
-  onEdit?: (slug: string, title: string) => void
+  onEdit?: (slug: string, title: string, status?: 'completed' | 'incomplete') => void
   onDelete?: (slug: string) => void
   onOpen?: (id: string | number) => void
   onCopyLink?: (id: string | number) => void
-  onToggleComplete?: (id: string | number, completed: boolean) => void
 }
 
 export const SubTask = ({
@@ -59,7 +57,6 @@ export const SubTask = ({
   onDelete,
   onOpen,
   onCopyLink,
-  onToggleComplete,
 }: SubTaskProps) => {
   const { t } = useTranslation()
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
@@ -104,9 +101,10 @@ const handleCopyLink = () => {
     onOpen?.(subtask.id)
   }
 
-  const handleToggleComplete = () => {
-    onToggleComplete?.(subtask.id, !subtask.completed)
-  }
+  // const handleToggleComplete = () => {
+  //   // onToggleComplete?.(subtask.slug || '', !subtask.completed)
+  //   onEdit?.(subtask.slug || '', subtask.title, !subtask.completed ? 'completed' : 'incomplete')
+  // }
 
   return (
     <>
@@ -115,11 +113,11 @@ const handleCopyLink = () => {
         subtask.completed && "opacity-70"
       )}>
         <div className="flex items-center gap-3 flex-1 min-w-0">
-          <Checkbox
+          {/* <Checkbox
             checked={subtask.completed}
             onCheckedChange={handleToggleComplete}
             className="data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground cursor-pointer"
-          />
+          /> */}
           
           <span className={cn(
             "text-sm",

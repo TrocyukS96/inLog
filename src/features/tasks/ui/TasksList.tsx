@@ -53,8 +53,6 @@ const TasksList = ({
     }
   }, [hasMore, tasks.length, pagination.total, pagination.limit, changePagination])
 
-  console.log(isFetching, isLoading, 'isFetching, isLoading')
-
   useEffect(() => {
     if (observerRef.current) {
       observerRef.current.disconnect()

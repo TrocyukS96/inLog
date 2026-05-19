@@ -16,8 +16,8 @@ import { useSearchParams } from 'react-router-dom'
 import { toast } from 'sonner'
 import { SubTasks } from '../../../entities/subtasks'
 import { TaskComments } from '../../../entities/task-comments'
-import type { Status, SubTask, Tag, Task, TaskPriority } from '../../../entities/task/model/types'
-import { DATE_VIEW_FORMAT, priorityTypes, TASK_STATUSES_STORAGE } from '../../../shared/config/constants'
+import type { Status, Tag, Task, TaskPriority } from '../../../entities/task/model/types'
+import { DATE_VIEW_FORMAT, priorityTypes } from '../../../shared/config/constants'
 import { errorsHandler } from '../../../shared/lib/errors-handler'
 import { cn, getPriorityColorStyle } from '../../../shared/lib/utils'
 import type { MemberResponse } from '../../../shared/types/dto/project'
@@ -49,13 +49,14 @@ type FormValues = z.infer<typeof taskSchema>
 
 interface Props {
   task: Task
+  tasks: Task[]
   tags: Tag[]
   taskSlug: string
   statuses: Status[]
   members: MemberResponse[]
 }
 
-const TaskDetails = ({ task, tags: existingTags, taskSlug, statuses, members }: Props) => {
+const TaskDetails = ({ task, tasks, tags: existingTags, taskSlug, statuses, members }: Props) => {
   const { t, i18n } = useTranslation()
   const [createTask] = useCreateTaskMutation()
   const [updateTask] = useUpdateTaskMutation()
@@ -71,18 +72,18 @@ const TaskDetails = ({ task, tags: existingTags, taskSlug, statuses, members }: 
   const [createTaskFile] = useCreateTaskFileMutation()
   const [deleteTaskFile] = useDeleteTaskFileMutation()
   const [searchParams] = useSearchParams()
+  const projectId = searchParams.get('project')
 
   const dispatch = useDispatch()
 
-  const [subtasks, setSubtasks] = useState<Array<{ completed: boolean } & SubTask>>([])
+  const [subtasks, setSubtasks] = useState<Task[]>([])
   const isTemplate = task?.is_template ?? false
 
   useEffect(() => {
-    setSubtasks((task?.subtasks ?? []).map((subtask) => ({
-      ...subtask,
-      completed: JSON.parse(localStorage.getItem(TASK_STATUSES_STORAGE) || '[]')?.find((status: { id: string | number }) => status.id === subtask.id)?.completed ?? false,
-    })))
-  }, [task?.subtasks])
+    if(task?.subtasks && task?.subtasks?.length > 0 && tasks.length > 0) {
+      setSubtasks(task?.subtasks)
+    }
+  }, [task?.subtasks, tasks])
 
   const form = useForm<FormValues>({
     resolver: zodResolver(taskSchema),
@@ -123,7 +124,7 @@ const TaskDetails = ({ task, tags: existingTags, taskSlug, statuses, members }: 
       return false
     }
 
-    const projectId = searchParams.get('project')
+    
 
     if (!projectId) {
       toast.error(t('errors.select-project-first'))
@@ -421,21 +422,29 @@ const TaskDetails = ({ task, tags: existingTags, taskSlug, statuses, members }: 
     }
   }
 
-  const editSubtask = async (_: string, title: string) => {
+  const editSubtask = async (_: string, title: string, status?: 'completed' | 'incomplete') => {
+    let targetStatus;
+
+    if (status) {
+      targetStatus = statuses?.find((st) => status === 'completed' ? st.name_en === 'Closed' : st.name_en === 'No status')?.id
+    }
+
     const projectId = searchParams.get('project')
     const isHasAccess = await checkTaskAccess()
     if (!isHasAccess) {
       return
     }
     try {
-      await updateTask({
+      const updatedSubtask = await updateTask({
         projectId: Number(projectId),
         taskSlug: taskSlug || '',
         data: {
           name: title,
           parent: task.id,
+          status: targetStatus,
         },
       }).unwrap()
+      setSubtasks((prevSubtasks) => prevSubtasks.map((subtask) => subtask.slug === updatedSubtask?.slug ? updatedSubtask : subtask))
     } catch (error) {
       errorsHandler(error, t)
     }
@@ -455,33 +464,9 @@ const TaskDetails = ({ task, tags: existingTags, taskSlug, statuses, members }: 
       }).unwrap()
 
       setSubtasks((prevSubtasks) => prevSubtasks.filter((subtask) => subtask.slug !== slug))
-      localStorage.setItem(TASK_STATUSES_STORAGE, JSON.stringify(subtasks.filter((subtask) => subtask.slug !== slug)))
     } catch (error) {
       errorsHandler(error, t)
     }
-  }
-
-  const toggleCompleteSubtask = async (id: string | number, completed: boolean) => {
-    const taskStatuses = localStorage.getItem(TASK_STATUSES_STORAGE)
-
-    if (!taskStatuses) {
-      localStorage.setItem(TASK_STATUSES_STORAGE, JSON.stringify([
-        {
-          id: id,
-          completed: completed,
-        }
-      ]))
-    } else {
-      const taskStatusesArray = JSON.parse(taskStatuses)
-      const taskStatus = taskStatusesArray.find((status: { id: string | number }) => status.id === id)
-      if (!taskStatus) {
-        taskStatusesArray.push({ id: id, completed: completed })
-      } else {
-        taskStatus.completed = completed
-      }
-      localStorage.setItem(TASK_STATUSES_STORAGE, JSON.stringify(taskStatusesArray))
-    }
-    setSubtasks((prevSubtasks) => prevSubtasks.map((subtask) => subtask.id === id ? { ...subtask, completed: completed } : subtask))
   }
 
   const addComment = async (text: string) => {
@@ -899,17 +884,16 @@ const TaskDetails = ({ task, tags: existingTags, taskSlug, statuses, members }: 
                     <AccordionTrigger>{isTemplate ? t('subtasks-entity.subtemplates') : t('subtasks-entity.subtasks')}</AccordionTrigger>
                     <AccordionContent>
                       <SubTasks
-                        subtasks={task.subtasks.map((subtask) => ({
+                        subtasks={subtasks.map((subtask) => ({
                           id: subtask.id,
                           title: subtask.name,
                           slug: subtask.slug,
-                          completed: JSON.parse(localStorage.getItem(TASK_STATUSES_STORAGE) || '[]')?.find((status: { id: string | number }) => status.id === subtask.id)?.completed ?? false,
+                          completed: subtask?.status?.name_en === 'Closed'
                         }))}
                         isTemplate={isTemplate}
                         onAddSubtask={addSubtask}
                         onEditSubtask={editSubtask}
                         onDeleteSubtask={deleteSubtask}
-                        onToggleCompleteSubtask={toggleCompleteSubtask}
                       />
                     </AccordionContent>
                   </AccordionItem>

@@ -1,5 +1,5 @@
 import { Loader2, Plus, Search, SortAsc, SortDesc, X } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useSearchParams } from 'react-router-dom'
 import { toast } from 'sonner'
@@ -16,9 +16,9 @@ import { TaskDetails } from '../../../features/task-details'
 import { DEBOUNCE_DELAY } from '../../../shared/config/constants'
 import useDebounce from '../../../shared/lib/hooks/use-deboucne'
 import { Input } from '../../../shared/ui/input'
+import type { TasksFilterValues } from '../model/types'
 import CreateTaskForm from './CreateTaskForm'
 import { TasksFilter } from './TasksFilter'
-import type { TasksFilterValues } from '../model/types'
 import TasksList from './TasksList'
 
 export default function Tasks({ type = 'tasks-page' }: { type?: 'tasks-page' | 'templates-page' }) {
@@ -37,6 +37,10 @@ export default function Tasks({ type = 'tasks-page' }: { type?: 'tasks-page' | '
     })
     const [searchValue, setSearchValue] = useState('')
     const debouncedSearchValue = useDebounce<string>(searchValue, DEBOUNCE_DELAY)
+
+    const filterRef = useRef<{
+        handleReset: () => void
+    }>(null)
 
     const { data: statuses } = useGetStatusesQuery({ projectId: Number(projectId) }, { skip: !projectId })
     const { data: members } = useGetProjectMembersQuery(Number(projectId), { skip: !projectId })
@@ -96,11 +100,11 @@ export default function Tasks({ type = 'tasks-page' }: { type?: 'tasks-page' | '
         setSearchParams(searchParams)
     }
 
-    const handleChangeTaskStatus = async(slug: string, status: 'completed' | 'incomplete') => {
+    const handleChangeTaskStatus = async (slug: string, status: 'completed' | 'incomplete') => {
         const targetStatus = statuses?.find((st) => status === 'completed' ? st.name_en === 'Closed' : st.name_en === 'No status')
         let toastId: string | number | undefined
         try {
-            if(!targetStatus) {
+            if (!targetStatus) {
                 toast.error(t('errors.status-not-found'))
                 return
             }
@@ -141,25 +145,16 @@ export default function Tasks({ type = 'tasks-page' }: { type?: 'tasks-page' | '
         toast.info(t('notice-list.template-created-from-task'))
     }
 
-    // const handleFilterChange = (value: DateRange | string | undefined, filterType: 'date' | 'search') => {
-    //     if (filterType === 'date') {
-    //         const created_at__range = value && typeof value === 'object'
-    //             ? format(value?.from || new Date(), DATE_REQUEST_FORMAT) + ',' + format(value?.to || new Date(), DATE_REQUEST_FORMAT)
-    //             : undefined
-    //         setFilterParams({
-    //             ...(filterParams ?? {}),
-    //             created_at__range: created_at__range
-    //         } as TasksFilterParams)
-    //     } else {
-    //         setSearchValue(value as string)
-    //     }
-    // }
-
     const handleFilterChange = (filters: TasksFilterValues) => {
         setFilterParams({
             ...(filterParams ?? {}),
             ...filters
         } as TasksFilterParams)
+    }
+
+    const handleResetFilters = () => {
+        setFilterParams({ limit: 10000, offset: 0 })
+        filterRef.current?.handleReset()
     }
 
     const handlePaginationChange = (value: { limit: number; offset: number }) => {
@@ -202,6 +197,7 @@ export default function Tasks({ type = 'tasks-page' }: { type?: 'tasks-page' | '
         }
         return <TaskDetails
             task={taskData}
+            tasks={tasksData?.results ?? []}
             tags={tagsResponse?.results ?? []}
             statuses={statuses ?? []}
             members={members ?? []}
@@ -261,9 +257,10 @@ export default function Tasks({ type = 'tasks-page' }: { type?: 'tasks-page' | '
 
                             <div className="flex gap-2">
                                 <TasksFilter
+                                    ref={filterRef}
                                     onFilterChange={handleFilterChange}
-                                    disabled={tasksLoading || taskFetching || tasksData?.results?.length === 0 || !projectId}
-                                    onReset={() => setFilterParams({ limit: 10, offset: 0 })}
+                                    disabled={tasksLoading || taskFetching || (tasksData?.results?.length === 0 && Object.keys(filterParams).length === 2) || !projectId}
+                                    onReset={() => setFilterParams({ limit: 10000, offset: 0 })}
                                 />
                                 <Button
                                     variant="outline"
@@ -283,40 +280,43 @@ export default function Tasks({ type = 'tasks-page' }: { type?: 'tasks-page' | '
                             </div>
                         </div>
                     </div>
-                    <TasksList
-                        tasks={tasksData?.results || []}
-                        selectedTaskSlug={selectedTaskSlug || undefined}
-                        selectTask={handleSelectTask}
-                        deleteTask={handleDeleteTask}
-                        createTemplate={createTemplate}
-                        changeTaskStatus={handleChangeTaskStatus}
-                        changePagination={handlePaginationChange}
-                        isFetching={tasksFetching}
-                        isLoading={tasksLoading}
-                        pagination={{
-                            limit: Number(filterParams.limit) || 10,
-                            offset: Number(filterParams.offset) || 0,
-                            total: tasksData?.count || 0
-                        }}
-                    />
+                    {
+                        tasksData?.results && tasksData.results.length > 0 && (
+                            <TasksList
+                                tasks={tasksData?.results || []}
+                                selectedTaskSlug={selectedTaskSlug || undefined}
+                                selectTask={handleSelectTask}
+                                deleteTask={handleDeleteTask}
+                                createTemplate={createTemplate}
+                                changeTaskStatus={handleChangeTaskStatus}
+                                changePagination={handlePaginationChange}
+                                isFetching={tasksFetching}
+                                isLoading={tasksLoading}
+                                pagination={{
+                                    limit: Number(filterParams.limit) || 10,
+                                    offset: Number(filterParams.offset) || 0,
+                                    total: tasksData?.count || 0
+                                }}
+                            />
+                        )
+                    }
                     {
                         (tasksData?.results && tasksData.results.length === 0 && !tasksLoading && !tasksFetching) && (
-                            <div className="text-center py-12 text-muted-foreground">
-                                {isTemplates ? t(`templates-page.templates-absent-message`) : t(`tasks-page.tasks-absent-message`)}
-                                {(filterParams.created_at__range || filterParams.name__icontains) && (
-                                    <div className="mt-4">
-                                        <Button
-                                            variant="outline"
-                                            size="sm"
-                                            onClick={() => {
-                                                setFilterParams({ limit: 10, offset: 0 })
-                                                setSearchValue('')
-                                            }}
-                                        >
-                                            {t('fields.clear-filters')}
-                                        </Button>
-                                    </div>
-                                )}
+                            <div className="pt-[68%] h-full">
+                                <div className="text-center text-muted-foreground">
+                                    {isTemplates ? t(`templates-page.templates-absent-message`) : t(`tasks-page.tasks-absent-message`)}
+                                    {Object.keys(filterParams).length > 2 && (
+                                        <div className="mt-2">
+                                            <Button
+                                                variant="outline"
+                                                size="sm"
+                                                onClick={handleResetFilters}
+                                            >
+                                                {t('fields.clear-filters')}
+                                            </Button>
+                                        </div>
+                                    )}
+                                </div>
                             </div>
                         )
                     }

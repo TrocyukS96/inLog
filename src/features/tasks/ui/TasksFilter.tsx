@@ -24,8 +24,8 @@ import {
     SelectTrigger,
     SelectValue,
 } from '../../../shared/ui/select'
-
-export type TaskTypeFilter = 'all' | 'parent' | 'child' | 'completed' | 'incomplete'
+import type { TaskTypeFilter } from '../../../entities/task/model/types'
+import { useEffect, useImperativeHandle } from 'react'
 
 export interface TasksFilterValues {
     dateRange?: DateRange
@@ -47,13 +47,15 @@ const taskTypeOptions: { value: TaskTypeFilter; label: string }[] = [
     { value: 'incomplete', label: 'tasks-page.incomplete-tasks' },
 ]
 
-export function TasksFilter({
+export const TasksFilter = React.forwardRef<{
+    handleReset: () => void
+}, TasksFilterProps>(({
     onFilterChange,
     onReset,
     initialValues = {},
     disabled = false,
     className,
-}: TasksFilterProps) {
+}, ref) => {
     const { t } = useTranslation()
     const [open, setOpen] = React.useState(false)
     const [localFilters, setLocalFilters] = React.useState<TasksFilterValues>({
@@ -63,7 +65,7 @@ export function TasksFilter({
 
     const [isFilterActive, setIsFilterActive] = React.useState(false)
 
-    React.useEffect(() => {
+    useEffect(() => {
         const hasActiveFilters = !!(
             localFilters.dateRange ||
             (localFilters.taskType && localFilters.taskType !== 'all')
@@ -87,7 +89,6 @@ export function TasksFilter({
     }
 
     const handleCancel = () => {
-        // Восстанавливаем начальные значения
         setLocalFilters({
             dateRange: initialValues.dateRange,
             taskType: initialValues.taskType || 'all',
@@ -108,6 +109,10 @@ export function TasksFilter({
             taskType: value as TaskTypeFilter,
         }))
     }
+
+    useImperativeHandle(ref, () => ({
+        handleReset: handleReset,
+    }), [])
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
@@ -134,7 +139,6 @@ export function TasksFilter({
                 </DialogHeader>
 
                 <div className="space-y-4 py-4">
-                    {/* Фильтр по дате */}
                     <div className="space-y-2">
                         <label className="text-sm font-medium">
                             {t('fields.date-range')}
@@ -147,7 +151,6 @@ export function TasksFilter({
                         />
                     </div>
 
-                    {/* Фильтр по типу задач */}
                     <div className="space-y-2">
                         <label className="text-sm font-medium">
                             {t('tasks-page.task-type')}
@@ -170,7 +173,6 @@ export function TasksFilter({
                     </div>
                 </div>
 
-                {/* Кнопки */}
                 <div className="flex justify-end gap-2">
                     <Button
                         variant="outline"
@@ -193,9 +195,10 @@ export function TasksFilter({
             </DialogContent>
         </Dialog>
     )
-}
+})
 
-// Хук для управления состоянием фильтров
+TasksFilter.displayName = 'TasksFilter'
+
 export function useTasksFilter(initialValues?: Partial<TasksFilterValues>) {
     const [filters, setFilters] = React.useState<TasksFilterValues>({
         dateRange: initialValues?.dateRange,

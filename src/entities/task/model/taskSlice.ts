@@ -19,13 +19,47 @@ export const taskApi = createApi({
                 url: `projects/${projectId}/tasks/task/`,
                 params: { ...params },
             }),
-            // providesTags: (result) =>
-            //     result
-            //       ? [
-            //           ...result.results.map((task) => ({ type: 'Task' as const, id: task.slug })),
-            //           { type: 'Task', id: 'LIST' },
-            //         ]
-            //       : [{ type: 'Task', id: 'LIST' }],
+            transformResponse: (response: {
+                count: number
+                next: string | null
+                previous: string | null
+                results: Task[]
+            }, _, arg) => {
+                const taskType = arg.params.taskType;
+
+                const changedResponse = {
+                    ...response,
+                    results: response.results.map((task,_,arr) => {
+                        const targetSubtasks = (task?.subtasks || []).map(subtask => subtask.id);
+                        return {
+                            ...task,
+                            subtasks: arr.filter(t => targetSubtasks.includes(t.id))
+                        }
+                    }),
+                };
+                
+                if (!taskType) {
+                    return changedResponse;
+                }
+        
+                const filteredResults = changedResponse.results.filter(task => {
+                    if(taskType === 'parent') {
+                        return task.parent === null;
+                    } else if(taskType === 'child') {
+                        return task.parent !== null;
+                    } else if(taskType === 'completed') {
+                        return task.status.name_en === 'Closed';
+                    } else if(taskType === 'incomplete') {
+                        return task.status.name_en === 'No status';
+                    }
+                });
+        
+                return {
+                    ...changedResponse,
+                    count: filteredResults.length,
+                    results: filteredResults,
+                };
+            },
             providesTags: ['Tasks'],
         }),
 

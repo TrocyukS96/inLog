@@ -28,11 +28,10 @@ interface SubTasksProps {
   isTemplate?: boolean
   subtasks?: SubTaskItem[]
   onAddSubtask?: (title: string) => void
-  onEditSubtask?: (slug: string, title: string) => void
+  onEditSubtask?: (slug: string, title: string, status?: 'completed' | 'incomplete') => void
   onDeleteSubtask?: (slug: string) => void
   onOpenSubtask?: (id: string | number) => void
   onCopySubtaskLink?: (id: string | number) => void
-  onToggleCompleteSubtask?: (id: string | number, completed: boolean) => void
 }
 
 const SubTasks = ({
@@ -44,7 +43,6 @@ const SubTasks = ({
   onDeleteSubtask,
   onOpenSubtask,
   onCopySubtaskLink,
-  onToggleCompleteSubtask,
 }: SubTasksProps) => {
   const { t } = useTranslation()
   const [isDialogOpen, setIsDialogOpen] = useState(false)
@@ -67,7 +65,6 @@ const SubTasks = ({
 
   return (
     <div className={cn('w-full space-y-4', className)}>
-      {/* Заголовок и кнопка добавления */}
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-semibold">
           {isTemplate ? t('subtasks-entity.subtemplates') : t('subtasks-entity.subtasks')}
@@ -138,7 +135,6 @@ const SubTasks = ({
               onDelete={onDeleteSubtask}
               onOpen={onOpenSubtask}
               onCopyLink={onCopySubtaskLink}
-              onToggleComplete={onToggleCompleteSubtask}
             />
           ))
         ) : (

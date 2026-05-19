@@ -16,7 +16,7 @@ export interface Task {
     equipment: ResearchEntity
     parent: number
     archived: boolean
-    subtasks: SubTask[]
+    subtasks: Task[]
     doers: TaskDoer[]
     supervisor: Supervisor | ProjectMember
     files: UserFile[]
@@ -28,6 +28,8 @@ export interface Task {
 }
 
 export type TaskPriority = 'low' | 'medium' | 'critical' | 'important'
+
+export type TaskTypeFilter = 'all' | 'parent' | 'child' | 'completed' | 'incomplete'
 
 export interface TasksFilterParams {
     slug: string
@@ -43,6 +45,8 @@ export interface TasksFilterParams {
     limit: string | number
     is_template: boolean
     offset: string | number
+
+    taskType?: TaskTypeFilter
 }
 
 export interface Status {
