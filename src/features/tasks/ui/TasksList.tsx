@@ -93,10 +93,10 @@ const TasksList = ({
 
   if (tasks.length === 0 && !isLoading && !isFetching) {
     return (
-      <div className="pt-[68%] h-full">
+      <div className="pt-[50%] h-full">
         <div className="text-center text-muted-foreground">
           {isTemplates ? t(`templates-page.templates-absent-message`) : t(`tasks-page.tasks-absent-message`)}
-          {Object.keys(filterParams).length > 2 && (
+          {Object.values(filterParams).filter(Boolean).length > 2 && (
             <div className="mt-2">
               <Button
                 variant="outline"

@@ -3,6 +3,42 @@ import type { Task, TaskPriority } from "../../../../entities/task/model/types"
 import { getPriorityColorStyle } from "../../../../shared/lib/utils"
 import type { GanttTask } from "../model/types"
 
+const sortTasksHierarchy = (tasks: GanttTask[]) => {
+    const map = new Map(tasks.map(task => [task.id, task]))
+    const added = new Set<string | number>()
+    const visiting = new Set<string | number>()
+
+    const result: GanttTask[] = []
+
+    const addTask = (task: GanttTask) => {
+        if (added.has(task.id)) return
+
+        if (visiting.has(task.id)) return
+
+        visiting.add(task.id)
+
+        if (task.parent) {
+            const parent = map.get(task.parent)
+
+            if (!parent) {
+                visiting.delete(task.id)
+                return
+            }
+
+            addTask(parent)
+        }
+
+        visiting.delete(task.id)
+
+        added.add(task.id)
+
+        result.push(task)
+    }
+
+    tasks.forEach(addTask)
+    return result
+}
+
 export const convertToGanttTasks = (tasks: Task[], language: string): GanttTask[] => {
     const validTasks = tasks.filter(task => {
         if (!task.due_date_start || !task.due_date_end) return false
@@ -29,7 +65,7 @@ export const convertToGanttTasks = (tasks: Task[], language: string): GanttTask[
         }
     })
 
-    return mappedTasks
+    return sortTasksHierarchy(mappedTasks)
 }
 
 export const getDefaultRoadmapColumns = (t: TFunction<"translation", undefined>) => {

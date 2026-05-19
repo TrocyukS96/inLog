@@ -7,7 +7,7 @@ import "@svar-ui/react-gantt/all.css"
 import { formatDate } from 'date-fns'
 import { AlertCircle, Clock } from 'lucide-react'
 import { useTheme } from 'next-themes'
-import { useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useDispatch } from 'react-redux'
 import { useSearchParams } from 'react-router-dom'
@@ -55,8 +55,14 @@ function TasksRoadmap() {
     }, { skip: !projectId })
 
     const ganttTasks = useMemo(() => {
-        const tasks = convertToGanttTasks(tasksData?.results || [], i18n.language)
-        return tasks
+        try {
+            debugger
+            const tasks = convertToGanttTasks(tasksData?.results || [], i18n.language)
+            return Array.isArray(tasks) ? tasks : []
+        } catch (error) {
+            console.error('Error converting tasks:', error)
+            return []
+        }
     }, [tasksData?.results, i18n.language])
 
 
@@ -101,6 +107,27 @@ function TasksRoadmap() {
         }
     }
 
+
+    const safeTaskTypes = useMemo(() => {
+        return Array.isArray(taskTypes) ? taskTypes : []
+    }, [taskTypes])
+
+    useEffect(() => {
+        console.log('Debug info:', {
+            tasksDataResults: tasksData?.results,
+            ganttTasks,
+            ganttTasksLength: ganttTasks?.length,
+            taskTypes,
+            columnsLength: columns?.length,
+            filteredColumnsLength: filteredColumns?.length,
+            viewMode,
+            scalePreset: scalePresets[viewMode]
+        })
+    }, [tasksData, ganttTasks, taskTypes, columns, filteredColumns, viewMode])
+
+    console.log(JSON.stringify(ganttTasks, null, 2),'----ganttTasks')
+    console.log(JSON.stringify(safeTaskTypes, null, 2),'----safeTaskTypes')
+
     return (
         <div className="flex flex-col gap-4 pt-1">
             <RoadmapControls
@@ -131,7 +158,7 @@ function TasksRoadmap() {
                                     columns={filteredColumns}
                                     start={ganttRange.start}
                                     end={ganttRange.end}
-                                    taskTypes={taskTypes}
+                                    taskTypes={safeTaskTypes}
                                     onUpdateTask={handleUpdateTask}
                                 />
                             </GanttWrapper>

@@ -137,7 +137,7 @@ export const taskApi = createApi({
                 url: `projects/${projectId}/tasks/task/${taskSlug}/`,
                 method: 'DELETE',
             }),
-            invalidatesTags: ['Tasks','Task'],
+            invalidatesTags: ['Tasks'],
         }),
 
         getStatuses: builder.query<Status[], { projectId: number }>({
