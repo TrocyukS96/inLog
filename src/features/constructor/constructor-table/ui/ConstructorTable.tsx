@@ -7,6 +7,7 @@ import {
   File,
   FileSpreadsheet,
   Hash,
+  List,
   MoreHorizontal,
   Plus,
   Trash2,
@@ -49,6 +50,7 @@ import {
 } from '../../../../shared/ui/table'
 import ConstructorTableEditingRow from './ConstructorTableEditingRow'
 import ConstructorTableFormDialog from './ConstructorTableFormDialog'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../../../shared/ui/select'
 
 export interface ColumnFormData {
   titleEn: string
@@ -112,8 +114,8 @@ const ConstructorTable = (props: Props) => {
       case 'integer':
         return 0
       case 'date':
-        return null
       case 'file':
+      case 'dropdown':
         return null
       default:
         return ''
@@ -177,6 +179,8 @@ const ConstructorTable = (props: Props) => {
         return <Calendar className={className} />
       case 'file':
         return <File className={className} />
+      case 'dropdown':
+        return <List className={className} />
       default:
         return <Type className={className} />
     }
@@ -476,6 +480,38 @@ const ConstructorTable = (props: Props) => {
             )}
           </div>
         )
+      case 'dropdown':
+        const options: { label: string, value: string }[] = [
+          { label: 'Option 1', value: 'option1' },
+          { label: 'Option 2', value: 'option2' },
+          { label: 'Option 3', value: 'option3' },
+        ]
+        return (
+          <div className="space-y-1 min-w-[150px]">
+            <Select
+              value={value || ''}
+              onValueChange={(value: string) => updateEditValue(column.key, value)}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder={t('fields.select-option')} />
+              </SelectTrigger>
+              <SelectContent>
+                {options.map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            
+            {error && (
+              <p className="text-xs text-destructive flex items-center gap-1">
+                <AlertCircle className="h-3 w-3" />
+                {error}
+              </p>
+            )}
+          </div>
+        )
       default:
         return (
           <div className="space-y-1 min-w-[150px]">
@@ -508,6 +544,10 @@ const ConstructorTable = (props: Props) => {
         return <span className="text-sm truncate min-w-[150px]">{formatDate(value)}</span>
       case 'integer':
         return <span className="text-sm truncate min-w-[150px]">{value}</span>
+      case 'dropdown':
+        return <span className="text-sm truncate min-w-[150px]">
+          {value}
+        </span>
       case 'file':
         return (
           <div className="flex items-center gap-2 min-w-[150px]">
@@ -579,7 +619,7 @@ const ConstructorTable = (props: Props) => {
                         <DropdownMenuItem
                           onClick={() => openDeleteColumnAlert(column)}
                           className="text-destructive focus:text-destructive"
-                          // disabled={columns.length <= 1}
+                        // disabled={columns.length <= 1}
                         >
                           <Trash2 className="h-3 w-3 mr-2" />
                           {t('buttons.delete')}

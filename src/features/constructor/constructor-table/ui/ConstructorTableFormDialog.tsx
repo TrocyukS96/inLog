@@ -146,6 +146,9 @@ const ConstructorTableFormDialog = ({
                 <SelectItem value="file">
                   {t('fields.file')}
                 </SelectItem>
+                <SelectItem value="dropdown">
+                  {t('fields.dropdown')}
+                </SelectItem>
               </SelectContent>
             </Select>
           </div>

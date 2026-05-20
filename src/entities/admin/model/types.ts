@@ -95,7 +95,7 @@ export interface AdminPanelGroup {
     name_en: string
     name_ru: string
     structure_element: number
-    type: 'string' | 'integer' | 'date' | 'file'
+    type: 'string' | 'integer' | 'date' | 'file' | 'dropdown'
     parent_node?: number  //добавил для удобства составления отчета
     parent_tab?: number  //добавил для удобства составления отчета
 

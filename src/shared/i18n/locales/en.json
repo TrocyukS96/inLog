@@ -135,6 +135,8 @@
         "text": "Text",
         "number": "Number",
         "file": "File",
+        "dropdown": "Dropdown",
+        "select-option": "Select option",
         "select-date": "Select date",
         "enter-text": "Enter text",
         "enter-number": "Enter number",
