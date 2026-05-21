@@ -7,7 +7,7 @@ import "@svar-ui/react-gantt/all.css"
 import { formatDate } from 'date-fns'
 import { AlertCircle, Clock } from 'lucide-react'
 import { useTheme } from 'next-themes'
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useDispatch } from 'react-redux'
 import { useSearchParams } from 'react-router-dom'
