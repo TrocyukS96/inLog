@@ -57,6 +57,7 @@ function TasksRoadmap() {
     const ganttTasks = useMemo(() => {
         try {
             const tasks = convertToGanttTasks(tasksData?.results || [], i18n.language)
+            console.log(JSON.stringify(tasks, null, 2), '----tasks')
             return Array.isArray(tasks) ? tasks : []
         } catch (error) {
             console.error('Error converting tasks:', error)
@@ -65,13 +66,59 @@ function TasksRoadmap() {
     }, [tasksData?.results, i18n.language])
 
 
-    const ganttRange = useMemo(() => {
-        if (!ganttTasks.length) return {}
+    // const ganttRange = useMemo(() => {
+    //     if (!ganttTasks.length) return {}
 
-        const dates = ganttTasks.flatMap(t => [t.start, t.end])
-        return {
-            start: dateFrom ? new Date(dateFrom) : new Date(Math.min(...dates.map(d => d.getTime()))),
-            end: dateTo ? new Date(dateTo) : new Date(Math.max(...dates.map(d => d.getTime()))),
+    //     const dates = ganttTasks.flatMap(t => [t.start, t.end])
+    //     return {
+    //         start: dateFrom ? new Date(dateFrom) : new Date(Math.min(...dates.map(d => d.getTime()))),
+    //         end: dateTo ? new Date(dateTo) : new Date(Math.max(...dates.map(d => d.getTime()))),
+    //     }
+    // }, [ganttTasks, dateFrom, dateTo])
+
+    const ganttRange = useMemo(() => {
+        // Всегда возвращаем объект с датами
+        if (!ganttTasks.length) {
+            const now = new Date()
+            return {
+                start: now,
+                end: new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000) // +7 дней
+            }
+        }
+
+        try {
+            const dates = ganttTasks.flatMap(t => {
+                // Убеждаемся, что это Date объекты
+                const start = t.start instanceof Date ? t.start : new Date(t.start)
+                const end = t.end instanceof Date ? t.end : new Date(t.end)
+
+                // Проверяем валидность
+                if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+                    console.warn('Invalid date for task:', t.id, t.start, t.end)
+                    return []
+                }
+
+                return [start, end]
+            })
+
+            if (!dates.length) {
+                const now = new Date()
+                return { start: now, end: new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000) }
+            }
+
+            const timestamps = dates.map(d => d.getTime())
+
+            return {
+                start: dateFrom ? new Date(dateFrom) : new Date(Math.min(...timestamps)),
+                end: dateTo ? new Date(dateTo) : new Date(Math.max(...timestamps)),
+            }
+        } catch (error) {
+            console.error('Error calculating ganttRange:', error)
+            const now = new Date()
+            return {
+                start: now,
+                end: new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000)
+            }
         }
     }, [ganttTasks, dateFrom, dateTo])
 
