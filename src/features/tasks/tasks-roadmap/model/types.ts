@@ -9,6 +9,7 @@ export interface RoadmapColumnOption {
 
 export interface GanttTask {
     id: number
+    slug: string
     text: string
     start: Date
     end: Date

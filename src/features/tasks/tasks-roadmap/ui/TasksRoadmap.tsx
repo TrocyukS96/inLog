@@ -56,7 +56,6 @@ function TasksRoadmap() {
 
     const ganttTasks = useMemo(() => {
         try {
-            debugger
             const tasks = convertToGanttTasks(tasksData?.results || [], i18n.language)
             return Array.isArray(tasks) ? tasks : []
         } catch (error) {
@@ -111,22 +110,6 @@ function TasksRoadmap() {
     const safeTaskTypes = useMemo(() => {
         return Array.isArray(taskTypes) ? taskTypes : []
     }, [taskTypes])
-
-    useEffect(() => {
-        console.log('Debug info:', {
-            tasksDataResults: tasksData?.results,
-            ganttTasks,
-            ganttTasksLength: ganttTasks?.length,
-            taskTypes,
-            columnsLength: columns?.length,
-            filteredColumnsLength: filteredColumns?.length,
-            viewMode,
-            scalePreset: scalePresets[viewMode]
-        })
-    }, [tasksData, ganttTasks, taskTypes, columns, filteredColumns, viewMode])
-
-    console.log(JSON.stringify(ganttTasks, null, 2),'----ganttTasks')
-    console.log(JSON.stringify(safeTaskTypes, null, 2),'----safeTaskTypes')
 
     return (
         <div className="flex flex-col gap-4 pt-1">

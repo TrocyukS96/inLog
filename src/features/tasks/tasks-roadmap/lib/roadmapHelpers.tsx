@@ -13,24 +13,31 @@ const sortTasksHierarchy = (tasks: GanttTask[]) => {
     const addTask = (task: GanttTask) => {
         if (added.has(task.id)) return
 
-        if (visiting.has(task.id)) return
+        if (visiting.has(task.id)) return //задача уже в процессе обработки
 
         visiting.add(task.id)
 
-        if (task.parent) {
+        const taskSlugParts = task.slug.split('_')
+
+        if (task.parent) { //если есть родитель, то добавляем его
             const parent = map.get(task.parent)
 
-            if (!parent) {
+            if (!parent) { //если родитель не найден, то удаляем задачу из процесса обработки, TODO - временное решение
                 visiting.delete(task.id)
                 return
             }
 
-            addTask(parent)
+            addTask(parent) //рекурсивно добавляем родителя
         }
 
-        visiting.delete(task.id)
+        if(!task.parent && taskSlugParts.length > 2) { //если есть родитель и в slug есть подзадача, то удаляем задачу из процесса обработки
+            visiting.delete(task.id)
+            return
+        }
 
-        added.add(task.id)
+        visiting.delete(task.id) //удаляем задачу из процесса обработки
+
+        added.add(task.id) //добавляем задачу в список обработанных
 
         result.push(task)
     }
@@ -64,8 +71,9 @@ export const convertToGanttTasks = (tasks: Task[], language: string): GanttTask[
             slug: task.slug,
         }
     })
-
-    return sortTasksHierarchy(mappedTasks)
+    const res = sortTasksHierarchy(mappedTasks)  //сортируем задачи по иерархии
+    // console.log(res,'----res')
+    return res 
 }
 
 export const getDefaultRoadmapColumns = (t: TFunction<"translation", undefined>) => {
