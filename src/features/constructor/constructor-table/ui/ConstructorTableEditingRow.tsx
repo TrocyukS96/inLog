@@ -24,7 +24,13 @@ const ConstructorTableEditingRow = (props: ConstructorTableEditingRowProps) => {
         record, 
         columns, 
         disabled,
-        saveEdit, cancelEdit, startEdit, deleteRow, renderEditCell, renderViewCell } = props
+        saveEdit, 
+        cancelEdit, 
+        startEdit, 
+        deleteRow, 
+        renderEditCell, 
+        renderViewCell,
+    } = props
     return (
         <TableRow
             key={record.key}

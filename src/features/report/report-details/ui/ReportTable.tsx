@@ -6,6 +6,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from ".
 import { Skeleton } from "../../../../shared/ui/skeleton"
 import { RefreshCw, FileText } from "lucide-react"
 import type { AdminPanelReportTable } from "../../../../entities/admin/model/types"
+import { formatDate } from "date-fns"
+import { DATE_VIEW_FORMAT } from "../../../../shared/config/constants"
 
 interface ReportTableProps {
     data: AdminPanelReportTable
@@ -60,7 +62,11 @@ const ReportTable = ({ data, isLoading = false, onRefresh }: ReportTableProps) =
                             <span>Файл</span>
                         </a>
                     )
-                } else {
+                } else if(fieldItem?.type === 'date') {
+                    rowData[fieldName] = formatDate(fieldItem?.value, DATE_VIEW_FORMAT)
+                }
+                
+                else {
                     rowData[fieldName] = fieldItem?.value ?? '-'
                 }
             })

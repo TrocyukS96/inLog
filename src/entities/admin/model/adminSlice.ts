@@ -1,6 +1,6 @@
 import { createApi } from "@reduxjs/toolkit/query/react"
 import { baseQuery } from '../../../shared/api/clientApi'
-import type { AdminPanelGroup, AdminPanelGroupRequest, AdminPanelNode, AdminPanelNodeRequest, AdminPanelNodeTab, AdminPanelReport, AdminPanelReportRequest } from "./types"
+import type { AdminPanelGroup, AdminPanelGroupRequest, AdminPanelNode, AdminPanelNodeRequest, AdminPanelNodeTab, AdminPanelReport, AdminPanelReportRequest, AdminPanelReportTable, AdminPanelRowRequest } from "./types"
 import { errorsHandler } from "../../../shared/lib/errors-handler"
 
 export const adminApi = createApi({
@@ -132,12 +132,59 @@ export const adminApi = createApi({
             }),
             invalidatesTags: ['NodeGroups','Node']
         }),
-        generateReport: builder.mutation<AdminPanelReport[], { organizationId: number, body: AdminPanelReportRequest[] }>({
+        generateReport: builder.mutation<AdminPanelReportTable, { organizationId: number, body: AdminPanelReportRequest[] }>({
             query: ({ organizationId, body }) => ({
                 url: `organizations/${organizationId}/get-combined-constructor-data/`,
                 method: 'POST',
                 body,
             }),
+            transformResponse: (response: AdminPanelReport[]) => {
+                const dataForTable: AdminPanelReportTable = {}
+                response.forEach((item: AdminPanelReport) => {
+                    item.data.objects.forEach((obj: any) => {
+                        const fieldNames = obj.data ? Object.keys(obj.data) : []
+                        if (fieldNames.length > 0) {
+                            fieldNames.forEach((fieldName: string) => {
+                                const fieldValue = obj.data[fieldName]
+                                
+                                if (!dataForTable[fieldName]) {
+                                    dataForTable[fieldName] = []
+                                }
+                                
+                                dataForTable[fieldName].push({
+                                    value: fieldValue?.value ?? '',
+                                    type: fieldValue?.type ?? '',
+                                    id: obj.id,
+                                })
+                            })
+                        }
+                    })
+                })
+                return dataForTable
+            }
+        }),
+        addAdminPanelRow:builder.mutation<AdminPanelReport, { organizationId: number, body: AdminPanelRowRequest }>({
+            query: ({ organizationId, body }) => ({
+                url: `organizations/${organizationId}/structure-element-object/`,
+                method: 'POST',
+                body
+            }),
+            invalidatesTags: ['NodeGroups','Node']
+        }),
+        updateAdminPanelRow: builder.mutation<AdminPanelReport, { organizationId: number, rowId: number, body: AdminPanelRowRequest }>({
+            query: ({ organizationId, rowId, body }) => ({
+                url: `organizations/${organizationId}/structure-element-object/${rowId}/`,
+                method: 'PATCH',
+                body,
+            }),
+            invalidatesTags: ['NodeGroups','Node']
+        }),
+        deleteAdminPanelRow: builder.mutation<void, { organizationId: number, rowId: number }>({
+            query: ({ organizationId, rowId }) => ({
+                url: `organizations/${organizationId}/structure-element-object/${rowId}/`,
+                method: 'DELETE',
+            }),
+            invalidatesTags: ['NodeGroups','Node']
         }),
     })
 })
@@ -156,5 +203,8 @@ export const {
     useAddAdminPanelGroupMutation,
     useDeleteAdminPanelGroupMutation,
     useUpdateAdminPanelGroupMutation,
-    useGenerateReportMutation
+    useGenerateReportMutation,
+    useAddAdminPanelRowMutation,
+    useDeleteAdminPanelRowMutation,
+    useUpdateAdminPanelRowMutation
 } = adminApi;

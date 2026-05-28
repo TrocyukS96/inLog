@@ -5,9 +5,10 @@ import { AlertCircle, Loader2, RefreshCcw } from 'lucide-react'
 import { useDispatch, useSelector } from 'react-redux'
 import { useSearchParams } from 'react-router-dom'
 import { makeSelectAdminPanelNodes } from '../../../../entities/admin'
-import { adminApi, useGetAdminPanelNodeByIdQuery } from '../../../../entities/admin/model/adminSlice'
+import { adminApi, useGetAdminPanelGroupsQuery, useGetAdminPanelNodeByIdQuery } from '../../../../entities/admin/model/adminSlice'
 import type { AdminPanelGroup, AdminPanelNode } from '../../../../entities/admin/model/types'
 import { Button } from '../../../../shared/ui/button'
+import ConstructorNodeProvider from '../model/ConstructorNodeContext'
 import ConstructorNodeConnections from './ConstructorNodeConnections'
 import ConstructorTableWrapper from './ConstructorTableWrapper'
 import ConstructorTabs from './ConstructorTabs'
@@ -60,6 +61,13 @@ const ConstructorNodeDetails = (props: Props) => {
 
     const { data: currentNode, isLoading, isError } = useGetAdminPanelNodeByIdQuery({ organizationId: organizationId!, nodeId }, { skip: !organizationId || !nodeId })
 
+    const { data: groups } = useGetAdminPanelGroupsQuery({
+        group: nodeId,
+        organizationId: organizationId,
+    }, {
+        skip: !nodeId
+    })
+
     const handleUpdateNodeConnections = (node: AdminPanelNode) => {
         updateNode(node)
     }
@@ -90,6 +98,7 @@ const ConstructorNodeDetails = (props: Props) => {
     }
 
     return (
+        <ConstructorNodeProvider nodeId={nodeId} groups={groups || []}>
         <div>
             <div className="flex items-center justify-between">
                 <h1 className="text-2xl font-bold">{currentNode?.[`name_${currentLang}`]}</h1>
@@ -109,6 +118,7 @@ const ConstructorNodeDetails = (props: Props) => {
                     <AccordionTrigger>{t('admin-page.table')}</AccordionTrigger>
                     <AccordionContent>
                         <ConstructorTableWrapper
+                            groups={groups || []}
                             isShowTitle={false}
                             data={
                                 {
@@ -145,6 +155,7 @@ const ConstructorNodeDetails = (props: Props) => {
 
             </Accordion>
         </div>
+        </ConstructorNodeProvider>
     )
 }
 

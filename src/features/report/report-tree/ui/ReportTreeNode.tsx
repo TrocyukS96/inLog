@@ -53,7 +53,7 @@ const ReportTreeNode = ({
     const [connectionNodes, setConnectionNodes] = useState<AdminPanelNode[]>([])
 
     useEffect(() => {
-        if(node.related_groups.length > 0) {
+        if (node.related_groups.length > 0) {
             setConnectionNodes(nodes.filter(n => node.related_groups.includes(n.id)))
         } else {
             setConnectionNodes([])
@@ -136,7 +136,7 @@ const ReportTreeNode = ({
                     }
                     return null
                 })
-                .filter((t): t is AdminPanelNodeTab => 
+                .filter((t): t is AdminPanelNodeTab =>
                     !!t && !!t.nestLevel && !!tab.nestLevel && t.nestLevel! < tab.nestLevel!
                 )
             if (parentTabs.length > 0 && !parentTabs.some(parent => selectedNodes?.some(sel => sel.id === parent.id))) {
@@ -166,72 +166,76 @@ const ReportTreeNode = ({
         </div>
     )
 
-    const NodeContent = (
-        <div
-            {...item.getProps()}
-            className={cn(
-                "w-fit flex items-center gap-2 py-2 px-3 rounded-lg transition-colors cursor-pointer group",
-                "hover:bg-accent hover:text-accent-foreground",
-            )}
-            style={{ paddingLeft: `${level * 20 + 12}px` }}
-        >
-            <div onClick={handleNodeSelect} className="flex-shrink-0">
-                <Checkbox
-                    className='cursor-pointer'
-                    checked={isChecked}
-                    disabled={disableNodeCheckbox()}
-                    onCheckedChange={(checked) => onNodeChange?.(node, checked as boolean)}
-                />
+    const NodeContent = () => {
+        const isDisabled = disableNodeCheckbox()
+        return (
+            <div
+                {...item.getProps()}
+                className={cn(
+                    "w-fit flex items-center gap-2 py-2 px-3 rounded-lg transition-colors cursor-pointer group",
+                    "hover:bg-accent hover:text-accent-foreground",
+                    isDisabled ? "cursor-not-allowed" : "cursor-pointer"
+                )}
+                style={{ paddingLeft: `${level * 20 + 12}px` }}
+            >
+                <div onClick={isDisabled ? undefined : handleNodeSelect} className="flex-shrink-0">
+                    <Checkbox
+                        className='cursor-pointer'
+                        checked={isChecked}
+                        disabled={isDisabled}
+                        onCheckedChange={(checked) => onNodeChange?.(node, checked as boolean)}
+                    />
+                </div>
+
+                {hasChildren && (
+                    <button
+                        onClick={(e) => {
+                            e.stopPropagation()
+                            onToggle?.(item)
+                        }}
+                        className="flex-shrink-0 p-0.5 rounded hover:bg-muted transition-colors"
+                    >
+                        {isExpanded ? (
+                            <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                        ) : (
+                            <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                        )}
+                    </button>
+                )}
+
+                {!hasChildren && <div className="w-0" />}
+
+                {hasChildren ? (
+                    <FolderTree className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                ) : (
+                    <FileText className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                )}
+
+                <span className="text-sm flex-1 truncate">
+                    {displayName}
+                </span>
             </div>
-
-            {hasChildren && (
-                <button
-                    onClick={(e) => {
-                        e.stopPropagation()
-                        onToggle?.(item)
-                    }}
-                    className="flex-shrink-0 p-0.5 rounded hover:bg-muted transition-colors"
-                >
-                    {isExpanded ? (
-                        <ChevronDown className="h-4 w-4 text-muted-foreground" />
-                    ) : (
-                        <ChevronRight className="h-4 w-4 text-muted-foreground" />
-                    )}
-                </button>
-            )}
-
-            {!hasChildren && <div className="w-0" />}
-
-            {hasChildren ? (
-                <FolderTree className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-            ) : (
-                <FileText className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-            )}
-
-            <span className="text-sm flex-1 truncate">
-                {displayName}
-            </span>
-        </div>
-    )
+        )
+    }
 
     return (
         <div className="select-none">
             {connectionNodes.length > 0 ? (
                 <HoverCard openDelay={100}>
                     <HoverCardTrigger asChild>
-                        {NodeContent}
+                        <NodeContent />
                     </HoverCardTrigger>
                     <HoverCardContent side="right" align="start" className="w-72 z-[100]">
                         {renderConnections()}
                     </HoverCardContent>
                 </HoverCard>
             ) : (
-                NodeContent
+                <NodeContent />
             )}
 
             {(tabs.length > 0 || orphanColumns.length > 0 || columnsByTab.size > 0) && (
-                <div 
-                    style={{ marginLeft: `${level * 26 + 12}px` }} 
+                <div
+                    style={{ marginLeft: `${level * 26 + 12}px` }}
                     className="mt-1 mb-2 space-y-3 border-l-2 border-border/50 ml-4 pl-4"
                 >
                     {tabs.length > 0 && (

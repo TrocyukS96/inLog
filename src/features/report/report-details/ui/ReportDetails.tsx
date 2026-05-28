@@ -2,9 +2,9 @@ import { useCallback, useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { useSearchParams } from "react-router-dom"
 import { useGenerateReportMutation } from "../../../../entities/admin/model/adminSlice"
-import type { AdminPanelGroup, AdminPanelNode, AdminPanelNodeTab, AdminPanelReport, AdminPanelReportRequest, AdminPanelReportTable } from "../../../../entities/admin/model/types"
-import ReportTable from "./ReportTable"
+import type { AdminPanelGroup, AdminPanelNode, AdminPanelNodeTab, AdminPanelReportRequest, AdminPanelReportTable } from "../../../../entities/admin/model/types"
 import { errorsHandler } from "../../../../shared/lib/errors-handler"
+import ReportTable from "./ReportTable"
 
 interface ReportDetailsProps {
     selectedEntities: {
@@ -78,32 +78,7 @@ const ReportDetails = ({ selectedEntities }: ReportDetailsProps) => {
                 setReportData({})
                 return
             }
-
-            const dataForTable: AdminPanelReportTable = {}
-            
-            response.forEach((item: AdminPanelReport) => {
-                item.data.objects.forEach((obj: any) => {
-                    const fieldNames = obj.data ? Object.keys(obj.data) : []
-                    
-                    if (fieldNames.length > 0) {
-                        fieldNames.forEach((fieldName: string) => {
-                            const fieldValue = obj.data[fieldName]
-                            
-                            if (!dataForTable[fieldName]) {
-                                dataForTable[fieldName] = []
-                            }
-                            
-                            dataForTable[fieldName].push({
-                                value: fieldValue?.value ?? '',
-                                type: fieldValue?.type ?? '',
-                                id: obj.id,
-                            })
-                        })
-                    }
-                })
-            })
-            
-            setReportData(dataForTable)
+            setReportData(response)
         } catch (error) {
             console.error('Error generating report:', error)
             errorsHandler(error, t)

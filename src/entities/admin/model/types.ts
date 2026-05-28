@@ -115,6 +115,23 @@ export interface AdminPanelReportRequest {
     element?:number
 }
 
+export interface AdminPanelRowRequest {
+    structure_element?: number
+    group: number
+    data: {
+        [key: string]: {
+            type: AdminPanelGroup['type']
+            value: string
+        }
+    }
+}
+
+export type AdminPanelRowData = Record<string, {
+    type: AdminPanelGroup['type'];
+    value: string;
+    rowIndex?:number; //добавил для удобства составления отчета
+}>
+
 export type AdminPanelReport = {
     id?: number
     structure_element: number
@@ -125,10 +142,7 @@ export type AdminPanelReport = {
         name_ru: string;
         objects: Array<{
             id: number;
-            data: Record<string, {
-                type: AdminPanelGroup['type'];
-                value: string;
-            }>;
+            data: AdminPanelRowData;
         }>;
         organization: number;
         parent: number;

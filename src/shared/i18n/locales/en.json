@@ -38,7 +38,8 @@
         "password": "Password must be at least 8 characters long",
         "password-not-match": "Passwords do not match",
         "required-to-agree": "You must agree to the terms and privacy policy",
-        "enter-name": "Enter name"
+        "enter-name": "Enter name",
+        "invalid-number": "Enter a valid number"
         
     },
 
@@ -213,7 +214,12 @@
         "node-tab-added": "Node tab has been added successfully",
         "saving-task-data": "Saving task data",
         "task-status-changed": "Task status has been changed successfully",
-        "changing-task-status": "Changing task status"
+        "changing-task-status": "Changing task status",
+        "saving-row": "Saving row",
+        "row-saved": "Row has been saved successfully",
+        "row-edited": "Row has been updated successfully",
+        "row-deleted": "Row has been deleted successfully",
+        "deleting-row": "Deleting row"
     },
 
     "buttons": {

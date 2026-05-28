@@ -15,10 +15,11 @@ import {
   Upload,
   X as XIcon
 } from 'lucide-react'
-import { useEffect, useRef, useState, useCallback } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import type { AdminPanelGroup } from '../../../../entities/admin/model/types'
+import type { AdminPanelGroup, AdminPanelRowRequest } from '../../../../entities/admin/model/types'
 import { DATE_VIEW_FORMAT } from '../../../../shared/config/constants'
+import { errorsHandler } from '../../../../shared/lib/errors-handler'
 import { cn, formatFileName } from '../../../../shared/lib/utils'
 import {
   AlertDialog,
@@ -40,6 +41,7 @@ import {
 } from '../../../../shared/ui/dropdown-menu'
 import { Input } from '../../../../shared/ui/input'
 import { Popover, PopoverContent, PopoverTrigger } from '../../../../shared/ui/popover'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../../../shared/ui/select'
 import {
   Table,
   TableBody,
@@ -50,7 +52,6 @@ import {
 } from '../../../../shared/ui/table'
 import ConstructorTableEditingRow from './ConstructorTableEditingRow'
 import ConstructorTableFormDialog from './ConstructorTableFormDialog'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../../../shared/ui/select'
 
 export interface ColumnFormData {
   titleEn: string
@@ -84,21 +85,36 @@ export interface DataItem {
 
 interface Props {
   initialColumns?: ColumnConfig[]
+  initialRows?: any[]
   onCreate?: (column: ColumnConfig) => void
   onDelete?: (columnKey: string) => void
   onEdit?: (column: ColumnConfig) => void
   onDataChange?: (data: DataItem[]) => void
+  onSaveRow?: (row: AdminPanelRowRequest['data']) => Promise<void>
+  onEditRow?: (rowKey: string, body: AdminPanelRowRequest['data']) => Promise<void>
+  onDeleteRow?: (rowId: string) => Promise<void>
 }
 
 const ConstructorTable = (props: Props) => {
-  const { initialColumns, onCreate, onDelete, onEdit, onDataChange } = props
+  const { 
+    initialColumns, 
+    initialRows, 
+    onCreate, 
+    onDelete, 
+    onEdit, 
+    onDataChange, 
+    onSaveRow,
+    onEditRow,
+    onDeleteRow
+  } = props
   const { t, i18n } = useTranslation()
   const currentLang = i18n.language === 'ru' ? 'ru' : 'en'
+
 
   const dateLocale = currentLang === 'ru' ? ru : enUS
 
   const [columns, setColumns] = useState<ColumnConfig[]>(initialColumns || [])
-  const [data, setData] = useState<DataItem[]>([])
+  const [rows, setRows] = useState<DataItem[]>([])
   const [editingKey, setEditingKey] = useState<string | null>(null)
   const [editValues, setEditValues] = useState<Record<string, any>>({})
   const [editErrors, setEditErrors] = useState<Record<string, string>>({})
@@ -137,8 +153,8 @@ const ConstructorTable = (props: Props) => {
 
     setColumns(initialColumns)
 
-    if (data.length > 0) {
-      const updatedData = data.map(row => {
+    if (rows.length > 0) {
+      const updatedData = rows.map(row => {
         const newRow = { ...row }
 
         initialColumns.forEach(newCol => {
@@ -155,15 +171,21 @@ const ConstructorTable = (props: Props) => {
 
         return newRow
       })
-      setData(updatedData)
+      setRows(updatedData)
     }
-  }, [initialColumns, columns, data, getDefaultValueForColumn])
+  }, [initialColumns, columns, rows, getDefaultValueForColumn])
+
+  useEffect(() => {
+    if (initialRows) {
+      setRows(initialRows)
+    }
+  }, [initialRows])
 
   useEffect(() => {
     if (onDataChange) {
-      onDataChange(data)
+      onDataChange(rows)
     }
-  }, [data, onDataChange])
+  }, [rows, onDataChange])
 
   const formatDate = (date: Date | string | null) => {
     if (!date) return ''
@@ -186,10 +208,15 @@ const ConstructorTable = (props: Props) => {
     }
   }
 
-  const deleteRow = (key: string) => {
-    setData(data.filter((item) => item.key !== key))
-    if (editingKey === key) {
-      cancelEdit()
+  const deleteRow = async(key: string) => {
+    let targetId = rows.find((item) => item.key === key)?.key
+
+    if (targetId) {
+    await onDeleteRow?.(targetId).then(() => {
+      if (editingKey === key) {
+          cancelEdit()
+        }
+      })
     }
   }
 
@@ -197,12 +224,12 @@ const ConstructorTable = (props: Props) => {
     const updatedColumns = columns.filter((col) => col.key !== columnKey)
     setColumns(updatedColumns)
 
-    const updatedData = data.map(row => {
+    const updatedData = rows.map(row => {
       const newRow = { ...row }
       delete newRow[columnKey]
       return newRow
     })
-    setData(updatedData)
+    setRows(updatedData)
     onDelete?.(columnKey)
   }
 
@@ -229,6 +256,34 @@ const ConstructorTable = (props: Props) => {
     setIsEditingColumn(true)
     setSelectedColumn(column)
     setIsColumnDialogOpen(true)
+  }
+
+  const validateEditValue = (column: ColumnConfig, value: any): string => {
+    if (value === '') {
+      return t('validation.required')
+    }
+
+    if (column.inputType === 'integer') {
+      if (value !== '' && isNaN(Number(value))) {
+        return t('validation.invalid-number')
+      }
+    }
+    return ''
+  }
+
+  const validateRow = () => {
+    const newErrors: Record<string, string> = {}
+    const rowKeys = Object.keys(editValues)
+    rowKeys.forEach((columnKey) => {
+      const column = columns.find(col => col.key === columnKey)
+      if (column) {
+        const error = validateEditValue(column, editValues[columnKey])
+        if (error) {
+          newErrors[columnKey] = error
+        }
+      }
+    })
+    return newErrors
   }
 
   const handleColumnSubmit = (formData: ColumnFormData) => {
@@ -262,12 +317,12 @@ const ConstructorTable = (props: Props) => {
       const updatedColumns = [...columns, newColumn]
       setColumns(updatedColumns)
 
-      if (data.length > 0) {
-        const updatedData = data.map(row => ({
+      if (rows.length > 0) {
+        const updatedData = rows.map(row => ({
           ...row,
           [newColumn.key]: getDefaultValueForColumn(newColumn.inputType)
         }))
-        setData(updatedData)
+        setRows(updatedData)
       }
 
       onCreate?.(newColumn)
@@ -275,6 +330,11 @@ const ConstructorTable = (props: Props) => {
   }
 
   const cancelEdit = () => {
+    const newErrors = validateRow()
+    const hasErrors = Object.keys(newErrors).length > 0
+    if (hasErrors) {
+      setRows(rows.slice(0, -1))
+    }
     setEditingKey(null)
     setEditValues({})
     setEditErrors({})
@@ -295,62 +355,49 @@ const ConstructorTable = (props: Props) => {
     setEditingKey(record.key)
   }
 
-  const validateEditValue = (column: ColumnConfig, value: any): string => {
-    if (column.inputType === 'integer') {
-      if (value !== '' && isNaN(Number(value))) {
-        return t('validation.invalid-number')
-      }
-    }
-    return ''
-  }
-
-  const saveEdit = (key: string) => {
-    const newErrors: Record<string, string> = {}
+  const saveEdit = async () => {
+    const newErrors = validateRow()
     let hasErrors = false
-
-    Object.keys(editValues).forEach((columnKey) => {
-      const column = columns.find(col => col.key === columnKey)
-      if (column) {
-        const error = validateEditValue(column, editValues[columnKey])
-        if (error) {
-          newErrors[columnKey] = error
-          hasErrors = true
-        }
-      }
-    })
+    if (Object.keys(newErrors).length > 0) {
+      hasErrors = true
+    }
 
     if (hasErrors) {
       setEditErrors(newErrors)
       return
     }
 
-    const newData = data.map((item) => {
-      if (item.key === key) {
-        const updatedItem = { ...item }
-
-        Object.keys(editValues).forEach((columnKey) => {
-          const column = columns.find(col => col.key === columnKey)
-
-          if (column?.inputType === 'integer') {
-            const value = editValues[columnKey]
-            updatedItem[columnKey] = value !== '' && value !== null && value !== undefined
-              ? Number(value)
-              : 0
-          } else if (column?.inputType === 'file') {
-            updatedItem[columnKey] = editValues[columnKey]
-          } else {
-            updatedItem[columnKey] = editValues[columnKey]
-          }
-        })
-
-        return updatedItem
+    try {
+      const fieldsKeys = Object.keys(editValues).filter((key) => key !== 'key')
+      const body: AdminPanelRowRequest['data'] = {
       }
-      return item
-    })
-    setData(newData)
-    setEditingKey(null)
-    setEditValues({})
-    setEditErrors({})
+
+      for (const key of fieldsKeys) {
+        const field = editValues[key]
+        const targetColumn = columns.find(val => val.key === key)
+        const fieldType = targetColumn?.inputType || 'string'
+
+        if (field) {
+          body[`${targetColumn?.title.en || ''}`] = {
+            type: fieldType,
+            value: fieldType ==='integer' ? Number(field) : field || ''
+          }
+        }
+      }
+
+      const targetRowKey = initialRows?.find((item) => item.key === editingKey)?.key
+      if(targetRowKey) {
+        await onEditRow?.(targetRowKey, body)
+      }else{
+        await onSaveRow?.(body)
+      }
+
+      setEditingKey(null)
+      setEditValues({})
+      setEditErrors({})
+    } catch (error) {
+      errorsHandler(error, t)
+    }
   }
 
   const updateEditValue = (columnKey: string, value: any) => {
@@ -384,7 +431,7 @@ const ConstructorTable = (props: Props) => {
       newRow[col.key] = getDefaultValueForColumn(col.inputType)
     })
 
-    setData([...data, newRow])
+    setRows([...rows, newRow])
     startEdit(newRow)
   }
 
@@ -503,7 +550,7 @@ const ConstructorTable = (props: Props) => {
                 ))}
               </SelectContent>
             </Select>
-            
+
             {error && (
               <p className="text-xs text-destructive flex items-center gap-1">
                 <AlertCircle className="h-3 w-3" />
@@ -643,7 +690,7 @@ const ConstructorTable = (props: Props) => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {data.length === 0 ? (
+            {rows.length === 0 ? (
               <TableRow>
                 <TableCell
                   colSpan={columns.length + 1}
@@ -660,7 +707,7 @@ const ConstructorTable = (props: Props) => {
                 </TableCell>
               </TableRow>
             ) : (
-              data.map((record) => {
+              rows.map((record) => {
                 const editing = isEditing(record.key)
                 return (
                   <ConstructorTableEditingRow
@@ -683,7 +730,7 @@ const ConstructorTable = (props: Props) => {
         </Table>
       </div>
 
-      {data.length > 0 && (
+      {rows.length > 0 && (
         <div className="mt-4">
           <Button
             variant="outline"

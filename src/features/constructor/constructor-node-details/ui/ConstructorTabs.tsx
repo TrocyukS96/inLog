@@ -5,14 +5,6 @@ import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useSearchParams } from 'react-router-dom'
 import type { AdminPanelNode, AdminPanelNodeTab } from '../../../../entities/admin/model/types'
-import { Button } from '../../../../shared/ui/button'
-import {
-    Dialog,
-    DialogContent,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle
-} from '../../../../shared/ui/dialog'
 import {
     AlertDialog,
     AlertDialogAction,
@@ -23,12 +15,19 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from '../../../../shared/ui/alert-dialog'
+import { Button } from '../../../../shared/ui/button'
+import {
+    Dialog,
+    DialogContent,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle
+} from '../../../../shared/ui/dialog'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../../../../shared/ui/dropdown-menu'
 import { Input } from '../../../../shared/ui/input'
 import { Label } from '../../../../shared/ui/label'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../../../shared/ui/tabs'
-import ConstructorTableWrapper from './ConstructorTableWrapper'
-import ConstructorTabsConnections from './ConstructorTabsConnections'
+import { Tabs, TabsList, TabsTrigger } from '../../../../shared/ui/tabs'
+import ConstructorTab from './ConstructorTab'
 
 interface Props {
     node?: AdminPanelNode
@@ -120,14 +119,14 @@ const ConstructorTabs = ({ node, addTab, updateTab, deleteTab }: Props) => {
         handleCloseModals()
     }
 
-    const handleChangeTabConnections = (tab: AdminPanelNodeTab) => {
-        updateTab({
-            id: tab.id!,
-            name_en: tab.name_en,
-            name_ru: tab.name_ru,
-            related_structure_elements: tab.related_structure_elements || [],
-        })
-    }
+    // const handleChangeTabConnections = (tab: AdminPanelNodeTab) => {
+    //     updateTab({
+    //         id: tab.id!,
+    //         name_en: tab.name_en,
+    //         name_ru: tab.name_ru,
+    //         related_structure_elements: tab.related_structure_elements || [],
+    //     })
+    // }
 
     const handleDeleteTab = () => {
         if (selectedTab) {
@@ -203,25 +202,10 @@ const ConstructorTabs = ({ node, addTab, updateTab, deleteTab }: Props) => {
                     </TabsList>
 
                     {tabs.map((tab) => (
-                        <TabsContent key={tab.id} value={tab.id!.toString()}>
-                            <div className="p-4 flex flex-col gap-6">
-                                <ConstructorTabsConnections
-                                    node={node}
-                                    tab={tab}
-                                    organizationId={organizationId}
-                                    onChange={handleChangeTabConnections}
-                                />
-                                <ConstructorTableWrapper
-                                    data={{
-                                        entityId: tab.id!,
-                                        name_en: tab.name_en,
-                                        name_ru: tab.name_ru,
-                                        organizationId: organizationId,
-                                        type: 'structure_element'
-                                    }}
-                                />
-                            </div>
-                        </TabsContent>
+                        <ConstructorTab
+                            tab={tab}
+                            organizationId={organizationId}
+                        />
                     ))}
                 </Tabs>
             )}

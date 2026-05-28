@@ -57,7 +57,6 @@ function TasksRoadmap() {
     const ganttTasks = useMemo(() => {
         try {
             const tasks = convertToGanttTasks(tasksData?.results || [], i18n.language)
-            console.log(JSON.stringify(tasks, null, 2), '----tasks')
             return Array.isArray(tasks) ? tasks : []
         } catch (error) {
             console.error('Error converting tasks:', error)

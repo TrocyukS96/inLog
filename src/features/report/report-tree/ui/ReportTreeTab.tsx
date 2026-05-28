@@ -92,9 +92,10 @@ const ReportTreeTab = ({
     const TriggerContent = (
         <div 
             className={cn(
-                "flex items-center gap-2 cursor-pointer w-fit p-2 rounded-lg transition-colors hover:bg-accent"
+                "flex items-center gap-2 cursor-pointer w-fit p-2 rounded-lg transition-colors hover:bg-accent",
+                disabledTab ? "opacity-50 cursor-not-allowed" : "cursor-pointer"
             )}
-            onClick={(e) => onTabSelect(tab, !isSelected, e)}
+            onClick={(e) => disabledTab ? undefined : onTabSelect(tab, !isSelected, e)}
         >
             <Checkbox
                 className='cursor-pointer'
@@ -135,7 +136,7 @@ const ReportTreeTab = ({
                                 column={column}
                                 isSelected={isColumnSelected(column)}
                                 disabled={disabledColumn}
-                                onSelect={(column, checked, e) => onColumnSelect(column, checked, e)}
+                                onSelect={(column, checked, e) =>disabledColumn ? undefined : onColumnSelect(column, checked, e)}
                             />
                         ))}
                     </div>
