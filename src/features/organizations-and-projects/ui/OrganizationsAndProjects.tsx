@@ -92,10 +92,10 @@ const OrganizationsAndProjects = () => {
                         {organizations.length === 0 ? (
                             <div className="text-center py-10 text-muted-foreground border border-border/50 rounded-lg">
                                 <Building2 className="h-12 w-12 mx-auto mb-3 text-muted-foreground/50" />
-                                <p className="mb-4">{t('settings-page.no-organizations-yet')}</p>
+                                <p className="mb-4">{t('scheduler-page.no-organizations-yet')}</p>
                                 <Button variant="outline" onClick={() => setIsCreateOrgOpen(true)}>
                                     <Plus className="h-4 w-4 mr-2" />
-                                    {t('settings-page.create-first-organization')}
+                                    {t('scheduler-page.create-first-organization')}
                                 </Button>
                             </div>
                         ) : (
@@ -165,7 +165,7 @@ const OrganizationsAndProjects = () => {
                         ) : projects.length === 0 ? (
                             <div className="text-center py-10 text-muted-foreground border border-border/50 rounded-lg">
                                 <FolderOpen className="h-12 w-12 mx-auto mb-3 text-muted-foreground/50" />
-                                <p className="mb-4">{t('settings-page.no-projects-in-organization')}</p>
+                                <p className="mb-4">{t('scheduler-page.no-projects-in-organization')}</p>
                                 <Button 
                                     variant="outline" 
                                     onClick={() => setIsCreateProjectOpen(true)}

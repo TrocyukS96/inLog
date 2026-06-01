@@ -53,17 +53,13 @@ export function RootLayout() {
   }, [])
 
   const verifyAndRedirect = useCallback(() => {
+    debugger
     const token = localStorage.getItem(ACCESS_TOKEN)
     if (isUserLoading || isOrgsLoading || isProjectsLoading || !token) return
 
     if (userError) {
       toast.error(t('errors.error-loading-user'))
       navigate(routes.login())
-      return
-    }
-
-    if ( projects && projects?.length === 0) {
-      navigate(routes.settings.organizationsAndProjects())
       return
     }
 
