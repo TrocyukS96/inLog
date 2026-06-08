@@ -2,8 +2,8 @@ import { TableRow, TableCell } from "../../../../shared/ui/table"
 import { Button } from "../../../../shared/ui/button"
 import { cn } from "../../../../shared/lib/utils"
 import { Save, X, Edit, Trash2 } from "lucide-react"
-import type { ColumnConfig } from "./ConstructorTable"
 import type { DataItem } from "./ConstructorTable"
+import type { ColumnConfig } from "../model/types"
 
 interface ConstructorTableEditingRowProps {
     editing?: boolean
