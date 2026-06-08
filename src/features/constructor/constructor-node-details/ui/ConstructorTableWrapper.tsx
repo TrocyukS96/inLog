@@ -15,6 +15,7 @@ import { errorsHandler } from "../../../../shared/lib/errors-handler";
 import ConstructorTable from "../../constructor-table/ui/ConstructorTable";
 import { useConstructorNodeContext } from "../model/ConstructorNodeContext";
 import { useMemo } from "react";
+import type { ColumnConfig } from "../../constructor-table/model/types";
 
 interface DataItem {
     key: string
@@ -34,16 +35,6 @@ interface Props {
     isShowTitle?: boolean
 }
 
-export interface ColumnConfig {
-    key: string
-    title: {
-        en: string
-        ru: string
-    }
-    inputType: AdminPanelGroup['type']
-    width?: number
-}
-
 const ConstructorTableWrapper = ({ groups, data, isShowTitle = true }: Props) => {
     const { t } = useTranslation()
 
@@ -54,6 +45,7 @@ const ConstructorTableWrapper = ({ groups, data, isShowTitle = true }: Props) =>
             ru: group.name_ru,
         },
         inputType: group.type,
+        dropdownOptions: group.dropdown_choices,
         width: 100,
     }))
 
@@ -100,12 +92,14 @@ const ConstructorTableWrapper = ({ groups, data, isShowTitle = true }: Props) =>
                     name_ru: column.title.ru,
                     // structure_element: node.id, 
                     [data.type]: data.entityId,
-                    type: column.inputType
+                    type: column.inputType,
+                    dropdown_choices: column.dropdownOptions
                 }
             }).unwrap()
             toast.success(t('notice-list.group-created'))
         } catch (error) {
             errorsHandler(error, t)
+            throw error
         } finally {
             toast.dismiss(toastId)
         }
@@ -142,6 +136,7 @@ const ConstructorTableWrapper = ({ groups, data, isShowTitle = true }: Props) =>
             toast.success(t('notice-list.row-saved'))
         } catch (error) {
             errorsHandler(error, t)
+            throw error
         } finally {
             toast.dismiss(toastId)
         }
@@ -164,6 +159,7 @@ const ConstructorTableWrapper = ({ groups, data, isShowTitle = true }: Props) =>
             toast.success(t('notice-list.row-edited'))
         } catch (error) {
             errorsHandler(error, t)
+            throw error
         } finally {
             toast.dismiss(toastId)
         }
@@ -181,6 +177,7 @@ const ConstructorTableWrapper = ({ groups, data, isShowTitle = true }: Props) =>
             toast.success(t('notice-list.row-deleted'))
         } catch (error) {
             errorsHandler(error, t)
+            throw error
         } finally {
             toast.dismiss(toastId)
         }

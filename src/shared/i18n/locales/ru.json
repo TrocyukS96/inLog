@@ -153,7 +153,9 @@
         "filter-tasks": "Фильтры задач",
         "select-status": "Выберите статус",
         "all-statuses": "Все статусы",
-        "all-priorities": "Все приоритеты"
+        "all-priorities": "Все приоритеты",
+        "dropdown-options": "Выберите опции",
+        "enter-dropdown-options": "Введите опции"
     },
     "notice-list": {
         "loading-task": "Загрузка задачи...",
@@ -215,7 +217,8 @@
         "row-saved": "Строка успешно сохранена",
         "row-edited": "Строка успешно обновлена",
         "row-deleted": "Строка успешно удалена",
-        "deleting-row": "Удаление строки"
+        "deleting-row": "Удаление строки",
+        "editing-row": "Редактирование строки"
     },
     "buttons": {
         "cancel": "Отменить",

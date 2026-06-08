@@ -1,30 +1,32 @@
 // ConstructorTableFormDialog.tsx
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import type { AdminPanelGroup } from '../../../../entities/admin/model/types'
 import { Button } from '../../../../shared/ui/button'
 import {
-    Dialog,
-    DialogContent,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle
 } from '../../../../shared/ui/dialog'
 import { Input } from '../../../../shared/ui/input'
 import { Label } from '../../../../shared/ui/label'
 import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from '../../../../shared/ui/select'
-import type { ColumnConfig } from './ConstructorTable'
-import type { AdminPanelGroup } from '../../../../entities/admin/model/types'
+import { TagsInput } from '../../../../shared/ui/tags-input'
+import type { ColumnConfig } from '../model/types'
 
 export interface ColumnFormData {
   titleEn: string
   titleRu: string
   inputType: AdminPanelGroup['type']
+  dropdownOptions?: string[]
 }
 
 interface ConstructorTableFormDialogProps {
@@ -49,6 +51,8 @@ const ConstructorTableFormDialog = ({
     titleRu: '',
     inputType: 'string',
   })
+
+  const [dropdownOptions, setDropdownOptions] = useState<string[]>([])
 
   // Reset form when dialog opens/closes or initialData changes
   useEffect(() => {
@@ -75,13 +79,26 @@ const ConstructorTableFormDialog = ({
       // You can add toast notification here
       return
     }
+
+    const result = {
+      ...formData,
+    }
+
+    if(formData.inputType === 'dropdown') {
+      result.dropdownOptions = dropdownOptions
+      setDropdownOptions([])
+    }
     
-    onSubmit(formData)
+    onSubmit(result)
     onOpenChange(false)
   }
 
   const handleCancel = () => {
     onOpenChange(false)
+  }
+  
+  const handleDropdownOptionsChange = (value: string[]) => {
+    setDropdownOptions(value)
   }
 
   return (
@@ -152,6 +169,20 @@ const ConstructorTableFormDialog = ({
               </SelectContent>
             </Select>
           </div>
+          {
+            formData.inputType === 'dropdown' && (
+              <div className="grid gap-2">
+                <Label htmlFor="dropdownOptions">
+                  {t('fields.dropdown-options')}
+                </Label>
+                <TagsInput
+                  value={dropdownOptions}
+                  onChange={handleDropdownOptionsChange}
+                  placeholder={t('fields.enter-dropdown-options')}
+                />
+              </div>
+            )
+          }
         </div>
 
         <DialogFooter>

@@ -156,7 +156,9 @@
         "filter-tasks": "Filter tasks",
         "select-status": "Select status",
         "all-statuses": "All statuses",
-        "all-priorities": "All priorities"
+        "all-priorities": "All priorities",
+        "dropdown-options": "Select options",
+        "enter-dropdown-options": "Enter options"
     },
 
     "notice-list": {
@@ -219,7 +221,8 @@
         "row-saved": "Row has been saved successfully",
         "row-edited": "Row has been updated successfully",
         "row-deleted": "Row has been deleted successfully",
-        "deleting-row": "Deleting row"
+        "deleting-row": "Deleting row",
+        "editing-row": "Editing row"
     },
 
     "buttons": {

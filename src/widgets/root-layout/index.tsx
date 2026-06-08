@@ -53,7 +53,6 @@ export function RootLayout() {
   }, [])
 
   const verifyAndRedirect = useCallback(() => {
-    debugger
     const token = localStorage.getItem(ACCESS_TOKEN)
     if (isUserLoading || isOrgsLoading || isProjectsLoading || !token) return
 

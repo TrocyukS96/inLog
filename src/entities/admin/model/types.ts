@@ -98,6 +98,7 @@ export interface AdminPanelGroup {
     type: 'string' | 'integer' | 'date' | 'file' | 'dropdown'
     parent_node?: number  //добавил для удобства составления отчета
     parent_tab?: number  //добавил для удобства составления отчета
+    dropdown_choices?: string[]
 
 }
 
@@ -107,6 +108,7 @@ export interface AdminPanelGroupRequest {
     structure_element?: number
     group?: number
     type: string
+    dropdown_choices?: string[]
 }
 
 export interface AdminPanelReportRequest {

@@ -52,21 +52,13 @@ import {
 } from '../../../../shared/ui/table'
 import ConstructorTableEditingRow from './ConstructorTableEditingRow'
 import ConstructorTableFormDialog from './ConstructorTableFormDialog'
+import type { ColumnConfig } from '../model/types'
 
 export interface ColumnFormData {
   titleEn: string
   titleRu: string
   inputType: AdminPanelGroup['type']
-}
-
-export interface ColumnConfig {
-  key: string
-  title: {
-    en: string
-    ru: string
-  }
-  inputType: AdminPanelGroup['type']
-  width?: number
+  dropdownOptions?: string[]
 }
 
 export interface FileData {
@@ -86,7 +78,7 @@ export interface DataItem {
 interface Props {
   initialColumns?: ColumnConfig[]
   initialRows?: any[]
-  onCreate?: (column: ColumnConfig) => void
+  onCreate?: (column: ColumnConfig) => Promise<void>
   onDelete?: (columnKey: string) => void
   onEdit?: (column: ColumnConfig) => void
   onDataChange?: (data: DataItem[]) => void
@@ -286,7 +278,7 @@ const ConstructorTable = (props: Props) => {
     return newErrors
   }
 
-  const handleColumnSubmit = (formData: ColumnFormData) => {
+  const handleColumnSubmit = async (formData: ColumnFormData) => {
     if (isEditingColumn && selectedColumn) {
       const updatedColumn: ColumnConfig = {
         ...selectedColumn,
@@ -295,6 +287,7 @@ const ConstructorTable = (props: Props) => {
           ru: formData.titleRu,
         },
         inputType: formData.inputType,
+        dropdownOptions: formData.dropdownOptions,
       }
 
       const updatedColumns = columns.map(col =>
@@ -303,6 +296,12 @@ const ConstructorTable = (props: Props) => {
       setColumns(updatedColumns)
 
       onEdit?.(updatedColumn)
+      try {
+        await onEdit?.(updatedColumn)
+      } catch {
+        setColumns(columns)
+        setRows(rows)
+      }
     } else {
       const newColumn: ColumnConfig = {
         key: Date.now().toString(),
@@ -312,6 +311,7 @@ const ConstructorTable = (props: Props) => {
         },
         inputType: formData.inputType,
         width: 150,
+        dropdownOptions: formData.dropdownOptions,
       }
 
       const updatedColumns = [...columns, newColumn]
@@ -325,7 +325,12 @@ const ConstructorTable = (props: Props) => {
         setRows(updatedData)
       }
 
-      onCreate?.(newColumn)
+      try {
+        await onCreate?.(newColumn)
+      } catch {
+        setColumns(columns)
+        setRows(rows)
+      }
     }
   }
 
@@ -379,15 +384,14 @@ const ConstructorTable = (props: Props) => {
 
         if (field) {
           body[`${targetColumn?.title.en || ''}`] = {
-            type: fieldType,
+            type: fieldType === 'dropdown' ? 'string' : fieldType,
             value: fieldType ==='integer' ? Number(field) : field || ''
           }
         }
       }
-
       const targetRowKey = initialRows?.find((item) => item.key === editingKey)?.key
       if(targetRowKey) {
-        await onEditRow?.(targetRowKey, body)
+       await onEditRow?.(targetRowKey, body)
       }else{
         await onSaveRow?.(body)
       }
@@ -397,6 +401,7 @@ const ConstructorTable = (props: Props) => {
       setEditErrors({})
     } catch (error) {
       errorsHandler(error, t)
+      setRows(rows.slice(0, -1))
     }
   }
 
@@ -528,11 +533,7 @@ const ConstructorTable = (props: Props) => {
           </div>
         )
       case 'dropdown':
-        const options: { label: string, value: string }[] = [
-          { label: 'Option 1', value: 'option1' },
-          { label: 'Option 2', value: 'option2' },
-          { label: 'Option 3', value: 'option3' },
-        ]
+        const options: { label: string, value: string }[] = (column.dropdownOptions || []).map((option) => ({ label: option, value: option }))
         return (
           <div className="space-y-1 min-w-[150px]">
             <Select
