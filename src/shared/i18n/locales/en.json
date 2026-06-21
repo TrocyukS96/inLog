@@ -366,7 +366,42 @@
         "select-organization-first": "Select organization first",
         "create-first-project": "Create first project",
         "create-organization": "Create organization",
-        "create-project": "Create project"
+        "create-project": "Create project",
+        "notifications": "Notifications"
+    },
+
+    "notifications-page": {
+        "all-notifications": "All notifications",
+        "settings": "Settings"
+    },
+
+    "notifications-settings": {
+        "notification-type": "Notification type",
+        "email": "Email",
+        "time-from": "From",
+        "time-to": "To",
+        "rows": {
+            "task-update-comments-added": "Comment added",
+            "task-update-supervisor-changed": "Supervisor changed",
+            "task-update-task-name-changed": "Task name changed",
+            "task-update-description-changed": "Description changed",
+            "task-update-priority-changed": "Priority changed",
+            "task-update-status-changed": "Status changed",
+            "task-update-start-date-changed": "Start date changed",
+            "task-update-end-date-changed": "End date changed",
+            "task-update-doers-changed": "Doers changed",
+            "task-update-tags-changed": "Tags changed",
+            "inLog-news-and-updates": "inLog news and updates",
+            "invitation-to-project": "Invitation to project",
+            "response-on-invitation-to-project": "Response on invitation to project",
+            "role-request": "Role request",
+            "request-to-change-role": "Request to change role",
+            "project-user-removal": "Removal from project",
+            "role-changing-by-admin": "Role changed by admin",
+            "admin-rights-transfer": "Admin rights transfer",
+            "existing-the-project": "Leaving the project",
+            "sound-on-all-notifications-types": "Sound on all notification types"
+        }
     },
 
     "tasks-page": {

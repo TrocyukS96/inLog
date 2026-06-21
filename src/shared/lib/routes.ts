@@ -49,6 +49,7 @@ export const routes = {
       list: () => '/settings',
       profile: () => '/settings/profile',
       organizationsAndProjects: () => '/settings/organizations-and-projects',
+      notifications: () => '/settings/notifications',
     },
 
     geoMechanics: {

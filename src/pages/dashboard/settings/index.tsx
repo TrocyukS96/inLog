@@ -20,6 +20,10 @@ const SettingsPage = () => {
             label: t('settings-page.organizations-and-projects'),
             href: '/settings/organizations-and-projects',
         },
+        {
+            label: t('settings-page.notifications'),
+            href: '/settings/notifications',
+        },
     ]
 
     return (

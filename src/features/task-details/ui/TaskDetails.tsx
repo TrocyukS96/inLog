@@ -907,7 +907,7 @@ const TaskDetails = ({ task, tasks, tags: existingTags, taskSlug, statuses, memb
                       filename: file.filename ?? '',
                       size: file.size,
                       created_at: file.created_at ?? '',
-                      mime_type: file.mimeType ?? '',
+                      mime_type: file.mime_type ?? '',
                     }))} onUpload={addFile} onDelete={deleteFile} />
                   </AccordionContent>
                 </AccordionItem>

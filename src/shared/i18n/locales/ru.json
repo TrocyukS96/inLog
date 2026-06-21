@@ -357,7 +357,42 @@
         "select-organization-first": "Выберите организацию",
         "create-first-project": "Создать первый проект",
         "create-organization": "Создать организацию",
-        "create-project": "Создать проект"
+        "create-project": "Создать проект",
+        "notifications": "Уведомления"
+    },
+
+    "notifications-page": {
+        "all-notifications": "Все уведомления",
+        "settings": "Настройки"
+    },
+
+    "notifications-settings": {
+        "notification-type": "Тип уведомления",
+        "email": "Email",
+        "time-from": "От",
+        "time-to": "До",
+        "rows": {
+            "task-update-comments-added": "Добавлен комментарий",
+            "task-update-supervisor-changed": "Изменён руководитель",
+            "task-update-task-name-changed": "Изменено название задачи",
+            "task-update-description-changed": "Изменено описание",
+            "task-update-priority-changed": "Изменён приоритет",
+            "task-update-status-changed": "Изменён статус",
+            "task-update-start-date-changed": "Изменена дата начала",
+            "task-update-end-date-changed": "Изменена дата окончания",
+            "task-update-doers-changed": "Изменены исполнители",
+            "task-update-tags-changed": "Изменены теги",
+            "inLog-news-and-updates": "Новости и обновления inLog",
+            "invitation-to-project": "Приглашение в проект",
+            "response-on-invitation-to-project": "Ответ на приглашение в проект",
+            "role-request": "Запрос роли",
+            "request-to-change-role": "Запрос на изменение роли",
+            "project-user-removal": "Удаление из проекта",
+            "role-changing-by-admin": "Роль изменена администратором",
+            "admin-rights-transfer": "Передача прав администратора",
+            "existing-the-project": "Выход из проекта",
+            "sound-on-all-notifications-types": "Звук для всех уведомлений"
+        }
     },
 
     "tasks-page": {

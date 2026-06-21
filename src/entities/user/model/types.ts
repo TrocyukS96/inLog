@@ -1,145 +1,128 @@
-  export type UserDTO = Partial<User> & {
-    // если есть специфичные поля для обновления
-  }
+import type { LanguageType, RoleType } from '../../../shared/types/enums'
 
-  /**
+export type UserUpdateDTO = Partial<User>
+
+/**
  * Аватар пользователя (разные размеры)
  */
 export interface Avatar {
-    small?: string
-    medium?: string
-    large?: string
-    original?: string
-  }
-  
-  /**
-   * Настройки пользователя (язык, уведомления, время и т.д.)
-   */
-  export interface UserSettings {
-    language: 'ru' | 'en' // LanguageTypes → лучше union вместо enum, проще в RTK
-    timezone: string
-    soundNotification: boolean // было any → предполагаю boolean
-    disabledEmailNotifications: string[]
-    disabledInlogNotifications: string[]
-    notifiableDaysOfWeek: number[] // 0 = воскресенье, 1 = понедельник и т.д.
-    notifyFromTime: string // формат "HH:mm"
-    notifyToTime: string   // формат "HH:mm"
-  }
-  
-  /**
-   * Основная модель пользователя
-   */
-  export interface User {
-    id: number
-    email: string
-    firstName: string          // name → firstName (более понятно)
-    middleName: string         // patronymic
-    lastName: string           // surname
-    name: string
-    surname: string
-    patronymic: string
-    fullName?: string 
-    full_name?: string         // вычисляемое поле, если нужно
-  
-    companyName?: string
-    position?: string
-    about?: string             // about_myself
-  
-    role?: 'admin' | 'user' | 'manager' | string // RoleTypes → union или string
-    avatar?: Avatar
-  
-    phone?: string | null
-    mobilePhone?: string | null
-    workPhone?: string | null
+  small?: string
+  medium?: string
+  large?: string
+  original?: string
+}
 
-    work_phone?: string | null
-    mobile_phone?: string | null
-  
-    settings: UserSettings
-  
-    // поля из профиля сотрудника
-    date_of_birth?: string       // ISO или 'YYYY-MM-DD'
-    department?: string
-    experienceYears?: number | string
-    joinedAt?: string          // in_organization_since
-    personnel_number?: string   // табельный номер
-    room?: string
-    workplace?: string
-    experience?: string
-    in_organization_since?: string
-  
-    // файлы пользователя (документы, сканы и т.д.)
-    files?: UserFile[]
+/**
+ * Настройки пользователя (язык, уведомления, время и т.д.)
+ */
+export interface UserSettings {
+  language: LanguageType
+  timezone: string
+  sound_notification: boolean | string
+  disabled_email_notifications: string[]
+  disabled_inlog_notifications: string[]
+  notifiable_days_of_week: number[]
+  notify_from_time: string
+  notify_to_time: string
+}
 
-    organization?: string
-  }
-  
-  /**
-   * Участник проекта (Member)
-   */
-  export interface ProjectMember {
-    id: number
-    user: User
-    role: 'admin' | 'member' | 'supervisor' | string
-    createdAt?: string
-    projectId: number | string // или ссылка на проект
-  
-    // дополнительные поля для UI
-    color?: string
-    name?: string // для отображения без полного user
-  }
-  
-  /**
-   * Расширенный участник (с дополнительными полями для таблицы/списка)
-   */
-  export interface ExtendedMember extends ProjectMember {
-    color: string
-  }
-  
-  /**
-   * Надзиратель / Supervisor
-   */
-  export interface Supervisor {
-    id: number
-    user?: User
-    taskId?: number
-    projectId?: number
-    file?: string
-    filename?: string
-    size?: number
-    createdAt?: string
-  }
-  
-  /**
-   * Исполнитель задачи (Doer)
-   */
-  export interface TaskDoer {
-    id: number
-    user?: User
-  }
-  
-  /**
-   * Минимальная информация о пользователе (для списков, карточек)
-   */
-  export interface SmallUser {
-    id: number
-    email: string
-    fullName?: string
-    companyName?: string
-    position?: string
-    avatar?: Avatar
-  }
-  
+/**
+ * Основная модель пользователя
+ */
+export interface User {
+  id?: number
+  email: string
+  name: string
+  patronymic: string
+  surname: string
+  full_name?: string
+  company_name: string
+  position: string
+  about_myself: string
+  role?: RoleType | string
+  avatar: Avatar
+  phone_number: string | null
+  settings: UserSettings
+  belonging: string
+  files?: UserFile[]
 
-  export interface UserFile {
-    id: number
-    name: string
-    url: string
-    size?: number
-    mimeType?: string
-    createdAt?: string
-    created_at?: string
-    task?:number
-    filename?:string
-    file?:string
-  }
+  date_of_birth?: string
+  department?: string
+  experience?: string
+  in_organization_since?: string
+  mobile_phone?: string | null
+  organization?: string
+  personnel_number?: string
+  room?: string
+  work_phone?: string | null
+  workplace?: string
+}
+
+/**
+ * Участник проекта
+ */
+export interface ProjectMember {
+  id?: number
+  user: User
+  role: RoleType | string
+  created_at?: string
+  project: number | string
+  name?: string
+  color?: string
+}
+
+/**
+ * Расширенный участник (с дополнительными полями для таблицы/списка)
+ */
+export interface ExtendedMember extends ProjectMember {
+  color: string
+}
+
+/**
+ * Надзиратель / Supervisor
+ */
+export interface Supervisor {
+  id: number
+  task?: number
+  project?: number
+  file?: string
+  filename?: string
+  size?: number
+  created_at?: string
+  user?: User
+}
+
+/**
+ * Исполнитель задачи
+ */
+export interface TaskDoer {
+  id: number
+  user?: User
+}
+
+/**
+ * Минимальная информация о пользователе (для списков, карточек)
+ */
+export interface SmallUser {
+  id?: number
+  email: string
+  full_name?: string
+  company_name?: string
+  position?: string
+  avatar?: Avatar
+}
+
+/**
+ * Документ пользователя
+ */
+export interface UserFile {
+  id: number
+  name?: string
+  url?: string
+  size?: number
+  mime_type?: string
+  created_at?: string
+  task?: number
+  filename?: string
+  file?: string
+}

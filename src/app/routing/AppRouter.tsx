@@ -21,6 +21,7 @@ import { ACCESS_TOKEN } from '../../shared/config/constants'
 import { routes } from '../../shared/lib/routes'
 import { RootLayout } from '../../widgets/root-layout'
 import { AdminReportsPage } from '../../pages/admin/admin-reports'
+import NotificationsPage from '../../pages/dashboard/notifications'
 
 export function AppRouter() {
   return (
@@ -54,6 +55,7 @@ export function AppRouter() {
               <Route index element={<Navigate to={routes.settings.profile()} replace />} />
               <Route path={routes.settings.profile()} element={<ProfilePage />} />
               <Route path={routes.settings.organizationsAndProjects()} element={<OrganizationsAndProjectsPage />} />
+              <Route path={routes.settings.notifications()} element={<NotificationsPage />} />
             </Route>
             <Route path={routes.geoMechanics.list()} element={<GeoMechanicsPage />} />
           </Route>

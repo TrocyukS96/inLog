@@ -75,7 +75,7 @@ const OrganizationsAndProjects = () => {
     }
 
     return (
-        <div>
+        <div className="pl-2">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 <Card className="bg-card/80 backdrop-blur-sm border-border/50 shadow-2xl">
                     <CardHeader className="flex flex-row items-center justify-between gap-4 pb-4">
