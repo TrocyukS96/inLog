@@ -22,6 +22,7 @@ const NotificationsSettings = () => {
     const [allInlogOn, setAllInlogOn] = useState(true)
     const [weekDays, setWeekDays] = useState<WeekDay[]>(weekDaysMoc['en'])
     const [activeDays, setActiveDays] = useState<number[]>([1, 2, 3, 4, 5])
+    const [bouncingDay, setBouncingDay] = useState<number | null>(null)
     const [timeFrom, setTimeFrom] = useState('09:00')
     const [timeTo, setTimeTo] = useState('18:00')
     const { data: userSettings, isLoading: isUserSettingsLoading } = useGetUserSettingsQuery()
@@ -252,11 +253,13 @@ const NotificationsSettings = () => {
                                 <button
                                     key={day.id}
                                     type="button"
-                                    onClick={() => toggleDay(day.id)}
+                                    onClick={() => { setBouncingDay(day.id); toggleDay(day.id) }}
+                                    onAnimationEnd={() => setBouncingDay(null)}
                                     disabled={isBusy}
                                     className={cn(
-                                        'w-10 h-10 flex items-center justify-center rounded-full border text-sm font-medium transition-colors',
+                                        'w-12 h-12 flex items-center justify-center rounded-full cursor-pointer border text-sm font-medium transition-colors',
                                         'disabled:pointer-events-none disabled:opacity-50',
+                                        bouncingDay === day.id && 'animate-bounce-pop',
                                         activeDays.includes(day.id)
                                             ? 'bg-primary border-primary text-primary-foreground'
                                             : 'border-border text-foreground hover:border-primary/50'
