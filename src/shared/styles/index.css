@@ -40,6 +40,16 @@
   --light-orange: oklch(0.78 0.18 70 / 0.4);
   --gray-bg: oklch(0.88 0 0 / 0.19);
 
+  /* Legacy aliases for server-rendered notification HTML */
+  --main-text-color: var(--foreground);
+  --border-gray: var(--border);
+  --main-phone: oklch(0.94 0.03 220);
+  --mint-color: var(--accent);
+  --light-green: oklch(0.92 0.06 145);
+  --light-red: oklch(0.94 0.04 25);
+  --error-text-color: var(--destructive);
+  --border-radius: var(--radius);
+
   --radius: 5px;
   --cell-size: 44px;
   --calendar-bg: var(--card);
@@ -113,6 +123,16 @@
   --gantt-bar-progress: #60a5fa;
   --gantt-bar-label: #ffffff;
   --gantt-link-stroke: #6b7280;
+
+  /* Legacy aliases for server-rendered notification HTML */
+  --main-text-color: var(--foreground);
+  --border-gray: var(--border);
+  --main-phone: oklch(0.22 0.03 240);
+  --mint-color: var(--accent);
+  --light-green: oklch(0.28 0.06 145);
+  --light-red: oklch(0.28 0.06 25);
+  --error-text-color: var(--destructive);
+  --border-radius: var(--radius);
 }
 
 /* Экспорт в Tailwind как утилиты (через @theme inline) */

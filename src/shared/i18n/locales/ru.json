@@ -189,6 +189,7 @@
         "file-deleted-successfully": "Файл успешно удален",
         "adding-file": "Добавление файла",
         "deleting-file": "Удаление файла",
+        "notification-deleted": "Уведомление успешно удалено",
         "changing-password": "Изменение пароля",
         "mail-to-change-password-has-been-sent": "Письмо для сброса пароля успешно отправлено",
         "creating-node": "Создание узла",
@@ -366,6 +367,32 @@
         "settings": "Настройки"
     },
 
+    "notifications-list": {
+        "accept": "Принять",
+        "reject": "Отклонить",
+        "delete": "Удалить уведомление",
+        "loading": "Загрузка уведомлений",
+        "updating": "Обновление уведомлений",
+        "empty": "Уведомлений пока нет",
+        "roles": {
+            "admin": "Администратор",
+            "member": "Участник",
+            "editor": "Редактор"
+        },
+        "descriptions": {
+            "accepted": "принял(а)",
+            "rejected": "отклонил(а)",
+            "sender-requests-role-in-project": "{{sender}} ({{senderEmail}}) запрашивает роль {{role}} в проекте",
+            "user-do-action-with-invitation-to-project": "{{user}} ({{senderEmail}}) {{action}} приглашение в проект",
+            "user-do-action-with-role-in-project": "{{user}} ({{senderEmail}}) {{action}} запрос на роль {{role}} в проекте",
+            "user-invite-you-to-project-with-certain": "{{user}} ({{senderEmail}}) приглашает вас в проект с ролью {{role}}",
+            "user-left-project": "{{user}} ({{senderEmail}}) покинул(а) проект (роль: {{role}})",
+            "admin-transfered-rights-to-you": "{{user}} ({{senderEmail}}) передал(а) вам права администратора",
+            "user-removed-you-from-project": "{{user}} ({{senderEmail}}) удалил(а) вас из проекта",
+            "admin-changed-your-role-to-certain": "{{user}} ({{senderEmail}}) изменил(а) вашу роль на {{role}}"
+        }
+    },
+
     "notifications-settings": {
         "notification-type": "Тип уведомления",
         "email": "Email",
@@ -391,6 +418,7 @@
             "role-changing-by-admin": "Роль изменена администратором",
             "admin-rights-transfer": "Передача прав администратора",
             "existing-the-project": "Выход из проекта",
+            "general-task-update": "Общее обновление задач",
             "sound-on-all-notifications-types": "Звук для всех уведомлений"
         }
     },

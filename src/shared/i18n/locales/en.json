@@ -193,6 +193,7 @@
         "file-deleted-successfully": "File has been deleted successfully",
         "adding-file": "Adding file",
         "deleting-file": "Deleting file",
+        "notification-deleted": "Notification has been deleted successfully",
         "changing-password": "Changing password",
         "mail-to-change-password-has-been-sent": "Mail to change password has been sent successfully",
         "creating-node": "Creating node",
@@ -375,6 +376,32 @@
         "settings": "Settings"
     },
 
+    "notifications-list": {
+        "accept": "Accept",
+        "reject": "Reject",
+        "delete": "Delete notification",
+        "loading": "Loading notifications",
+        "updating": "Updating notifications",
+        "empty": "No notifications yet",
+        "roles": {
+            "admin": "Admin",
+            "member": "Member",
+            "editor": "Editor"
+        },
+        "descriptions": {
+            "accepted": "accepted",
+            "rejected": "rejected",
+            "sender-requests-role-in-project": "{{sender}} ({{senderEmail}}) requests the {{role}} role in the project",
+            "user-do-action-with-invitation-to-project": "{{user}} ({{senderEmail}}) {{action}} the invitation to the project",
+            "user-do-action-with-role-in-project": "{{user}} ({{senderEmail}}) {{action}} the role request for the {{role}} role in the project",
+            "user-invite-you-to-project-with-certain": "{{user}} ({{senderEmail}}) invites you to the project with the {{role}} role",
+            "user-left-project": "{{user}} ({{senderEmail}}) left the project (role: {{role}})",
+            "admin-transfered-rights-to-you": "{{user}} ({{senderEmail}}) transferred admin rights to you",
+            "user-removed-you-from-project": "{{user}} ({{senderEmail}}) removed you from the project",
+            "admin-changed-your-role-to-certain": "{{user}} ({{senderEmail}}) changed your role to {{role}}"
+        }
+    },
+
     "notifications-settings": {
         "notification-type": "Notification type",
         "email": "Email",
@@ -400,6 +427,7 @@
             "role-changing-by-admin": "Role changed by admin",
             "admin-rights-transfer": "Admin rights transfer",
             "existing-the-project": "Leaving the project",
+            "general-task-update": "General tasks update",
             "sound-on-all-notifications-types": "Sound on all notification types"
         }
     },

@@ -1,5 +1,6 @@
 import { useTranslation } from "react-i18next"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "../../../shared/ui/tabs"
+import { NotificationsList } from "../../../features/notifications/notifications-list"
 import NotificationsSettings from "../../../features/notifications/notifications-settings/ui/NotificationsSettings"
 
 const NotificationsPage = () => {
@@ -18,9 +19,7 @@ const NotificationsPage = () => {
                 </TabsList>
 
                 <TabsContent value="all">
-                    <div>
-                        <h2 className="text-lg font-medium">{t('notifications-page.all-notifications')}</h2>
-                    </div>
+                    <NotificationsList />
                 </TabsContent>
 
                 <TabsContent value="settings">

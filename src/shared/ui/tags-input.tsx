@@ -18,10 +18,22 @@ export interface TagsInputProps extends Omit<React.InputHTMLAttributes<HTMLInput
 }
 
 const TagsInput = React.forwardRef<HTMLInputElement, TagsInputProps>(
-  ({ className, value = [], onChange, placeholder, disabled, maxTags, options = [], ...props }) => {
+  ({ className, value = [], onChange, placeholder, disabled, maxTags, options = [], ...props }, ref) => {
     const [inputValue, setInputValue] = React.useState("")
     const [open, setOpen] = React.useState(false)
     const inputRef = React.useRef<HTMLInputElement>(null)
+
+    const setInputRef = React.useCallback(
+      (node: HTMLInputElement | null) => {
+        inputRef.current = node
+        if (typeof ref === 'function') {
+          ref(node)
+        } else if (ref) {
+          ref.current = node
+        }
+      },
+      [ref]
+    )
 
     // Фильтруем опции на основе ввода, исключая уже выбранные теги
     const filteredOptions = React.useMemo(() => {
@@ -105,7 +117,7 @@ const TagsInput = React.forwardRef<HTMLInputElement, TagsInputProps>(
                 </Badge>
               ))}
               <input
-                ref={inputRef}
+                ref={setInputRef}
                 type="text"
                 className="flex-1 bg-transparent outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed min-w-[120px] text-foreground text-sm"
                 value={inputValue}
