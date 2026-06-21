@@ -8,18 +8,6 @@ export default {
     ],
     theme: {
       extend: {
-        keyframes: {
-          'bounce-pop': {
-            '0%':   { transform: 'scale(1)' },
-            '35%':  { transform: 'scale(0.72)' },
-            '65%':  { transform: 'scale(1.22)' },
-            '82%':  { transform: 'scale(0.94)' },
-            '100%': { transform: 'scale(1)' },
-          },
-        },
-        animation: {
-          'bounce-pop': 'bounce-pop 0.38s cubic-bezier(0.36,0.07,0.19,0.97)',
-        },
         colors: {
           primary: '#3B82F6',
           secondary: '#60A5FA',
