@@ -112,7 +112,7 @@ const TaskDetails = ({ task, tasks, tags: existingTags, taskSlug, statuses, memb
       due_date_end: task.due_date_end ? new Date(task.due_date_end) : null,
       status: task.status?.id?.toString(),
       supervisor: task.supervisor?.user?.id,
-      doers: task.doers?.map((d) => d.user?.id.toString() || ''),
+      doers: task.doers?.map((d) => d.user?.id?.toString() || ''),
       tags: task.tags?.map((tag) => tag.name) || [],
     })
   }, [task])
@@ -263,7 +263,7 @@ const TaskDetails = ({ task, tasks, tags: existingTags, taskSlug, statuses, memb
 
     if (operationType === 'delete') {
       try {
-        const targetDoer = task.doers?.find((doer) => doer.user?.id.toString() === targetId)
+        const targetDoer = task.doers?.find((doer) => doer.user?.id?.toString() === targetId)
         if (!targetDoer) {
           return
         }
@@ -915,18 +915,7 @@ const TaskDetails = ({ task, tasks, tags: existingTags, taskSlug, statuses, memb
                   <AccordionTrigger>{t('comments-entity.comments')}</AccordionTrigger>
                   <AccordionContent>
                     <TaskComments
-                      comments={task.comments?.map((comment) => ({
-                        id: comment.id,
-                        text: comment.text,
-                        author: {
-                          id: comment.user.id,
-                          name: comment.user.full_name || comment.user.email || t('fields.not-specified'),
-                          avatar: comment.user.avatar?.small,
-                          email: comment.user.email,
-                        },
-                        createdAt: comment.created_at,
-                        files: comment.files,
-                      })) || []}
+                      comments={task.comments ?? []}
                       currentUser={{
                         id: task?.creator?.id ?? 0,
                         name: task?.creator?.full_name || task?.creator?.email || t('fields.not-specified'),

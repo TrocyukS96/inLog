@@ -52,7 +52,7 @@ export function UserMenu() {
 
       <DropdownMenuContent align="end" className="w-56">
         <DropdownMenuLabel>
-          {user?.fullName || user?.email || t('header.user-menu')}
+          {user?.full_name || user?.email || t('header.user-menu')}
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuItem asChild>

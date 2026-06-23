@@ -4,6 +4,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { UserMenu } from './ui/UserMenu'
 import { useUpdateUserSettingsMutation } from '../../entities/user/model/userSlice'
 import { errorsHandler } from '../../shared/lib/errors-handler'
+import type { LanguageType } from '../../shared/types/enums'
 
 export function Header() {
   const { t } = useTranslation()
@@ -49,7 +50,7 @@ function LanguageSwitcher() {
 
   const changeLanguage = async (lang: string) => {
     try {
-      await updateUserSettings({ language: lang }).unwrap()
+      await updateUserSettings({ language: lang as LanguageType }).unwrap()
       i18n.changeLanguage(lang)
     } catch (error) {
       errorsHandler(error, t)

@@ -7,7 +7,6 @@ import {
   useInvitationResponseMutation,
   useUpdateNotificationMutation,
 } from '../../../../entities/notification'
-import type { Notification as NotificationItem } from '../../../../entities/notification'
 import { useChangeRoleAdminResponseMutation } from '../../../../entities/user/model/userSlice'
 import { errorsHandler } from '../../../../shared/lib/errors-handler'
 import { cn } from '../../../../shared/lib/utils'
@@ -15,6 +14,7 @@ import type { RequestAction } from '../../../../shared/types/enums'
 import NotificationSkeleton from './NotificationSkeleton'
 import type { NotificationsListProps } from './types'
 import Notification from '../../../../entities/notification/ui/Notification'
+import type { Notification as NotificationItem } from '../../../../entities/notification/model/types'
 
 const SKELETON_COUNT = 5
 

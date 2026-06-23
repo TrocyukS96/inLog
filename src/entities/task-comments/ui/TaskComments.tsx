@@ -16,22 +16,11 @@ import {
 import { Label } from '../../../shared/ui/label'
 import { Textarea } from '../../../shared/ui/textarea'
 import TaskComment from './TaskComment'
-
-interface CommentItem {
-  id: string | number
-  text: string
-  author: {
-    id: string | number
-    name: string
-    avatar?: string
-    email?: string
-  }
-  createdAt: string | Date
-}
+import type { Comment } from '../../task/model/types'
 
 interface Props {
   className?: string
-  comments?: CommentItem[]
+  comments?: Comment[]
   currentUser?: {
     id: string | number
     name: string
@@ -157,7 +146,16 @@ const TaskComments = ({
           comments.map((comment) => (
             <TaskComment
               key={comment.id}
-              comment={comment}
+              comment={{
+                id: comment.id,
+                text: comment.text,
+                author: {
+                  id: comment.user?.id ?? 0,
+                  name: comment.user?.full_name || comment.user?.email || t('fields.not-specified'),
+                  avatar: comment.user?.avatar?.small,
+                },
+                createdAt: comment.created_at,
+              }}
               currentUser={currentUser}
               onEdit={onEditComment}
               onDelete={onDeleteComment}
