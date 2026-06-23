@@ -320,7 +320,14 @@
         "settings": "Settings",
         "profile": "Profile",
         "user-menu": "User menu",
-        "logout": "Logout"
+        "logout": "Logout",
+        "notifications": "Notifications",
+        "view-all": "View all",
+        "unread-notifications": "{{count}} unread",
+        "all-caught-up": "You're all caught up",
+        "no-notifications": "No notifications yet",
+        "no-notifications-description": "New updates about tasks and projects will appear here.",
+        "show-more-notifications": "Show {{count}} more notifications"
     },
 
     "dashboard-page": {

@@ -2,9 +2,9 @@
   --notification-bg: var(--card);
   --notification-text: var(--card-foreground);
   --notification-muted: var(--muted-foreground);
-  --notification-unread-bg: var(--main-phone);
-  --notification-border: var(--border-gray);
-  --notification-accent-border: color-mix(in oklch, var(--primary) 35%, var(--border-gray));
+  --notification-unread-bg: color-mix(in oklch, var(--primary) 12%, var(--card));
+  --notification-border: var(--border);
+  --notification-accent-border: color-mix(in oklch, var(--primary) 35%, var(--border));
 
   position: relative;
   padding: 10px;

@@ -311,7 +311,14 @@
         "settings": "Настройки",
         "profile": "Профиль",
         "user-menu": "Меню пользователя",
-        "logout": "Выйти"
+        "logout": "Выйти",
+        "notifications": "Уведомления",
+        "view-all": "Все",
+        "unread-notifications": "{{count}} непрочитанных",
+        "all-caught-up": "Новых уведомлений нет",
+        "no-notifications": "Уведомлений пока нет",
+        "no-notifications-description": "Здесь будут появляться обновления по задачам и проектам.",
+        "show-more-notifications": "Показать ещё {{count}} уведомлений"
     },
 
     "dashboard-page": {

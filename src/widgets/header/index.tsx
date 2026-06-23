@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next'
 import { Button } from '../../shared/ui/button'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../../shared/ui/dropdown-menu'
+import { NotificationsMenu } from './ui/NotificationsMenu'
 import { UserMenu } from './ui/UserMenu'
 import { useUpdateUserSettingsMutation } from '../../entities/user/model/userSlice'
 import { errorsHandler } from '../../shared/lib/errors-handler'
@@ -34,8 +35,9 @@ export function Header() {
         <h1 className="text-xl font-semibold">{getPageTitle()}</h1>
       </div>
 
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-2">
         <LanguageSwitcher />
+        <NotificationsMenu />
         <UserMenu />
       </div>
     </header>
