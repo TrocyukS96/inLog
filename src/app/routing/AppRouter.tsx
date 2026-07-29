@@ -5,6 +5,7 @@ import { toast } from 'sonner'
 import AdminPage from '../../pages/admin'
 import { AdminConstructorPage } from '../../pages/admin/admin-constructor'
 import CheckEmailPage from '../../pages/auth/check-email'
+import EmailConfirmationPage from '../../pages/auth/email-confirmation'
 import LoginPage from '../../pages/auth/login'
 import PasswordRecoveryPage from '../../pages/auth/password-recovery'
 import RecoveryMessagePage from '../../pages/auth/recovery-message'
@@ -31,6 +32,7 @@ export function AppRouter() {
         <Route path={routes.login()} element={<LoginPage />} />
         <Route path={routes.register()} element={<RegisterPage />} />
         <Route path={routes.checkEmail()} element={<CheckEmailPage />} />
+        <Route path={routes.emailConfirmation()} element={<EmailConfirmationPage />} />
         <Route path={routes.passwordRecovery()} element={<PasswordRecoveryPage />} />
         <Route path={routes.recoveryMessage()} element={<RecoveryMessagePage />} />
 

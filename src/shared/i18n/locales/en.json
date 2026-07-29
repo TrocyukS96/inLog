@@ -29,7 +29,13 @@
             "rules-of-use":"Rules of use",
             "privacy-policy":"Privacy policy"
         },
-        "agree-to-recieve-news-and-updates": "I agree to receive news and updates"
+        "agree-to-recieve-news-and-updates": "I agree to receive news and updates",
+        "email-confirmation-title": "Email confirmation",
+        "email-confirmation-success": "Your email has been confirmed. You can now sign in.",
+        "email-confirmation-error": "Could not confirm your email. The link is invalid or expired.",
+        "email-confirmation-invalid-link": "Invalid confirmation link.",
+        "email-confirmation-resend": "Resend confirmation email",
+        "email-confirming": "Confirming your email..."
     },
 
     "validation": {
@@ -604,6 +610,22 @@
         "subtemplate": "Sub-template"
     },
 
+
+    "whiteboard": {
+        "title": "Whiteboard",
+        "loading": "Loading whiteboard...",
+        "auto-save-hint": "Changes are saved automatically in the browser",
+        "add-task-card": "Add task card",
+        "new-task": "New task",
+        "task-title-placeholder": "Task title",
+        "task-description-placeholder": "Description...",
+        "invalid-card": "Invalid card",
+        "status": {
+            "todo": "To do",
+            "in-progress": "In progress",
+            "done": "Done"
+        }
+    },
 
     "common": {
         "load-more": "Load more",

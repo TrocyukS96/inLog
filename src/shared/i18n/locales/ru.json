@@ -27,7 +27,13 @@
             "rules-of-use": "Правилами пользования",
             "privacy-policy": "Политикой конфиденциальности"
         },
-        "agree-to-recieve-news-and-updates": "Я согласен получать новости и обновления"
+        "agree-to-recieve-news-and-updates": "Я согласен получать новости и обновления",
+        "email-confirmation-title": "Подтверждение email",
+        "email-confirmation-success": "Email успешно подтверждён. Теперь вы можете войти в систему.",
+        "email-confirmation-error": "Не удалось подтвердить email. Ссылка недействительна или устарела.",
+        "email-confirmation-invalid-link": "Некорректная ссылка подтверждения.",
+        "email-confirmation-resend": "Отправить письмо повторно",
+        "email-confirming": "Подтверждаем ваш email..."
     },
     "validation": {
         "required": "Обязательное поле",
@@ -595,6 +601,22 @@
         "edited": "ред.",
         "shift-enter-for-new-line": "Для перехода на новую строку используйте Shift+Enter"
       },
+
+    "whiteboard": {
+        "title": "Доска",
+        "loading": "Загрузка доски...",
+        "auto-save-hint": "Изменения автоматически сохраняются в браузере",
+        "add-task-card": "Добавить карточку задачи",
+        "new-task": "Новая задача",
+        "task-title-placeholder": "Название задачи",
+        "task-description-placeholder": "Описание...",
+        "invalid-card": "Некорректная карточка",
+        "status": {
+            "todo": "К выполнению",
+            "in-progress": "В работе",
+            "done": "Готово"
+        }
+    },
 
     "common": {
         "load-more": "Загрузить больше",

@@ -8,7 +8,7 @@ import { taskApi, useAddTaskCommentMutation, useAddTaskDoerMutation, useAddTaskS
 import { Form } from '../../../shared/ui/form'
 
 import { format } from 'date-fns'
-import { CalendarIcon, CircleUserRoundIcon, EyeIcon, FlagIcon, Kanban, TagIcon, UserIcon, UserPlusIcon } from 'lucide-react'
+import { CalendarIcon, CircleUserRoundIcon, EyeIcon, FlagIcon, Kanban, LayoutGridIcon, TagIcon, UserIcon, UserPlusIcon } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useDispatch } from 'react-redux'
@@ -31,6 +31,7 @@ import { Label } from '../../../shared/ui/label'
 import { ScrollArea } from '../../../shared/ui/scroll-area'
 import { TagsInput } from '../../../shared/ui/tags-input'
 import TaskDescription from './TaskDescription'
+import { Whiteboard } from '../../whiteboard'
 
 const taskSchema = z.object({
   name: z.string().min(1, 'Название обязательно'),
@@ -77,6 +78,7 @@ const TaskDetails = ({ task, tasks, tags: existingTags, taskSlug, statuses, memb
   const dispatch = useDispatch()
 
   const [subtasks, setSubtasks] = useState<Task[]>([])
+  const [openSections, setOpenSections] = useState<string[]>(['task-details', 'description', 'subtasks', 'files', 'comments'])
   const isTemplate = task?.is_template ?? false
 
   useEffect(() => {
@@ -678,7 +680,8 @@ const TaskDetails = ({ task, tasks, tags: existingTags, taskSlug, statuses, memb
               <Accordion
                 type="multiple"
                 className="mt-4"
-                defaultValue={['task-details', 'description', 'subtasks', 'files', 'comments']}
+                value={openSections}
+                onValueChange={setOpenSections}
               >
                 <AccordionItem value="task-details">
                   <AccordionTrigger>{isTemplate ? t('templates-page.templates-details') : t('tasks-page.task-details')}</AccordionTrigger>
@@ -877,6 +880,22 @@ const TaskDetails = ({ task, tasks, tags: existingTags, taskSlug, statuses, memb
                         )}
                       />
                     </div>
+                  </AccordionContent>
+                </AccordionItem>
+                <AccordionItem className="w-full" value="whiteboard">
+                  <AccordionTrigger>
+                    <div className="flex items-center gap-2">
+                      <LayoutGridIcon className="w-4 h-4" />
+                      {t('whiteboard.title')}
+                    </div>
+                  </AccordionTrigger>
+                  <AccordionContent>
+                    {openSections.includes('whiteboard') && projectId && taskSlug && (
+                      <Whiteboard
+                        storageKey={`task-${projectId}-${taskSlug}`}
+                        height={480}
+                      />
+                    )}
                   </AccordionContent>
                 </AccordionItem>
                 {task.parent === undefined || task.parent === null && (
