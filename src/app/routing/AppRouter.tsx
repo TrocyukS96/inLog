@@ -24,7 +24,6 @@ import { RootLayout } from '../../widgets/root-layout'
 import { AdminReportsPage } from '../../pages/admin/admin-reports'
 import { AdminUsersPage } from '../../pages/admin/admin-users'
 import { AdminMembersPage } from '../../pages/admin/admin-members'
-import { AdminOverviewPage } from '../../pages/admin/admin-overview'
 import { AdminOrganizationsPage } from '../../pages/admin/admin-organizations'
 import { AdminProjectsPage } from '../../pages/admin/admin-projects'
 import { AdminTasksPage } from '../../pages/admin/admin-tasks'
@@ -56,8 +55,7 @@ export function AppRouter() {
             </Route>
             <Route path={routes.admin.list()} element={<AdminRoute />}>
               <Route element={<AdminPage />}>
-                <Route index element={<Navigate to={routes.admin.overview()} replace />} />
-                <Route path={routes.admin.overview()} element={<AdminOverviewPage />} />
+                <Route index element={<Navigate to={routes.admin.users()} replace />} />
                 <Route path={routes.admin.users()} element={<AdminUsersPage />} />
                 <Route path={routes.admin.members()} element={<AdminMembersPage />} />
                 <Route path={routes.admin.organizations()} element={<AdminOrganizationsPage />} />

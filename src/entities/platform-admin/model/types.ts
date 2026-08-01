@@ -39,6 +39,23 @@ export interface AdminMember {
   created_at: string
 }
 
+export interface UpdateAdminOrganizationBody {
+  full_name?: string
+  short_name?: string
+  address?: string
+  inn?: string | null
+  kpp?: string | null
+}
+
+export interface UpdateAdminProjectBody {
+  name?: string
+  organization_id?: number
+  reservoir?: string
+  company_customer?: string
+  contractor?: string
+  country?: string
+}
+
 export interface AdminOrganization {
   id: number
   full_name: string

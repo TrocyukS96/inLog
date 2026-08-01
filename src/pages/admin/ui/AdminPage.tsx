@@ -2,7 +2,6 @@ import {
   Building2,
   CheckSquare,
   FolderKanban,
-  LayoutDashboard,
   PieChart,
   UserCheck,
   Users,
@@ -25,11 +24,6 @@ const AdminPage = () => {
     const { t } = useTranslation()
 
     const navItems: NavItem[] = [
-        {
-            label: t('admin-page.overview'),
-            href: routes.admin.overview(),
-            icon: <LayoutDashboard className="h-4 w-4" />,
-        },
         {
             label: t('admin-page.users'),
             href: routes.admin.users(),

@@ -7,9 +7,15 @@ import { useTranslation } from 'react-i18next'
 import { useSelector } from 'react-redux'
 import { toast } from 'sonner'
 import * as z from 'zod'
-import { selectUser } from '../../../entities/user/model/selectors'
+import { selectUser, selectUserRole } from '../../../entities/user/model/selectors'
 import type { User as UserType } from '../../../entities/user/model/types'
-import { useAddUserDocumentMutation, useDeleteUserDocumentMutation, useGetUserDocumentsQuery, useUpdateMeMutation } from '../../../entities/user/model/userSlice'
+import { PlatformRoleBadge } from '../../../features/platform-admin/ui/PlatformRoleBadge'
+import {
+  useAddUserDocumentMutation,
+  useDeleteUserDocumentMutation,
+  useGetUserDocumentsQuery,
+  useUpdateMeMutation,
+} from '../../../entities/user/model/userSlice'
 import { usePasswordResetMutation } from '../../../features/auth/model/authSlice'
 import { DATE_REQUEST_FORMAT } from '../../../shared/config/constants'
 import { errorsHandler } from '../../../shared/lib/errors-handler'
@@ -48,6 +54,7 @@ const Employee = () => {
     const [isLoading, setIsLoading] = useState(true)
     const [isSaving, setIsSaving] = useState(false)
     const userData = useSelector(selectUser)
+    const userRole = useSelector(selectUserRole)
     const [updateMe] = useUpdateMeMutation()
     const { data: userDocuments, isLoading: isUserDocumentsLoading } = useGetUserDocumentsQuery()
     const [addUserDocument] = useAddUserDocumentMutation()
@@ -239,8 +246,7 @@ const Employee = () => {
     return (
         <div className="container mx-auto py-6 px-4 md:px-6 max-w-4xl">
             <div className="space-y-6">
-                {/* Шапка с аватаром */}
-                <div className="flex items-start gap-6">
+                <div className="flex items-start gap-8 pb-1">
                     <Avatar className="h-24 w-24 border-2 border-border">
                         <AvatarImage
                             src={userData?.avatar?.medium}
@@ -251,14 +257,22 @@ const Employee = () => {
                         </AvatarFallback>
                     </Avatar>
 
-                    <div className="flex-1">
+                    <div className="flex flex-1 flex-col gap-4 pt-1">
                         <h1 className="text-2xl font-bold tracking-tight">
                             {userData?.surname} {userData?.name} {userData?.patronymic}
                         </h1>
-                        <p className="text-muted-foreground">
-                            {userData?.position}
-                        </p>
-                        <div className="flex items-center gap-2 mt-2 text-sm text-muted-foreground">
+                        {userData?.position && (
+                            <p className="text-muted-foreground">{userData.position}</p>
+                        )}
+                        {userRole && (
+                            <div className="flex flex-wrap items-center gap-2.5">
+                                <span className="text-sm text-muted-foreground">
+                                    {t('profile-page.user-role')}
+                                </span>
+                                <PlatformRoleBadge role={userRole} />
+                            </div>
+                        )}
+                        <div className="flex items-center gap-2.5 text-sm text-muted-foreground">
                             <Mail className="h-4 w-4" />
                             <span>{userData?.email}</span>
                         </div>

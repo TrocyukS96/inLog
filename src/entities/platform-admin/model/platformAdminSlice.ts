@@ -11,13 +11,24 @@ import type {
   AdminTaskTag,
   AdminUser,
   PaginatedResponse,
+  UpdateAdminOrganizationBody,
+  UpdateAdminProjectBody,
 } from './types'
 import type { PlatformRole } from '../../../shared/types/platform-role'
 
 export const platformAdminApi = createApi({
   reducerPath: 'platformAdminApi',
   baseQuery,
-  tagTypes: ['AdminUsers', 'AdminAccess', 'AdminTasks', 'AdminTaskStatuses', 'AdminTaskTags', 'AdminMembers'],
+  tagTypes: [
+    'AdminUsers',
+    'AdminAccess',
+    'AdminTasks',
+    'AdminTaskStatuses',
+    'AdminTaskTags',
+    'AdminMembers',
+    'AdminOrganizations',
+    'AdminProjects',
+  ],
   endpoints: (builder) => ({
     getAdminAccess: builder.query<AdminAccess, void>({
       query: () => 'admin/access/',
@@ -87,6 +98,31 @@ export const platformAdminApi = createApi({
         url: 'admin/organization/',
         params: { limit, offset, ...(search ? { search } : {}) },
       }),
+      providesTags: (result) =>
+        result
+          ? [
+              ...result.results.map(({ id }) => ({ type: 'AdminOrganizations' as const, id })),
+              { type: 'AdminOrganizations', id: 'LIST' },
+            ]
+          : [{ type: 'AdminOrganizations', id: 'LIST' }],
+    }),
+    updateAdminOrganization: builder.mutation<
+      AdminOrganization,
+      { id: number; body: UpdateAdminOrganizationBody }
+    >({
+      query: ({ id, body }) => ({
+        url: `admin/organization/${id}/`,
+        method: 'PATCH',
+        body,
+      }),
+      invalidatesTags: [{ type: 'AdminOrganizations', id: 'LIST' }],
+    }),
+    deleteAdminOrganization: builder.mutation<void, number>({
+      query: (id) => ({
+        url: `admin/organization/${id}/`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: [{ type: 'AdminOrganizations', id: 'LIST' }],
     }),
     getAdminProjects: builder.query<
       PaginatedResponse<AdminProject>,
@@ -101,6 +137,31 @@ export const platformAdminApi = createApi({
           ...(organization ? { organization } : {}),
         },
       }),
+      providesTags: (result) =>
+        result
+          ? [
+              ...result.results.map(({ id }) => ({ type: 'AdminProjects' as const, id })),
+              { type: 'AdminProjects', id: 'LIST' },
+            ]
+          : [{ type: 'AdminProjects', id: 'LIST' }],
+    }),
+    updateAdminProject: builder.mutation<
+      AdminProject,
+      { id: number; body: UpdateAdminProjectBody }
+    >({
+      query: ({ id, body }) => ({
+        url: `admin/project/${id}/`,
+        method: 'PATCH',
+        body,
+      }),
+      invalidatesTags: [{ type: 'AdminProjects', id: 'LIST' }],
+    }),
+    deleteAdminProject: builder.mutation<void, number>({
+      query: (id) => ({
+        url: `admin/project/${id}/`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: [{ type: 'AdminProjects', id: 'LIST' }],
     }),
     getAdminTasks: builder.query<
       PaginatedResponse<AdminTask>,
@@ -191,7 +252,11 @@ export const {
   useUpdateAdminUserRoleMutation,
   useGetAdminMembersQuery,
   useGetAdminOrganizationsQuery,
+  useUpdateAdminOrganizationMutation,
+  useDeleteAdminOrganizationMutation,
   useGetAdminProjectsQuery,
+  useUpdateAdminProjectMutation,
+  useDeleteAdminProjectMutation,
   useGetAdminTasksQuery,
   useDeleteAdminTaskMutation,
   useGetAdminTaskStatusesQuery,
