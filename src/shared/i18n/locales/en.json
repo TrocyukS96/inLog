@@ -237,6 +237,7 @@
         "continue": "Continue",
         "save": "Save",
         "delete": "Delete",
+        "deleting": "Deleting...",
         "edit": "Edit",
         "add": "Add",
         "create": "Create",
