@@ -8,6 +8,8 @@ import {
   useGetAdminOrganizationsQuery,
 } from '../../../../entities/platform-admin/model/platformAdminSlice'
 import { ADMIN_PAGE_SIZE, formatAdminDateShort } from '../../../../features/platform-admin/lib/format'
+import { useAdminDeleteDialog } from '../../../../features/platform-admin/lib/useAdminDeleteDialog'
+import { AdminDeleteConfirmDialog } from '../../../../features/platform-admin/ui/AdminDeleteConfirmDialog'
 import { AdminOrganizationEditDialog } from '../../../../features/platform-admin/ui/AdminOrganizationEditDialog'
 import { AdminPagination } from '../../../../features/platform-admin/ui/AdminPagination'
 import { AdminSearchBar } from '../../../../features/platform-admin/ui/AdminSearchBar'
@@ -35,27 +37,28 @@ export function AdminOrganizationsPage() {
     offset,
     search: appliedSearch || undefined,
   })
-  const [deleteOrganization, { isLoading: isDeleting }] = useDeleteAdminOrganizationMutation()
+  const [deleteOrganization, { isLoading: isDeletingOrg }] = useDeleteAdminOrganizationMutation()
+  const { target, isDeleting, openDeleteDialog, closeDeleteDialog, confirmDelete } =
+    useAdminDeleteDialog()
 
   const organizations = data?.results ?? []
-  const isBusy = isLoading || isFetching || isDeleting
+  const isBusy = isLoading || isFetching || isDeletingOrg || isDeleting
 
-  const handleDelete = async (organization: AdminOrganization) => {
-    if (
-      !window.confirm(
-        t('admin-page.delete-organization-confirmation', { name: organization.full_name })
-      )
-    ) {
-      return
-    }
-
-    try {
-      await deleteOrganization(organization.id).unwrap()
-      toast.success(t('admin-page.organization-deleted'))
-    } catch (error) {
-      toast.error(t('errors.something-went-wrong'))
-      console.error(error)
-    }
+  const handleDelete = (organization: AdminOrganization) => {
+    openDeleteDialog({
+      type: 'organization',
+      name: organization.full_name,
+      onConfirm: async () => {
+        try {
+          await deleteOrganization(organization.id).unwrap()
+          toast.success(t('admin-page.organization-deleted'))
+        } catch (error) {
+          toast.error(t('errors.something-went-wrong'))
+          console.error(error)
+          throw error
+        }
+      },
+    })
   }
 
   return (
@@ -152,6 +155,19 @@ export function AdminOrganizationsPage() {
             setEditingOrganization(null)
           }
         }}
+      />
+
+      <AdminDeleteConfirmDialog
+        open={Boolean(target)}
+        onOpenChange={(open) => {
+          if (!open) {
+            closeDeleteDialog()
+          }
+        }}
+        entityType={target?.type ?? 'organization'}
+        entityName={target?.name ?? ''}
+        isDeleting={isDeleting}
+        onConfirm={confirmDelete}
       />
     </>
   )

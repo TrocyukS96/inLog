@@ -8,6 +8,8 @@ import {
   useGetAdminProjectsQuery,
 } from '../../../../entities/platform-admin/model/platformAdminSlice'
 import { ADMIN_PAGE_SIZE, formatAdminDateShort } from '../../../../features/platform-admin/lib/format'
+import { useAdminDeleteDialog } from '../../../../features/platform-admin/lib/useAdminDeleteDialog'
+import { AdminDeleteConfirmDialog } from '../../../../features/platform-admin/ui/AdminDeleteConfirmDialog'
 import { AdminPagination } from '../../../../features/platform-admin/ui/AdminPagination'
 import { AdminProjectEditDialog } from '../../../../features/platform-admin/ui/AdminProjectEditDialog'
 import { AdminSearchBar } from '../../../../features/platform-admin/ui/AdminSearchBar'
@@ -35,23 +37,28 @@ export function AdminProjectsPage() {
     offset,
     search: appliedSearch || undefined,
   })
-  const [deleteProject, { isLoading: isDeleting }] = useDeleteAdminProjectMutation()
+  const [deleteProject, { isLoading: isDeletingProject }] = useDeleteAdminProjectMutation()
+  const { target, isDeleting, openDeleteDialog, closeDeleteDialog, confirmDelete } =
+    useAdminDeleteDialog()
 
   const projects = data?.results ?? []
-  const isBusy = isLoading || isFetching || isDeleting
+  const isBusy = isLoading || isFetching || isDeletingProject || isDeleting
 
-  const handleDelete = async (project: AdminProject) => {
-    if (!window.confirm(t('admin-page.delete-project-confirmation', { name: project.name }))) {
-      return
-    }
-
-    try {
-      await deleteProject(project.id).unwrap()
-      toast.success(t('admin-page.project-deleted'))
-    } catch (error) {
-      toast.error(t('errors.something-went-wrong'))
-      console.error(error)
-    }
+  const handleDelete = (project: AdminProject) => {
+    openDeleteDialog({
+      type: 'project',
+      name: project.name,
+      onConfirm: async () => {
+        try {
+          await deleteProject(project.id).unwrap()
+          toast.success(t('admin-page.project-deleted'))
+        } catch (error) {
+          toast.error(t('errors.something-went-wrong'))
+          console.error(error)
+          throw error
+        }
+      },
+    })
   }
 
   return (
@@ -149,6 +156,19 @@ export function AdminProjectsPage() {
             setEditingProject(null)
           }
         }}
+      />
+
+      <AdminDeleteConfirmDialog
+        open={Boolean(target)}
+        onOpenChange={(open) => {
+          if (!open) {
+            closeDeleteDialog()
+          }
+        }}
+        entityType={target?.type ?? 'project'}
+        entityName={target?.name ?? ''}
+        isDeleting={isDeleting}
+        onConfirm={confirmDelete}
       />
     </>
   )

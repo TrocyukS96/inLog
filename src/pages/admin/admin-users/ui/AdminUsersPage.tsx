@@ -10,6 +10,8 @@ import {
 } from '../../../../entities/platform-admin/model/platformAdminSlice'
 import { selectUser } from '../../../../entities/user/model/selectors'
 import { ADMIN_PAGE_SIZE, formatAdminDate } from '../../../../features/platform-admin/lib/format'
+import { useAdminDeleteDialog } from '../../../../features/platform-admin/lib/useAdminDeleteDialog'
+import { AdminDeleteConfirmDialog } from '../../../../features/platform-admin/ui/AdminDeleteConfirmDialog'
 import { AdminPagination } from '../../../../features/platform-admin/ui/AdminPagination'
 import { AdminSearchBar } from '../../../../features/platform-admin/ui/AdminSearchBar'
 import { AdminSectionShell } from '../../../../features/platform-admin/ui/AdminSectionShell'
@@ -42,29 +44,34 @@ export function AdminUsersPage() {
     offset,
     search: appliedSearch || undefined,
   })
-  const [deleteUser, { isLoading: isDeleting }] = useDeleteAdminUserMutation()
+  const [deleteUser, { isLoading: isDeletingUser }] = useDeleteAdminUserMutation()
   const [updateRole, { isLoading: isUpdatingRole }] = useUpdateAdminUserRoleMutation()
+  const { target, isDeleting, openDeleteDialog, closeDeleteDialog, confirmDelete } =
+    useAdminDeleteDialog()
 
   const users = data?.results ?? []
-  const isBusy = isLoading || isFetching || isDeleting || isUpdatingRole
+  const isBusy = isLoading || isFetching || isDeletingUser || isUpdatingRole || isDeleting
 
   const handleSearch = () => {
     setAppliedSearch(search.trim())
     setOffset(0)
   }
 
-  const handleDelete = async (userId: number, email: string) => {
-    if (!window.confirm(t('admin-page.delete-user-confirmation', { email }))) {
-      return
-    }
-
-    try {
-      await deleteUser(userId).unwrap()
-      toast.success(t('admin-page.user-deleted'))
-    } catch (error) {
-      toast.error(t('errors.something-went-wrong'))
-      console.error(error)
-    }
+  const handleDelete = (userId: number, email: string) => {
+    openDeleteDialog({
+      type: 'user',
+      name: email,
+      onConfirm: async () => {
+        try {
+          await deleteUser(userId).unwrap()
+          toast.success(t('admin-page.user-deleted'))
+        } catch (error) {
+          toast.error(t('errors.something-went-wrong'))
+          console.error(error)
+          throw error
+        }
+      },
+    })
   }
 
   const handleRoleChange = async (userId: number, role: PlatformRole) => {
@@ -78,6 +85,7 @@ export function AdminUsersPage() {
   }
 
   return (
+    <>
     <AdminSectionShell
       title={t('admin-page.users')}
       description={t('admin-page.users-description')}
@@ -162,5 +170,19 @@ export function AdminUsersPage() {
         </TableBody>
       </Table>
     </AdminSectionShell>
+
+    <AdminDeleteConfirmDialog
+      open={Boolean(target)}
+      onOpenChange={(open) => {
+        if (!open) {
+          closeDeleteDialog()
+        }
+      }}
+      entityType={target?.type ?? 'user'}
+      entityName={target?.name ?? ''}
+      isDeleting={isDeleting}
+      onConfirm={confirmDelete}
+    />
+    </>
   )
 }

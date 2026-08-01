@@ -11,11 +11,13 @@ import {
   useGetAdminTaskTagsQuery,
 } from '../../../../entities/platform-admin/model/platformAdminSlice'
 import { ADMIN_PAGE_SIZE, formatAdminDateShort } from '../../../../features/platform-admin/lib/format'
+import { useAdminDeleteDialog } from '../../../../features/platform-admin/lib/useAdminDeleteDialog'
 import {
   getAdminTaskCreator,
   getAdminTaskMembers,
 } from '../../../../features/platform-admin/lib/task-users'
 import { AdminAvatarStack } from '../../../../features/platform-admin/ui/AdminAvatarStack'
+import { AdminDeleteConfirmDialog } from '../../../../features/platform-admin/ui/AdminDeleteConfirmDialog'
 import { AdminPagination } from '../../../../features/platform-admin/ui/AdminPagination'
 import { AdminSearchBar } from '../../../../features/platform-admin/ui/AdminSearchBar'
 import { AdminSectionShell } from '../../../../features/platform-admin/ui/AdminSectionShell'
@@ -55,6 +57,8 @@ export function AdminTasksPage() {
   const [deleteTask, { isLoading: isDeletingTask }] = useDeleteAdminTaskMutation()
   const [deleteStatus, { isLoading: isDeletingStatus }] = useDeleteAdminTaskStatusMutation()
   const [deleteTag, { isLoading: isDeletingTag }] = useDeleteAdminTaskTagMutation()
+  const { target, isDeleting, openDeleteDialog, closeDeleteDialog, confirmDelete } =
+    useAdminDeleteDialog()
 
   const activeQuery =
     tab === 'tasks' ? tasksQuery : tab === 'statuses' ? statusesQuery : tagsQuery
@@ -62,7 +66,8 @@ export function AdminTasksPage() {
     activeQuery.isFetching ||
     isDeletingTask ||
     isDeletingStatus ||
-    isDeletingTag
+    isDeletingTag ||
+    isDeleting
 
   const handleSearch = () => {
     setAppliedSearch(search.trim())
@@ -76,49 +81,59 @@ export function AdminTasksPage() {
     setAppliedSearch('')
   }
 
-  const handleDeleteTask = async (taskId: number, name: string) => {
-    if (!window.confirm(t('admin-page.delete-task-confirmation', { name }))) {
-      return
-    }
-
-    try {
-      await deleteTask(taskId).unwrap()
-      toast.success(t('admin-page.task-deleted'))
-    } catch (error) {
-      toast.error(t('errors.something-went-wrong'))
-      console.error(error)
-    }
+  const handleDeleteTask = (taskId: number, name: string) => {
+    openDeleteDialog({
+      type: 'task',
+      name,
+      onConfirm: async () => {
+        try {
+          await deleteTask(taskId).unwrap()
+          toast.success(t('admin-page.task-deleted'))
+        } catch (error) {
+          toast.error(t('errors.something-went-wrong'))
+          console.error(error)
+          throw error
+        }
+      },
+    })
   }
 
-  const handleDeleteStatus = async (statusId: number, name: string) => {
-    if (!window.confirm(t('admin-page.delete-status-confirmation', { name }))) {
-      return
-    }
-
-    try {
-      await deleteStatus(statusId).unwrap()
-      toast.success(t('admin-page.status-deleted'))
-    } catch (error) {
-      toast.error(t('errors.something-went-wrong'))
-      console.error(error)
-    }
+  const handleDeleteStatus = (statusId: number, name: string) => {
+    openDeleteDialog({
+      type: 'task-status',
+      name,
+      onConfirm: async () => {
+        try {
+          await deleteStatus(statusId).unwrap()
+          toast.success(t('admin-page.status-deleted'))
+        } catch (error) {
+          toast.error(t('errors.something-went-wrong'))
+          console.error(error)
+          throw error
+        }
+      },
+    })
   }
 
-  const handleDeleteTag = async (tagId: number, name: string) => {
-    if (!window.confirm(t('admin-page.delete-tag-confirmation', { name }))) {
-      return
-    }
-
-    try {
-      await deleteTag(tagId).unwrap()
-      toast.success(t('admin-page.tag-deleted'))
-    } catch (error) {
-      toast.error(t('errors.something-went-wrong'))
-      console.error(error)
-    }
+  const handleDeleteTag = (tagId: number, name: string) => {
+    openDeleteDialog({
+      type: 'task-tag',
+      name,
+      onConfirm: async () => {
+        try {
+          await deleteTag(tagId).unwrap()
+          toast.success(t('admin-page.tag-deleted'))
+        } catch (error) {
+          toast.error(t('errors.something-went-wrong'))
+          console.error(error)
+          throw error
+        }
+      },
+    })
   }
 
   return (
+    <>
     <AdminSectionShell
       title={t('admin-page.tasks')}
       description={t('admin-page.tasks-description')}
@@ -346,5 +361,19 @@ export function AdminTasksPage() {
         </TabsContent>
       </Tabs>
     </AdminSectionShell>
+
+    <AdminDeleteConfirmDialog
+      open={Boolean(target)}
+      onOpenChange={(open) => {
+        if (!open) {
+          closeDeleteDialog()
+        }
+      }}
+      entityType={target?.type ?? 'task'}
+      entityName={target?.name ?? ''}
+      isDeleting={isDeleting}
+      onConfirm={confirmDelete}
+    />
+    </>
   )
 }
