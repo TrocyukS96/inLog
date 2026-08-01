@@ -6,6 +6,7 @@ import { organizationApi } from '../../entities/organization/model/organizationS
 import { projectApi } from '../../entities/project/model/projectSlice'
 import { taskApi } from '../../entities/task/model/taskSlice'
 import { adminApi } from '../../entities/admin/model/adminSlice'
+import { platformAdminApi } from '../../entities/platform-admin/model/platformAdminSlice'
 import { notificationApi } from '../../entities/notification/model/notificationSlice'
 
 export const store = configureStore({
@@ -16,6 +17,7 @@ export const store = configureStore({
     [projectApi.reducerPath]: projectApi.reducer,
     [taskApi.reducerPath]: taskApi.reducer,
     [adminApi.reducerPath]: adminApi.reducer,
+    [platformAdminApi.reducerPath]: platformAdminApi.reducer,
     [notificationApi.reducerPath]: notificationApi.reducer,
   },
   middleware: (getDefaultMiddleware) =>
@@ -26,6 +28,7 @@ export const store = configureStore({
       projectApi.middleware,
       taskApi.middleware,
       adminApi.middleware,
+      platformAdminApi.middleware,
       notificationApi.middleware,
     ),
 })

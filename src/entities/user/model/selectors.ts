@@ -1,7 +1,8 @@
 import { createSelector } from '@reduxjs/toolkit'
 import type { RootState } from '../../../app/store/store'
-import { userApi } from './userSlice'
+import { isPlatformAdmin, isSuperAdmin } from '../../../shared/types/platform-role'
 import type { User } from './types'
+import { userApi } from './userSlice'
 import { ACCESS_TOKEN } from '../../../shared/config/constants'
 
 const selectUserApiSlice = (state: RootState) => state[userApi.reducerPath]
@@ -42,6 +43,12 @@ export const selectUserFullName = createSelector(
 export const selectUserAvatar = createSelector(selectUser, (user) => user?.avatar)
 
 export const selectUserRole = createSelector(selectUser, (user) => user?.role)
+
+export const selectIsPlatformAdmin = createSelector(selectUserRole, (role) =>
+  isPlatformAdmin(role)
+)
+
+export const selectIsSuperAdmin = createSelector(selectUserRole, (role) => isSuperAdmin(role))
 
 export const selectIsAuthenticatedAlternative = createSelector(
   selectUser,

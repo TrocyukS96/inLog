@@ -325,6 +325,7 @@
         "scheduler": "Scheduler",
         "settings": "Settings",
         "profile": "Profile",
+        "admin-panel": "Admin panel",
         "user-menu": "User menu",
         "logout": "Logout",
         "notifications": "Notifications",
@@ -521,6 +522,127 @@
 
     "admin-page": {
         "admin-panel": "Admin panel",
+        "users": "Users",
+        "users-description": "All registered users with signup date and role management.",
+        "access-denied": "You do not have permission to access the admin panel",
+        "search-users": "Search by email or name",
+        "search": "Search",
+        "loading": "Loading...",
+        "delete-user-confirmation": "Delete user {{email}}?",
+        "delete-task-confirmation": "Delete task \"{{name}}\"?",
+        "delete-status-confirmation": "Delete status \"{{name}}\"?",
+        "delete-tag-confirmation": "Delete tag \"{{name}}\"?",
+        "user-deleted": "User deleted",
+        "task-deleted": "Task deleted",
+        "status-deleted": "Status deleted",
+        "tag-deleted": "Tag deleted",
+        "user-role-updated": "User role updated",
+        "super-admin-code-only": "Super admin can only be assigned via server configuration",
+        "overview": "Overview",
+        "overview-description": "System-wide summary of users, organizations, projects, and tasks.",
+        "overview-open": "Open section →",
+        "overview-cards": {
+            "users": "Users",
+            "members": "Members",
+            "organizations": "Organizations",
+            "projects": "Projects",
+            "tasks": "Tasks"
+        },
+        "members": "Members",
+        "members-description": "All project and organization members across the system.",
+        "members-tab": {
+            "project": "Projects",
+            "organization": "Organizations"
+        },
+        "search-members": "Search by email, name, or project",
+        "members-table": {
+            "user": "User",
+            "organization": "Organization",
+            "project": "Project",
+            "role": "Role",
+            "belonging": "Belonging",
+            "joined": "Joined"
+        },
+        "organizations": "Organizations",
+        "organizations-description": "All organizations in the system regardless of membership.",
+        "search-organizations": "Search by organization name",
+        "projects": "Projects",
+        "projects-description": "All projects across users and organizations.",
+        "search-projects": "Search by project name",
+        "tasks": "Tasks",
+        "tasks-description": "Tasks, statuses, and tags across all projects.",
+        "search-tasks": "Search by name or slug",
+        "search-tags": "Search by tag name",
+        "tasks-tab": {
+            "tasks": "Tasks",
+            "statuses": "Statuses",
+            "tags": "Tags"
+        },
+        "pagination": {
+            "showing": "{{from}}–{{to}} of {{count}}",
+            "prev": "Previous",
+            "next": "Next"
+        },
+        "orgs-table": {
+            "name": "Full name",
+            "short-name": "Short name",
+            "inn": "INN",
+            "members": "Members",
+            "projects": "Projects",
+            "created": "Created"
+        },
+        "projects-table": {
+            "name": "Name",
+            "organization": "Organization",
+            "country": "Country",
+            "members": "Members",
+            "created": "Created"
+        },
+        "tasks-table": {
+            "name": "Task",
+            "organization": "Organization",
+            "project": "Project",
+            "status": "Status",
+            "creator": "Creator",
+            "members": "Members",
+            "priority": "Priority",
+            "flags": "Flags",
+            "archived": "Archived",
+            "template": "Template",
+            "subtask": "Subtask",
+            "created": "Created"
+        },
+        "statuses-table": {
+            "name": "Status",
+            "project": "Project",
+            "position": "Position",
+            "created": "Created",
+            "actions": "Actions"
+        },
+        "tags-table": {
+            "name": "Tag",
+            "project": "Project",
+            "flags": "Properties",
+            "systemic": "Systemic",
+            "orphan": "Orphan",
+            "created": "Created",
+            "actions": "Actions"
+        },
+        "platform-roles": {
+            "member": "Member",
+            "admin": "Admin",
+            "super_admin": "Super admin"
+        },
+        "users-table": {
+            "email": "Email",
+            "name": "Name",
+            "role": "Role",
+            "verified": "Email verified",
+            "registered-at": "Registered at",
+            "actions": "Actions",
+            "yes": "Yes",
+            "no": "No"
+        },
         "constructor": "Constructor",   
         "reports": "Reports",
         "edit-node": "Edit node",

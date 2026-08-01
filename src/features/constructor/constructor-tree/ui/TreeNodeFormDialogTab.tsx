@@ -129,7 +129,7 @@ const PanelTreeModalTab: FC<IProps> = ({
 
     return (
         <div className={cn(
-            "relative border rounded-lg p-6 pb-2 mb-4 transition-all",
+            "relative border border-border rounded-lg p-6 pb-2 mb-4 transition-all",
             hasError && "border-destructive bg-destructive/5"
         )}>
             <div className="space-y-6">

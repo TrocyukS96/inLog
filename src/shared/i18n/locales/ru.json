@@ -316,6 +316,7 @@
         "scheduler": "Планировщик",
         "settings": "Настройки",
         "profile": "Профиль",
+        "admin-panel": "Админ-панель",
         "user-menu": "Меню пользователя",
         "logout": "Выйти",
         "notifications": "Уведомления",
@@ -513,6 +514,127 @@
 
     "admin-page": {
         "admin-panel": "Админ панель",
+        "users": "Пользователи",
+        "users-description": "Список всех пользователей системы с датой регистрации и управлением ролями.",
+        "access-denied": "Недостаточно прав для доступа к админ-панели",
+        "search-users": "Поиск по email или имени",
+        "search": "Найти",
+        "loading": "Загрузка...",
+        "delete-user-confirmation": "Удалить пользователя {{email}}?",
+        "delete-task-confirmation": "Удалить задачу «{{name}}»?",
+        "delete-status-confirmation": "Удалить статус «{{name}}»?",
+        "delete-tag-confirmation": "Удалить тег «{{name}}»?",
+        "user-deleted": "Пользователь удалён",
+        "task-deleted": "Задача удалена",
+        "status-deleted": "Статус удалён",
+        "tag-deleted": "Тег удалён",
+        "user-role-updated": "Роль пользователя обновлена",
+        "super-admin-code-only": "Супер-админ назначается только через конфигурацию сервера",
+        "overview": "Обзор",
+        "overview-description": "Сводка по всей системе — пользователи, организации, проекты и задачи.",
+        "overview-open": "Открыть раздел →",
+        "overview-cards": {
+            "users": "Пользователи",
+            "members": "Участники",
+            "organizations": "Организации",
+            "projects": "Проекты",
+            "tasks": "Задачи"
+        },
+        "members": "Участники",
+        "members-description": "Все участники проектов и организаций в системе.",
+        "members-tab": {
+            "project": "Проекты",
+            "organization": "Организации"
+        },
+        "search-members": "Поиск по email, имени или проекту",
+        "members-table": {
+            "user": "Пользователь",
+            "organization": "Организация",
+            "project": "Проект",
+            "role": "Роль",
+            "belonging": "Принадлежность",
+            "joined": "Добавлен"
+        },
+        "organizations": "Организации",
+        "organizations-description": "Все организации в системе независимо от участников.",
+        "search-organizations": "Поиск по названию организации",
+        "projects": "Проекты",
+        "projects-description": "Все проекты всех пользователей и организаций.",
+        "search-projects": "Поиск по названию проекта",
+        "tasks": "Задачи",
+        "tasks-description": "Задачи, статусы и теги по всем проектам.",
+        "search-tasks": "Поиск по названию или slug",
+        "search-tags": "Поиск по названию тега",
+        "tasks-tab": {
+            "tasks": "Задачи",
+            "statuses": "Статусы",
+            "tags": "Теги"
+        },
+        "pagination": {
+            "showing": "{{from}}–{{to}} из {{count}}",
+            "prev": "Назад",
+            "next": "Далее"
+        },
+        "orgs-table": {
+            "name": "Полное название",
+            "short-name": "Краткое название",
+            "inn": "ИНН",
+            "members": "Участники",
+            "projects": "Проекты",
+            "created": "Создана"
+        },
+        "projects-table": {
+            "name": "Название",
+            "organization": "Организация",
+            "country": "Страна",
+            "members": "Участники",
+            "created": "Создан"
+        },
+        "tasks-table": {
+            "name": "Задача",
+            "organization": "Организация",
+            "project": "Проект",
+            "status": "Статус",
+            "creator": "Автор",
+            "members": "Участники",
+            "priority": "Приоритет",
+            "flags": "Метки",
+            "archived": "Архив",
+            "template": "Шаблон",
+            "subtask": "Подзадача",
+            "created": "Создана"
+        },
+        "statuses-table": {
+            "name": "Статус",
+            "project": "Проект",
+            "position": "Позиция",
+            "created": "Создан",
+            "actions": "Действия"
+        },
+        "tags-table": {
+            "name": "Тег",
+            "project": "Проект",
+            "flags": "Свойства",
+            "systemic": "Системный",
+            "orphan": "Orphan",
+            "created": "Создан",
+            "actions": "Действия"
+        },
+        "platform-roles": {
+            "member": "Участник",
+            "admin": "Админ",
+            "super_admin": "Супер админ"
+        },
+        "users-table": {
+            "email": "Email",
+            "name": "Имя",
+            "role": "Роль",
+            "verified": "Email подтверждён",
+            "registered-at": "Дата регистрации",
+            "actions": "Действия",
+            "yes": "Да",
+            "no": "Нет"
+        },
         "constructor": "Конструктор",
         "reports": "Отчеты",
         "edit-node": "Редактировать узел",

@@ -32,6 +32,8 @@ import {
   TooltipTrigger,
 } from '../../shared/ui/tooltip'
 import { useCallback } from 'react'
+import { useSelector } from 'react-redux'
+import { selectIsPlatformAdmin } from '../../entities/user/model/selectors'
 
 
 export function Sidebar() {
@@ -40,6 +42,7 @@ export function Sidebar() {
   const navigate = useNavigate()
   const location = useLocation()
   const dispatch = useDispatch()
+  const isPlatformAdmin = useSelector(selectIsPlatformAdmin)
 
   const handleLogout = async () => {
     try {
@@ -106,18 +109,19 @@ export function Sidebar() {
             <TooltipContent side="right">{t('sidebar.scheduler')}</TooltipContent>
           </Tooltip>
 
-          {/* TODO: add admin panel page */}
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <NavLink
-                to={routes.admin.list()}
-                className={getLinkClassName(routes.admin.list())}
-              >
-                <ShieldPlus className="h-7 w-7 text-white" />
-              </NavLink>
-            </TooltipTrigger>
-            <TooltipContent side="right">{t('sidebar.admin-panel')}</TooltipContent>
-          </Tooltip>
+          {isPlatformAdmin && (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <NavLink
+                  to={routes.admin.list()}
+                  className={getLinkClassName(routes.admin.list())}
+                >
+                  <ShieldPlus className="h-7 w-7 text-white" />
+                </NavLink>
+              </TooltipTrigger>
+              <TooltipContent side="right">{t('sidebar.admin-panel')}</TooltipContent>
+            </Tooltip>
+          )}
 
           <Tooltip>
             <TooltipTrigger asChild>
