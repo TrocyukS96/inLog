@@ -1,4 +1,6 @@
 // src/shared/lib/routes.ts
+import { isPlatformAdmin } from '../types/platform-role'
+
 export const routes = {
     // публичные
     login: () => '/login',
@@ -45,14 +47,18 @@ export const routes = {
       members: () => '/admin/members',
       organizations: () => '/admin/organizations',
       projects: () => '/admin/projects',
+      organizationsAndProjects: () => '/admin/organizations-and-projects',
       tasks: () => '/admin/tasks',
       constructor: () => '/admin/constructor',
+      catalog: () => '/admin/catalog',
       reports: () => '/admin/reports',
     },
 
     settings: {
       list: () => '/settings',
       profile: () => '/settings/profile',
+      organizations: () => '/settings/organizations',
+      projects: () => '/settings/projects',
       organizationsAndProjects: () => '/settings/organizations-and-projects',
       notifications: () => '/settings/notifications',
     },
@@ -64,6 +70,29 @@ export const routes = {
     // 404
     notFound: () => '*',
   } as const;
+
+  const platformConsolePaths = [
+    routes.admin.users(),
+    routes.admin.members(),
+    routes.admin.organizations(),
+    routes.admin.projects(),
+    routes.admin.organizationsAndProjects(),
+    routes.admin.tasks(),
+    routes.admin.constructor(),
+    routes.admin.catalog(),
+  ]
+
+  export function isPlatformConsolePath(pathname: string) {
+    if (pathname === routes.admin.list()) return true
+    return platformConsolePaths.some(
+      (path) => pathname === path || pathname.startsWith(`${path}/`),
+    )
+  }
+
+  /** Where a signed-in user lands. Only super admin can leave this area later. */
+  export function defaultAuthenticatedPath(role?: string | null) {
+    return isPlatformAdmin(role) ? routes.admin.list() : routes.dashboard()
+  }
   
   // Тип для автодополнения (опционально, но очень полезно)
   export type RouteKeys = typeof routes;

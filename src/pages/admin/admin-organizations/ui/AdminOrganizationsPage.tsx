@@ -1,21 +1,30 @@
-import { Pencil, Trash2 } from 'lucide-react'
-import { useState } from 'react'
+import { Pencil, Plus, Trash2 } from 'lucide-react'
+import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { useSelector } from 'react-redux'
+import { Link } from 'react-router-dom'
+import { selectUser } from '../../../../entities/user/model/selectors'
+import { canAccessSection } from '../../../../shared/lib/available-features'
 import { toast } from 'sonner'
-import type { AdminOrganization } from '../../../../entities/platform-admin/model/types'
 import {
   useDeleteAdminOrganizationMutation,
   useGetAdminOrganizationsQuery,
 } from '../../../../entities/platform-admin/model/platformAdminSlice'
+import type { AdminOrganization, AdminUserBrief } from '../../../../entities/platform-admin/model/types'
 import { ADMIN_PAGE_SIZE, formatAdminDateShort } from '../../../../features/platform-admin/lib/format'
 import { useAdminDeleteDialog } from '../../../../features/platform-admin/lib/useAdminDeleteDialog'
 import { AdminDeleteConfirmDialog } from '../../../../features/platform-admin/ui/AdminDeleteConfirmDialog'
+import { AdminOrganizationCreateDialog } from '../../../../features/platform-admin/ui/AdminOrganizationCreateDialog'
 import { AdminOrganizationEditDialog } from '../../../../features/platform-admin/ui/AdminOrganizationEditDialog'
 import { AdminPagination } from '../../../../features/platform-admin/ui/AdminPagination'
-import { AdminSearchBar } from '../../../../features/platform-admin/ui/AdminSearchBar'
 import { AdminSectionShell } from '../../../../features/platform-admin/ui/AdminSectionShell'
-import { Badge } from '../../../../shared/ui/badge'
+import { DebouncedSearchInput } from '../../../../features/platform-admin/ui/DebouncedSearchInput'
+import { OrganizationMembersDialog } from '../../../../features/platform-admin/ui/OrganizationMembersDialog'
+import { PeopleStackCell } from '../../../../features/platform-admin/ui/PeopleStackCell'
+import { routes } from '../../../../shared/lib/routes'
 import { Button } from '../../../../shared/ui/button'
+import { NameChipStack } from '../../../../shared/ui/name-chip-stack'
+import { SiteNameChip } from '../../../../shared/ui/site-name-chip'
 import {
   Table,
   TableBody,
@@ -25,24 +34,45 @@ import {
   TableRow,
 } from '../../../../shared/ui/table'
 
+function memberUsers(organization: AdminOrganization): AdminUserBrief[] {
+  return (organization.members ?? []).flatMap((member) => {
+    if (!member.user) return []
+    return [{
+      id: member.user.id,
+      email: member.user.email,
+      full_name: member.user.full_name,
+    }]
+  })
+}
+
 export function AdminOrganizationsPage() {
   const { t } = useTranslation()
-  const [search, setSearch] = useState('')
+  const user = useSelector(selectUser)
+  const projectsOpen = canAccessSection(user, 'projects')
   const [appliedSearch, setAppliedSearch] = useState('')
   const [offset, setOffset] = useState(0)
   const [editingOrganization, setEditingOrganization] = useState<AdminOrganization | null>(null)
+  const [isCreateOpen, setIsCreateOpen] = useState(false)
+  const [membersOrganization, setMembersOrganization] = useState<AdminOrganization | null>(null)
 
   const { data, isLoading, isFetching } = useGetAdminOrganizationsQuery({
     limit: ADMIN_PAGE_SIZE,
     offset,
     search: appliedSearch || undefined,
   })
-  const [deleteOrganization, { isLoading: isDeletingOrg }] = useDeleteAdminOrganizationMutation()
-  const { target, isDeleting, openDeleteDialog, closeDeleteDialog, confirmDelete } =
-    useAdminDeleteDialog()
+  const [deleteOrganization] = useDeleteAdminOrganizationMutation()
+  const { target, isDeleting, openDeleteDialog, closeDeleteDialog, confirmDelete } = useAdminDeleteDialog()
 
-  const organizations = data?.results ?? []
-  const isBusy = isLoading || isFetching || isDeletingOrg || isDeleting
+  const organizations = useMemo(() => {
+    return data?.results ?? []
+  }, [data?.results])
+  const isBusy = isLoading || isFetching || isDeleting
+
+  const setSearch = (value: string) => {
+    const next = value.trim()
+    setAppliedSearch((current) => (current === next ? current : next))
+    setOffset(0)
+  }
 
   const handleDelete = (organization: AdminOrganization) => {
     openDeleteDialog({
@@ -66,19 +96,22 @@ export function AdminOrganizationsPage() {
       <AdminSectionShell
         title={t('admin-page.organizations')}
         description={t('admin-page.organizations-description')}
+        actions={
+          <Button type="button" onClick={() => setIsCreateOpen(true)}>
+            <Plus />
+            {t('admin-page.create-organization')}
+          </Button>
+        }
         isLoading={isLoading}
         isEmpty={!isLoading && organizations.length === 0}
         toolbar={
-          <AdminSearchBar
-            value={search}
-            onChange={setSearch}
-            onSubmit={() => {
-              setAppliedSearch(search.trim())
-              setOffset(0)
-            }}
-            placeholder={t('admin-page.search-organizations')}
-            actionLabel={t('admin-page.search')}
-          />
+          <div className="flex w-full items-center gap-2">
+            <DebouncedSearchInput
+              value={appliedSearch}
+              onDebouncedChange={setSearch}
+              placeholder={t('admin-page.search-organizations')}
+            />
+          </div>
         }
         footer={
           data ? (
@@ -92,13 +125,14 @@ export function AdminOrganizationsPage() {
           ) : null
         }
       >
-        <Table>
+        <Table className="w-full min-w-max [&_td]:whitespace-nowrap [&_td]:py-1.5 [&_th]:h-9 [&_th]:whitespace-nowrap">
           <TableHeader>
             <TableRow>
-              <TableHead>ID</TableHead>
               <TableHead>{t('admin-page.orgs-table.name')}</TableHead>
               <TableHead>{t('admin-page.orgs-table.short-name')}</TableHead>
+              <TableHead>{t('fields.address')}</TableHead>
               <TableHead>{t('admin-page.orgs-table.inn')}</TableHead>
+              <TableHead>{t('admin-page.orgs-table.kpp')}</TableHead>
               <TableHead>{t('admin-page.orgs-table.members')}</TableHead>
               <TableHead>{t('admin-page.orgs-table.projects')}</TableHead>
               <TableHead>{t('admin-page.orgs-table.created')}</TableHead>
@@ -106,28 +140,46 @@ export function AdminOrganizationsPage() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {organizations.map((org) => (
-              <TableRow key={org.id}>
-                <TableCell className="text-muted-foreground">#{org.id}</TableCell>
-                <TableCell className="max-w-[240px] truncate font-medium">{org.full_name}</TableCell>
-                <TableCell>{org.short_name}</TableCell>
-                <TableCell>{org.inn || '—'}</TableCell>
+            {organizations.map((organization) => (
+              <TableRow key={organization.id}>
                 <TableCell>
-                  <Badge variant="secondary">{org.members_count}</Badge>
+                  <SiteNameChip value={organization.full_name} toneKey={String(organization.id)} />
                 </TableCell>
                 <TableCell>
-                  <Badge variant="outline">{org.projects_count}</Badge>
+                  <SiteNameChip value={organization.short_name} toneKey={String(organization.id)} />
+                </TableCell>
+                <TableCell>{organization.address || '—'}</TableCell>
+                <TableCell>{organization.inn || '—'}</TableCell>
+                <TableCell>{organization.kpp || '—'}</TableCell>
+                <TableCell>
+                  <PeopleStackCell
+                    users={memberUsers(organization)}
+                    label={t('admin-page.org-members')}
+                    onOpen={() => setMembersOrganization(organization)}
+                  />
+                </TableCell>
+                <TableCell>
+                  {projectsOpen ? (
+                    <Link
+                      to={`${routes.admin.projects()}?organization=${organization.id}`}
+                      className="inline-flex rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    >
+                      <NameChipStack items={organization.projects ?? []} />
+                    </Link>
+                  ) : (
+                    <NameChipStack items={organization.projects ?? []} />
+                  )}
                 </TableCell>
                 <TableCell className="whitespace-nowrap text-muted-foreground">
-                  {formatAdminDateShort(org.created_at)}
+                  {organization.created_at ? formatAdminDateShort(organization.created_at) : '—'}
                 </TableCell>
                 <TableCell className="text-right">
-                  <div className="flex items-center justify-end gap-1">
+                  <div className="flex justify-end">
                     <Button
                       variant="ghost"
                       size="icon"
-                      disabled={isBusy}
-                      onClick={() => setEditingOrganization(org)}
+                      aria-label={t('admin-page.edit-organization')}
+                      onClick={() => setEditingOrganization(organization)}
                     >
                       <Pencil className="h-4 w-4" />
                     </Button>
@@ -135,7 +187,8 @@ export function AdminOrganizationsPage() {
                       variant="ghost"
                       size="icon"
                       disabled={isBusy}
-                      onClick={() => handleDelete(org)}
+                      aria-label={t('buttons.delete')}
+                      onClick={() => handleDelete(organization)}
                     >
                       <Trash2 className="h-4 w-4 text-destructive" />
                     </Button>
@@ -147,22 +200,25 @@ export function AdminOrganizationsPage() {
         </Table>
       </AdminSectionShell>
 
+      <AdminOrganizationCreateDialog open={isCreateOpen} onOpenChange={setIsCreateOpen} />
+      <OrganizationMembersDialog
+        organization={membersOrganization}
+        open={Boolean(membersOrganization)}
+        onOpenChange={(open) => {
+          if (!open) setMembersOrganization(null)
+        }}
+      />
       <AdminOrganizationEditDialog
         organization={editingOrganization}
         open={Boolean(editingOrganization)}
         onOpenChange={(open) => {
-          if (!open) {
-            setEditingOrganization(null)
-          }
+          if (!open) setEditingOrganization(null)
         }}
       />
-
       <AdminDeleteConfirmDialog
         open={Boolean(target)}
         onOpenChange={(open) => {
-          if (!open) {
-            closeDeleteDialog()
-          }
+          if (!open) closeDeleteDialog()
         }}
         entityType={target?.type ?? 'organization'}
         entityName={target?.name ?? ''}

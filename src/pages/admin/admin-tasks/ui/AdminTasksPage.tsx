@@ -1,11 +1,13 @@
-import { Trash2 } from 'lucide-react'
-import { useState } from 'react'
+import { MoreHorizontal, Pencil, Plus, Trash2 } from 'lucide-react'
+import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 import {
   useDeleteAdminTaskMutation,
   useDeleteAdminTaskStatusMutation,
   useDeleteAdminTaskTagMutation,
+  useGetAdminOrganizationsQuery,
+  useGetAdminProjectsQuery,
   useGetAdminTasksQuery,
   useGetAdminTaskStatusesQuery,
   useGetAdminTaskTagsQuery,
@@ -14,16 +16,29 @@ import { ADMIN_PAGE_SIZE, formatAdminDateShort } from '../../../../features/plat
 import { useAdminDeleteDialog } from '../../../../features/platform-admin/lib/useAdminDeleteDialog'
 import {
   getAdminTaskCreator,
-  getAdminTaskMembers,
+  getAdminTaskDoerUsers,
 } from '../../../../features/platform-admin/lib/task-users'
 import { AdminAvatarStack } from '../../../../features/platform-admin/ui/AdminAvatarStack'
 import { AdminDeleteConfirmDialog } from '../../../../features/platform-admin/ui/AdminDeleteConfirmDialog'
+import { AdminTaskCreateDialog } from '../../../../features/platform-admin/ui/AdminTaskCreateDialog'
+import { AdminTaskStatusDialog } from '../../../../features/platform-admin/ui/AdminTaskStatusDialog'
+import { AdminTaskTagDialog } from '../../../../features/platform-admin/ui/AdminTaskTagDialog'
+import { AdminTaskEditDialog } from '../../../../features/platform-admin/ui/AdminTaskEditDialog'
 import { AdminPagination } from '../../../../features/platform-admin/ui/AdminPagination'
-import { AdminSearchBar } from '../../../../features/platform-admin/ui/AdminSearchBar'
+import { DebouncedSearchInput } from '../../../../features/platform-admin/ui/DebouncedSearchInput'
 import { AdminSectionShell } from '../../../../features/platform-admin/ui/AdminSectionShell'
 import { AdminUserCell } from '../../../../features/platform-admin/ui/AdminUserCell'
-import { Badge } from '../../../../shared/ui/badge'
+import type { TaskPriority } from '../../../../entities/task/model/types'
+import type { AdminTask, AdminTaskStatus, AdminTaskTag } from '../../../../entities/platform-admin/model/types'
+import { getPriorityColorStyle } from '../../../../shared/lib/utils'
 import { Button } from '../../../../shared/ui/button'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '../../../../shared/ui/dropdown-menu'
+import { SiteNameChip } from '../../../../shared/ui/site-name-chip'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../../../shared/ui/tabs'
 import {
   Table,
@@ -37,20 +52,61 @@ import {
 export function AdminTasksPage() {
   const { t } = useTranslation()
   const [tab, setTab] = useState('tasks')
+  const [editingTask, setEditingTask] = useState<AdminTask | null>(null)
+  const [isCreateOpen, setIsCreateOpen] = useState(false)
+  const [isStatusCreateOpen, setIsStatusCreateOpen] = useState(false)
+  const [editingStatus, setEditingStatus] = useState<AdminTaskStatus | null>(null)
+  const [isTagCreateOpen, setIsTagCreateOpen] = useState(false)
+  const [editingTag, setEditingTag] = useState<AdminTaskTag | null>(null)
   const [search, setSearch] = useState('')
-  const [appliedSearch, setAppliedSearch] = useState('')
   const [offset, setOffset] = useState(0)
 
   const tasksQuery = useGetAdminTasksQuery(
-    { limit: ADMIN_PAGE_SIZE, offset, search: appliedSearch || undefined },
+    { limit: ADMIN_PAGE_SIZE, offset, search: search || undefined },
     { skip: tab !== 'tasks' }
   )
+  const projectsQuery = useGetAdminProjectsQuery({ limit: 200, offset: 0 })
+  const organizationsQuery = useGetAdminOrganizationsQuery(
+    { limit: 200, offset: 0 },
+    { skip: tab !== 'tasks' },
+  )
+  const projectNameById = useMemo(() => {
+    const names = new Map<number, string>()
+    for (const project of projectsQuery.data?.results ?? []) names.set(project.id, project.name)
+    return names
+  }, [projectsQuery.data?.results])
+  const tasks = useMemo(() => {
+    const projects = new Map((projectsQuery.data?.results ?? []).map((project) => [project.id, project]))
+    const organizations = new Map(
+      (organizationsQuery.data?.results ?? []).map((organization) => [
+        organization.id,
+        organization.short_name || organization.full_name,
+      ]),
+    )
+
+    return (tasksQuery.data?.results ?? []).map((task) => {
+      const project = projects.get(task.project_id)
+      const organizationId = task.organization_id || project?.organization_id
+      const organizationName =
+        task.organization_name ||
+        project?.organization_name ||
+        (organizationId ? organizations.get(organizationId) : '') ||
+        ''
+
+      return {
+        ...task,
+        project_name: task.project_name || project?.name || '',
+        organization_id: organizationId,
+        organization_name: organizationName,
+      }
+    })
+  }, [organizationsQuery.data?.results, projectsQuery.data?.results, tasksQuery.data?.results])
   const statusesQuery = useGetAdminTaskStatusesQuery(
     { limit: ADMIN_PAGE_SIZE, offset },
     { skip: tab !== 'statuses' }
   )
   const tagsQuery = useGetAdminTaskTagsQuery(
-    { limit: ADMIN_PAGE_SIZE, offset, search: appliedSearch || undefined },
+    { limit: ADMIN_PAGE_SIZE, offset, search: search || undefined },
     { skip: tab !== 'tags' }
   )
 
@@ -69,16 +125,18 @@ export function AdminTasksPage() {
     isDeletingTag ||
     isDeleting
 
-  const handleSearch = () => {
-    setAppliedSearch(search.trim())
-    setOffset(0)
+  const handleSearch = (value: string) => {
+    const next = value.trim()
+    setSearch((current) => {
+      if (current !== next) setOffset(0)
+      return next
+    })
   }
 
   const handleTabChange = (value: string) => {
     setTab(value)
     setOffset(0)
     setSearch('')
-    setAppliedSearch('')
   }
 
   const handleDeleteTask = (taskId: number, name: string) => {
@@ -146,24 +204,42 @@ export function AdminTasksPage() {
       }
       toolbar={
         <div className="space-y-3">
-          <Tabs value={tab} onValueChange={handleTabChange}>
-            <TabsList>
-              <TabsTrigger value="tasks">{t('admin-page.tasks-tab.tasks')}</TabsTrigger>
-              <TabsTrigger value="statuses">{t('admin-page.tasks-tab.statuses')}</TabsTrigger>
-              <TabsTrigger value="tags">{t('admin-page.tasks-tab.tags')}</TabsTrigger>
-            </TabsList>
-          </Tabs>
+          <div className="flex w-full flex-col items-stretch gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <Tabs value={tab} onValueChange={handleTabChange}>
+              <TabsList>
+                <TabsTrigger value="tasks">{t('admin-page.tasks-tab.tasks')}</TabsTrigger>
+                <TabsTrigger value="statuses">{t('admin-page.tasks-tab.statuses')}</TabsTrigger>
+                <TabsTrigger value="tags">{t('admin-page.tasks-tab.tags')}</TabsTrigger>
+              </TabsList>
+            </Tabs>
+            <Button
+              type="button"
+              className="w-full shrink-0 sm:w-auto"
+              onClick={() => {
+                if (tab === 'statuses') setIsStatusCreateOpen(true)
+                else if (tab === 'tags') setIsTagCreateOpen(true)
+                else setIsCreateOpen(true)
+              }}
+            >
+              <Plus />
+              {tab === 'statuses'
+                ? t('admin-page.create-status')
+                : tab === 'tags'
+                  ? t('admin-page.create-tag')
+                  : t('admin-page.create-task')}
+            </Button>
+          </div>
           {(tab === 'tasks' || tab === 'tags') && (
-            <AdminSearchBar
-              value={search}
-              onChange={setSearch}
-              onSubmit={handleSearch}
+            <DebouncedSearchInput
+              key={tab}
+              value=""
+              delay={300}
+              onDebouncedChange={handleSearch}
               placeholder={
                 tab === 'tasks'
                   ? t('admin-page.search-tasks')
                   : t('admin-page.search-tags')
               }
-              actionLabel={t('admin-page.search')}
             />
           )}
         </div>
@@ -190,56 +266,69 @@ export function AdminTasksPage() {
                 <TableHead>{t('admin-page.tasks-table.project')}</TableHead>
                 <TableHead>{t('admin-page.tasks-table.status')}</TableHead>
                 <TableHead>{t('admin-page.tasks-table.creator')}</TableHead>
-                <TableHead>{t('admin-page.tasks-table.members')}</TableHead>
-                <TableHead>{t('admin-page.tasks-table.priority')}</TableHead>
-                <TableHead>{t('admin-page.tasks-table.flags')}</TableHead>
+                <TableHead>{t('admin-page.tasks-table.doers')}</TableHead>
+                <TableHead>{t('admin-page.tasks-table.tags')}</TableHead>
                 <TableHead>{t('admin-page.tasks-table.created')}</TableHead>
                 <TableHead className="text-right">{t('admin-page.users-table.actions')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {(tasksQuery.data?.results ?? []).map((task) => (
+              {tasks.map((task) => {
+                const doers = getAdminTaskDoerUsers(task)
+                const priority = task.priority as TaskPriority | ''
+                return (
                 <TableRow key={task.id}>
+                  <TableCell className="relative pl-4">
+                    <span
+                      aria-hidden
+                      className="absolute bottom-1.5 left-0 top-1.5 w-1 rounded-full"
+                      style={
+                        priority
+                          ? getPriorityColorStyle(priority, 'background')
+                          : { backgroundColor: 'var(--border)' }
+                      }
+                      title={priority ? t(`fields.priority-types.${priority}`) : undefined}
+                    />
+                    <div className="flex max-w-[16rem] flex-col">
+                      <span className="truncate font-medium" title={task.name}>
+                        {task.name}
+                      </span>
+                      <span className="truncate text-xs text-muted-foreground">{task.slug}</span>
+                    </div>
+                  </TableCell>
+                  <TableCell className="max-w-[180px]">
+                    <SiteNameChip
+                      value={task.organization_name}
+                      toneKey={`org-${task.organization_id || task.organization_name}`}
+                    />
+                  </TableCell>
                   <TableCell>
-                    <div className="flex flex-col">
-                      <span className="font-medium">{task.name}</span>
-                      <span className="text-xs text-muted-foreground">{task.slug}</span>
-                    </div>
-                  </TableCell>
-                  <TableCell className="max-w-[160px]">
-                    <div className="flex flex-col">
-                      <span className="truncate">{task.organization_name || '—'}</span>
-                      {task.organization_id && (
-                        <span className="text-xs text-muted-foreground">#{task.organization_id}</span>
-                      )}
-                    </div>
+                    <SiteNameChip value={task.project_name} toneKey={`project-${task.project_id}`} />
                   </TableCell>
                   <TableCell>
-                    <div className="flex flex-col">
-                      <span>{task.project_name}</span>
-                      <span className="text-xs text-muted-foreground">#{task.project_id}</span>
-                    </div>
+                    <SiteNameChip
+                      value={task.status_name_ru || task.status_name_en}
+                      toneKey={`status-${task.status_id}`}
+                    />
                   </TableCell>
-                  <TableCell>{task.status_name_ru || task.status_name_en}</TableCell>
                   <TableCell className="min-w-[180px]">
                     <AdminUserCell user={getAdminTaskCreator(task)} compact />
                   </TableCell>
-                  <TableCell className="min-w-[120px]">
-                    <AdminAvatarStack users={getAdminTaskMembers(task)} />
-                  </TableCell>
                   <TableCell>
-                    <Badge variant="outline">{task.priority}</Badge>
+                    {doers.length > 0 ? (
+                      <AdminAvatarStack users={doers} max={4} showCount={false} className="w-auto" />
+                    ) : (
+                      <span className="text-muted-foreground">—</span>
+                    )}
                   </TableCell>
                   <TableCell>
                     <div className="flex flex-wrap gap-1">
-                      {task.archived && (
-                        <Badge variant="secondary">{t('admin-page.tasks-table.archived')}</Badge>
-                      )}
-                      {task.is_template && (
-                        <Badge variant="secondary">{t('admin-page.tasks-table.template')}</Badge>
-                      )}
-                      {task.parent_id && (
-                        <Badge variant="outline">{t('admin-page.tasks-table.subtask')}</Badge>
+                      {(task.tags ?? []).length > 0 ? (
+                        task.tags?.map((tag) => (
+                          <SiteNameChip key={tag} value={tag} toneKey={`tag-${tag}`} />
+                        ))
+                      ) : (
+                        <span className="text-muted-foreground">—</span>
                       )}
                     </div>
                   </TableCell>
@@ -247,17 +336,35 @@ export function AdminTasksPage() {
                     {formatAdminDateShort(task.created_at)}
                   </TableCell>
                   <TableCell className="text-right">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      disabled={isBusy}
-                      onClick={() => handleDeleteTask(task.id, task.name)}
-                    >
-                      <Trash2 className="h-4 w-4 text-destructive" />
-                    </Button>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          disabled={isBusy}
+                          aria-label={t('admin-page.user-edit.menu')}
+                        >
+                          <MoreHorizontal className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem onClick={() => setEditingTask(task)}>
+                          <Pencil />
+                          {t('admin-page.user-edit.edit')}
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          className="text-destructive focus:text-destructive"
+                          onClick={() => handleDeleteTask(task.id, task.name)}
+                        >
+                          <Trash2 />
+                          {t('admin-page.user-edit.delete')}
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </TableCell>
                 </TableRow>
-              ))}
+                )
+              })}
             </TableBody>
           </Table>
         </TabsContent>
@@ -269,7 +376,6 @@ export function AdminTasksPage() {
                 <TableHead>{t('admin-page.statuses-table.name')}</TableHead>
                 <TableHead>{t('admin-page.statuses-table.project')}</TableHead>
                 <TableHead>{t('admin-page.statuses-table.position')}</TableHead>
-                <TableHead>{t('admin-page.statuses-table.created')}</TableHead>
                 <TableHead className="text-right">{t('admin-page.users-table.actions')}</TableHead>
               </TableRow>
             </TableHeader>
@@ -277,32 +383,55 @@ export function AdminTasksPage() {
               {(statusesQuery.data?.results ?? []).map((status) => (
                 <TableRow key={status.id}>
                   <TableCell>
-                    <div className="flex flex-col">
-                      <span className="font-medium">{status.name_ru}</span>
-                      <span className="text-xs text-muted-foreground">{status.name_en}</span>
+                    <div className="flex flex-col items-start gap-1">
+                      <SiteNameChip
+                        value={status.name_ru || status.name_en}
+                        toneKey={`status-${status.id}`}
+                      />
+                      {status.name_en && status.name_ru ? (
+                        <span className="pl-1 text-xs text-muted-foreground">{status.name_en}</span>
+                      ) : null}
                     </div>
                   </TableCell>
                   <TableCell>
-                    <div className="flex flex-col">
-                      <span>{status.project_name}</span>
-                      <span className="text-xs text-muted-foreground">#{status.project_id}</span>
-                    </div>
+                    <SiteNameChip
+                      value={projectNameById.get(status.project_id) || (status.project_id ? String(status.project_id) : '')}
+                      toneKey={`project-${status.project_id}`}
+                    />
                   </TableCell>
-                  <TableCell>{status.position}</TableCell>
-                  <TableCell className="whitespace-nowrap text-muted-foreground">
-                    {formatAdminDateShort(status.created_at)}
+                  <TableCell>
+                    <SiteNameChip
+                      value={String(status.position)}
+                      toneKey={`position-${status.position}`}
+                      className="min-w-6 justify-center px-2"
+                    />
                   </TableCell>
                   <TableCell className="text-right">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      disabled={isBusy}
-                      onClick={() =>
-                        handleDeleteStatus(status.id, status.name_ru || status.name_en)
-                      }
-                    >
-                      <Trash2 className="h-4 w-4 text-destructive" />
-                    </Button>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          disabled={isBusy}
+                          aria-label={t('admin-page.user-edit.menu')}
+                        >
+                          <MoreHorizontal className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem onClick={() => setEditingStatus(status)}>
+                          <Pencil />
+                          {t('admin-page.user-edit.edit')}
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          className="text-destructive focus:text-destructive"
+                          onClick={() => handleDeleteStatus(status.id, status.name_ru || status.name_en)}
+                        >
+                          <Trash2 />
+                          {t('admin-page.user-edit.delete')}
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </TableCell>
                 </TableRow>
               ))}
@@ -316,7 +445,7 @@ export function AdminTasksPage() {
               <TableRow>
                 <TableHead>{t('admin-page.tags-table.name')}</TableHead>
                 <TableHead>{t('admin-page.tags-table.project')}</TableHead>
-                <TableHead>{t('admin-page.tags-table.flags')}</TableHead>
+                <TableHead>{t('admin-page.tags-table.systemic')}</TableHead>
                 <TableHead>{t('admin-page.tags-table.created')}</TableHead>
                 <TableHead className="text-right">{t('admin-page.users-table.actions')}</TableHead>
               </TableRow>
@@ -324,35 +453,45 @@ export function AdminTasksPage() {
             <TableBody>
               {(tagsQuery.data?.results ?? []).map((tag) => (
                 <TableRow key={tag.id}>
-                  <TableCell className="font-medium">{tag.name}</TableCell>
                   <TableCell>
-                    <div className="flex flex-col">
-                      <span>{tag.project_name}</span>
-                      <span className="text-xs text-muted-foreground">#{tag.project_id}</span>
-                    </div>
+                    <SiteNameChip value={tag.name} toneKey={`tag-${tag.id}`} />
                   </TableCell>
                   <TableCell>
-                    <div className="flex flex-wrap gap-1">
-                      {tag.is_systemic && (
-                        <Badge variant="secondary">{t('admin-page.tags-table.systemic')}</Badge>
-                      )}
-                      {tag.is_orphan && (
-                        <Badge variant="outline">{t('admin-page.tags-table.orphan')}</Badge>
-                      )}
-                    </div>
+                    <SiteNameChip
+                      value={projectNameById.get(tag.project_id) || (tag.project_id ? String(tag.project_id) : '')}
+                      toneKey={`project-${tag.project_id}`}
+                    />
+                  </TableCell>
+                  <TableCell>
+                    <SiteNameChip
+                      value={tag.is_systemic ? t('admin-page.users-table.yes') : t('admin-page.users-table.no')}
+                      toneKey={tag.is_systemic ? 'systemic-yes' : 'systemic-no'}
+                    />
                   </TableCell>
                   <TableCell className="whitespace-nowrap text-muted-foreground">
                     {formatAdminDateShort(tag.created_at)}
                   </TableCell>
                   <TableCell className="text-right">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      disabled={isBusy}
-                      onClick={() => handleDeleteTag(tag.id, tag.name)}
-                    >
-                      <Trash2 className="h-4 w-4 text-destructive" />
-                    </Button>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon" disabled={isBusy} aria-label={t('admin-page.users-table.actions')}>
+                          <MoreHorizontal className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem onClick={() => setEditingTag(tag)}>
+                          <Pencil />
+                          {t('admin-page.user-edit.edit')}
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          className="text-destructive focus:text-destructive"
+                          onClick={() => handleDeleteTag(tag.id, tag.name)}
+                        >
+                          <Trash2 />
+                          {t('admin-page.user-edit.delete')}
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </TableCell>
                 </TableRow>
               ))}
@@ -362,6 +501,34 @@ export function AdminTasksPage() {
       </Tabs>
     </AdminSectionShell>
 
+    <AdminTaskCreateDialog open={isCreateOpen} onOpenChange={setIsCreateOpen} />
+    <AdminTaskStatusDialog
+      open={isStatusCreateOpen || Boolean(editingStatus)}
+      status={editingStatus}
+      onOpenChange={(open) => {
+        if (!open) {
+          setIsStatusCreateOpen(false)
+          setEditingStatus(null)
+        }
+      }}
+    />
+    <AdminTaskTagDialog
+      open={isTagCreateOpen || Boolean(editingTag)}
+      tag={editingTag}
+      onOpenChange={(open) => {
+        if (!open) {
+          setIsTagCreateOpen(false)
+          setEditingTag(null)
+        }
+      }}
+    />
+    <AdminTaskEditDialog
+      task={editingTask}
+      open={Boolean(editingTask)}
+      onOpenChange={(open) => {
+        if (!open) setEditingTask(null)
+      }}
+    />
     <AdminDeleteConfirmDialog
       open={Boolean(target)}
       onOpenChange={(open) => {

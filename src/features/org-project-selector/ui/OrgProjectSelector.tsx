@@ -1,79 +1,78 @@
-import { Loader2 } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { Loader2, Plus } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
-import { useSearchParams } from 'react-router-dom'
+import { useSelector } from 'react-redux'
+import { Link } from 'react-router-dom'
+import { selectUser } from '../../../entities/user/model/selectors'
+import { useGetProjectMembersQuery } from '../../../entities/project/model/projectSlice'
+import type { AdminUserBrief } from '../../../entities/platform-admin/model/types'
+import { canAccessSection } from '../../../shared/lib/available-features'
+import type { MemberResponse } from '../../../shared/types/dto/project'
 
-import { useGetOrganizationsQuery } from '../../../entities/organization/model/organizationSlice'
-import { useGetProjectsQuery } from '../../../entities/project/model/projectSlice'
+import { AdminAvatarStack } from '../../platform-admin/ui/AdminAvatarStack'
+import { routes } from '../../../shared/lib/routes'
+import { Button } from '../../../shared/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../../shared/ui/select'
+import { type OrgProjectSelectorType, useEnsureOrgProjectParams } from '../model/useEnsureOrgProjectParams'
+
+function memberToSubscriber(member: MemberResponse): AdminUserBrief | null {
+    const user = member.user
+    if (!user?.id) return null
+
+    return {
+        id: user.id,
+        email: user.email,
+        full_name: user.full_name,
+        name: user.name,
+        avatar: user.avatar
+            ? { small: user.avatar.small, medium: user.avatar.medium }
+            : undefined,
+    }
+}
 
 interface Props {
-    type?: 'all' | 'organization' | 'project'
+    type?: OrgProjectSelectorType
 }
 
 const OrgProjectSelector = ({
     type = 'all',
 }: Props) => {
     const { t } = useTranslation()
-    // const [_orgOpen, setOrgOpen] = useState(false)
-    // const [_projOpen, setProjOpen] = useState(false)
+    const user = useSelector(selectUser)
+    const organizationsOpen = canAccessSection(user, 'organizations')
+    const projectsOpen = canAccessSection(user, 'projects')
+    const {
+        organizations,
+        projects,
+        orgsLoading,
+        projectsLoading,
+        currentOrgId,
+        currentProjectId,
+        searchParams,
+        setSearchParams,
+    } = useEnsureOrgProjectParams(type)
+    const { data: members, isLoading: membersLoading } = useGetProjectMembersQuery(currentProjectId ?? 0, {
+        skip: !currentProjectId,
+    })
+    const subscribers = (members ?? []).flatMap((member) => {
+        const subscriber = memberToSubscriber(member)
+        return subscriber ? [subscriber] : []
+    })
 
-    const [searchParams, setSearchParams] = useSearchParams()
-    const [currentOrgId, setCurrentOrgId] = useState<number | null>(Number(searchParams.get('org')) || null)
-    const [currentProjectId, setCurrentProjectId] = useState<number | null>(Number(searchParams.get('project')) || null)
-
-    const { data: organizations = [], isLoading: orgsLoading } = useGetOrganizationsQuery()
-
-    const { data: projects = [], isLoading: projectsLoading } = useGetProjectsQuery(
-        { organization: currentOrgId! },
-        { skip: !currentOrgId }
-    )
-
-    const [_addOrgLoading, _setAddOrgLoading] = useState(false)
-    const [_addProjLoading, _setAddProjLoading] = useState(false)
-
-    // const orgSchema = z.object({
-    //     fullName: z.string().min(1, t('fields.enter-full-name')),
-    //     shortName: z.string().min(1, t('fields.enter-short-name')),
-    //     address: z.string().min(1, t('fields.enter-address')),
-    // })
-
-    // const projectSchema = z.object({
-    //     name: z.string().min(1, t('fields.enter-project-name')),
-    // })
-
-    useEffect(() => {
-        const orgParam = searchParams.get('org')
-        const projectParam = searchParams.get('project')
-
-        if (orgParam && Number(orgParam)) {
-            setCurrentOrgId(Number(orgParam))
-        }
-
-        if (projectParam && Number(projectParam)) {
-            setCurrentProjectId(Number(projectParam))
-        }
-    }, [searchParams])
-
-    useEffect(() => {
+    const handleOrgChange = (value: string) => {
         const params = new URLSearchParams(searchParams)
-
-        if (currentOrgId) {
-            params.set('org', currentOrgId.toString())
-        } else {
-            params.delete('org')
-        }
-
-        if (currentProjectId) {
-            params.set('project', currentProjectId.toString())
-        } else {
-            params.delete('project')
-        }
-
+        params.set('org', value)
+        params.delete('project')
+        params.delete('task')
         setSearchParams(params, { replace: true })
-    }, [currentOrgId, currentProjectId, searchParams, setSearchParams])
+    }
 
-    // Форма организации
+    const handleProjectChange = (value: string) => {
+        const params = new URLSearchParams(searchParams)
+        params.set('project', value)
+        params.delete('task')
+        setSearchParams(params, { replace: true })
+    }
+
     if (orgsLoading || projectsLoading) {
         return (
             <div className="flex items-center justify-center py-4">
@@ -84,7 +83,6 @@ const OrgProjectSelector = ({
 
     return (
         <div className="space-y-6 px-4 py-4 bg-card rounded-lg border border-border">
-            {/* Организация */}
             {(type === 'all' || type === 'organization') && (
                 <div>
                     <div className="flex items-center justify-between mb-2">
@@ -94,17 +92,23 @@ const OrgProjectSelector = ({
                     </div>
 
                     {organizations.length === 0 ? (
-                        <div className="text-sm text-muted-foreground py-2">
-                            {t('scheduler-page.no-organizations-yet')}
+                        <div className="space-y-3 py-2">
+                            <p className="text-sm text-muted-foreground">
+                                {t('scheduler-page.no-organizations-yet')}
+                            </p>
+                            {organizationsOpen && (
+                                <Button asChild variant="outline" size="sm" className="w-full whitespace-nowrap">
+                                    <Link to={routes.settings.organizations()}>
+                                        <Plus className="h-4 w-4 shrink-0" />
+                                        {t('scheduler-page.create-first-organization')}
+                                    </Link>
+                                </Button>
+                            )}
                         </div>
                     ) : (
                         <Select
                             value={currentOrgId?.toString() || ''}
-                            onValueChange={(value) => {
-                                const id = Number(value)
-                                setCurrentOrgId(id)
-                                setCurrentProjectId(null) // сбрасываем проект
-                            }}
+                            onValueChange={handleOrgChange}
                         >
                             <SelectTrigger className="w-full">
                                 <SelectValue placeholder={t('scheduler-page.select-organization-first')} />
@@ -121,7 +125,6 @@ const OrgProjectSelector = ({
                 </div>
             )}
 
-            {/* Проект */}
             {(type === 'all' || type === 'project') && (
                 <div>
                     <div className="flex items-center justify-between mb-2">
@@ -131,13 +134,25 @@ const OrgProjectSelector = ({
                     </div>
 
                     {projects.length === 0 ? (
-                        <div className="text-sm text-muted-foreground py-2">
-                            {t('scheduler-page.no-projects-in-organization')}
+                        <div className="space-y-3 py-2">
+                            <p className="text-sm text-muted-foreground">
+                                {currentOrgId
+                                    ? t('scheduler-page.no-projects-in-organization')
+                                    : t('scheduler-page.select-organization-first')}
+                            </p>
+                            {currentOrgId && projectsOpen && (
+                                <Button asChild variant="outline" size="sm" className="w-full whitespace-nowrap">
+                                    <Link to={`${routes.settings.projects()}?org=${currentOrgId}`}>
+                                        <Plus className="h-4 w-4 shrink-0" />
+                                        {t('settings-page.create-first-project')}
+                                    </Link>
+                                </Button>
+                            )}
                         </div>
                     ) : (
                         <Select
                             value={currentProjectId?.toString() || ''}
-                            onValueChange={(value) => setCurrentProjectId(Number(value))}
+                            onValueChange={handleProjectChange}
                         >
                             <SelectTrigger className="w-full">
                                 <SelectValue placeholder={t('scheduler-page.select-project-first')} />
@@ -150,6 +165,23 @@ const OrgProjectSelector = ({
                                 ))}
                             </SelectContent>
                         </Select>
+                    )}
+                    {currentOrgId && currentProjectId && (
+                        <div className="mt-4">
+                            <span className="mb-2 block text-sm font-medium text-muted-foreground">
+                                {t('settings-page.subscribers')}
+                            </span>
+                            {membersLoading ? (
+                                <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                            ) : (
+                                <AdminAvatarStack
+                                    users={subscribers}
+                                    max={5}
+                                    showCount={false}
+                                    className="w-auto"
+                                />
+                            )}
+                        </div>
                     )}
                 </div>
             )}

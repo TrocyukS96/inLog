@@ -2,7 +2,9 @@ import { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { BrowserRouter, Navigate, Outlet, Route, Routes, useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
+import { Loader2 } from 'lucide-react'
 import AdminPage from '../../pages/admin'
+import { AdminCatalogPage } from '../../pages/admin/admin-catalog'
 import { AdminConstructorPage } from '../../pages/admin/admin-constructor'
 import CheckEmailPage from '../../pages/auth/check-email'
 import EmailConfirmationPage from '../../pages/auth/email-confirmation'
@@ -16,19 +18,19 @@ import SchedulerPage from '../../pages/dashboard/scheduler'
 import TasksPage from '../../pages/dashboard/scheduler/tasks'
 import TemplatesPage from '../../pages/dashboard/scheduler/templates'
 import SettingsPage from '../../pages/dashboard/settings'
-import OrganizationsAndProjectsPage from '../../pages/dashboard/settings/ogranizations-and-projects'
+import OrganizationsPage from '../../pages/dashboard/settings/organizations'
+import ProjectsPage from '../../pages/dashboard/settings/projects'
 import ProfilePage from '../../pages/dashboard/settings/profile'
-import { ACCESS_TOKEN } from '../../shared/config/constants'
+import { bootstrapAuth, isLoggingOut, useAuthStatus } from '../../shared/api/auth-session'
 import { routes } from '../../shared/lib/routes'
 import { RootLayout } from '../../widgets/root-layout'
 import { AdminReportsPage } from '../../pages/admin/admin-reports'
 import { AdminUsersPage } from '../../pages/admin/admin-users'
-import { AdminMembersPage } from '../../pages/admin/admin-members'
 import { AdminOrganizationsPage } from '../../pages/admin/admin-organizations'
 import { AdminProjectsPage } from '../../pages/admin/admin-projects'
 import { AdminTasksPage } from '../../pages/admin/admin-tasks'
 import NotificationsPage from '../../pages/dashboard/notifications'
-import { AdminRoute } from './AdminRoute'
+import { AdminIndexRedirect, AdminRoute } from './AdminRoute'
 
 export function AppRouter() {
   return (
@@ -53,22 +55,28 @@ export function AppRouter() {
               <Route path={routes.scheduler.statuses()} element={<div>Statuses</div>} />
               <Route path={routes.scheduler.roadmap()} element={<div>Roadmap</div>} />
             </Route>
+            <Route element={<AdminPage />}>
+              <Route path={routes.admin.reports()} element={<AdminReportsPage />} />
+            </Route>
             <Route path={routes.admin.list()} element={<AdminRoute />}>
               <Route element={<AdminPage />}>
-                <Route index element={<Navigate to={routes.admin.users()} replace />} />
+                <Route index element={<AdminIndexRedirect />} />
                 <Route path={routes.admin.users()} element={<AdminUsersPage />} />
-                <Route path={routes.admin.members()} element={<AdminMembersPage />} />
+                <Route path={routes.admin.members()} element={<Navigate to={routes.admin.users()} replace />} />
                 <Route path={routes.admin.organizations()} element={<AdminOrganizationsPage />} />
                 <Route path={routes.admin.projects()} element={<AdminProjectsPage />} />
+                <Route path={routes.admin.organizationsAndProjects()} element={<Navigate to={routes.admin.organizations()} replace />} />
                 <Route path={routes.admin.tasks()} element={<AdminTasksPage />} />
                 <Route path={routes.admin.constructor()} element={<AdminConstructorPage />} />
-                <Route path={routes.admin.reports()} element={<AdminReportsPage />} />
+                <Route path={routes.admin.catalog()} element={<AdminCatalogPage />} />
               </Route>
             </Route>
-            <Route path={routes.settings.list()} element={<SettingsPage />}  >
-              <Route index element={<Navigate to={routes.settings.profile()} replace />} />
-              <Route path={routes.settings.profile()} element={<ProfilePage />} />
-              <Route path={routes.settings.organizationsAndProjects()} element={<OrganizationsAndProjectsPage />} />
+            <Route path={routes.settings.profile()} element={<ProfilePage />} />
+            <Route path={routes.settings.organizations()} element={<OrganizationsPage />} />
+            <Route path={routes.settings.projects()} element={<ProjectsPage />} />
+            <Route path={routes.settings.organizationsAndProjects()} element={<Navigate to={routes.settings.organizations()} replace />} />
+            <Route path={routes.settings.list()} element={<SettingsPage />}>
+              <Route index element={<Navigate to={routes.settings.notifications()} replace />} />
               <Route path={routes.settings.notifications()} element={<NotificationsPage />} />
             </Route>
             <Route path={routes.geoMechanics.list()} element={<GeoMechanicsPage />} />
@@ -82,17 +90,27 @@ export function AppRouter() {
 }
 
 const ProtectedRoute = () => {
-  const token = localStorage.getItem(ACCESS_TOKEN)
-  const isAuth = !!token
+  const status = useAuthStatus()
   const { t } = useTranslation()
   const navigate = useNavigate()
 
   useEffect(() => {
-    if (!isAuth) {
-      toast.error(t('errors.session-expired'))
-      navigate(routes.login())
-    }
-  }, [isAuth])
+    void bootstrapAuth()
+  }, [])
 
-  return isAuth ? <Outlet /> : null
+  useEffect(() => {
+    if (status !== 'anonymous' || isLoggingOut()) return
+    toast.error(t('errors.session-expired'))
+    navigate(routes.login())
+  }, [navigate, status, t])
+
+  if (status !== 'authenticated') {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <Loader2 className="h-12 w-12 animate-spin text-primary" />
+      </div>
+    )
+  }
+
+  return <Outlet />
 }

@@ -39,7 +39,7 @@ interface Props {
 const ConstructorTree = ({
     nodes = [],
     mode = 'single',
-    // selectedIds = [],
+    selectedIds = [],
     onSelect,
     onEdit,
     onDelete,
@@ -280,6 +280,11 @@ const ConstructorTree = ({
         }
     }, [forceUpdateKey, tree, allExpanded, expandAllNodes])
 
+    useEffect(() => {
+        if (!selectedIds.length) return
+        tree.setSelectedItems(selectedIds.map(String))
+    }, [selectedIds, forceUpdateKey, tree])
+
     const hasFolders = useMemo(() => {
         return currentNodes.some(node =>
             currentNodes.some(child => child.parent === node.id)
@@ -314,7 +319,7 @@ const ConstructorTree = ({
                         </p>
                     </div>
                 ) : (
-                    <ScrollArea className="h-full overflow-y-auto max-h-[calc(100vh-180px)]">
+                    <ScrollArea className="h-full min-h-0 overflow-y-auto">
                         <div {...tree.getContainerProps()} className="space-y-0.5 h-full">
                             {tree.getItems().map((item: any) => {
                                 const nodeId = item.getItemData()

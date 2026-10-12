@@ -1,12 +1,13 @@
 import { Loader2 } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../../shared/ui/card'
-import { ScrollArea } from '../../../shared/ui/scroll-area'
+import { Card, CardContent } from '../../../shared/ui/card'
 
 interface AdminSectionShellProps {
   title: string
   description: string
+  actions?: ReactNode
+  banner?: ReactNode
   toolbar?: ReactNode
   footer?: ReactNode
   isLoading?: boolean
@@ -18,6 +19,8 @@ interface AdminSectionShellProps {
 export function AdminSectionShell({
   title,
   description,
+  actions,
+  banner,
   toolbar,
   footer,
   isLoading = false,
@@ -28,19 +31,20 @@ export function AdminSectionShell({
   const { t } = useTranslation()
 
   return (
-    <div className="flex h-full min-h-0 flex-col gap-4">
-      <div>
-        <h2 className="text-xl font-semibold tracking-tight">{title}</h2>
-        <p className="text-sm text-muted-foreground">{description}</p>
+    <div className="flex h-full min-h-0 flex-col gap-3 overflow-y-auto sm:gap-4">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div className="min-w-0">
+          <h2 className="text-lg font-semibold tracking-tight sm:text-xl">{title}</h2>
+          <p className="text-sm text-muted-foreground">{description}</p>
+        </div>
+        {actions && <div className="shrink-0 [&_button]:w-full sm:[&_button]:w-auto">{actions}</div>}
       </div>
+
+      {banner}
 
       {toolbar}
 
       <Card className="flex min-h-0 flex-1 flex-col overflow-hidden">
-        <CardHeader className="border-b border-border py-4">
-          <CardTitle className="text-base">{title}</CardTitle>
-          <CardDescription>{description}</CardDescription>
-        </CardHeader>
         <CardContent className="flex min-h-0 flex-1 flex-col p-0">
           {isLoading && (
             <div className="flex items-center gap-2 p-6 text-sm text-muted-foreground">
@@ -56,9 +60,9 @@ export function AdminSectionShell({
           )}
 
           {!isLoading && !isEmpty && (
-            <ScrollArea className="h-[calc(100vh-280px)]">
-              <div className="min-w-max">{children}</div>
-            </ScrollArea>
+            <div className="min-h-0 w-full min-w-0 flex-1 overflow-auto">
+              {children}
+            </div>
           )}
 
           {footer}

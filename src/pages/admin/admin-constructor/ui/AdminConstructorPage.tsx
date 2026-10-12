@@ -1,5 +1,5 @@
 import { Loader2 } from "lucide-react"
-import { useCallback, useState } from "react"
+import { useCallback, useEffect, useMemo } from "react"
 import { useTranslation } from "react-i18next"
 import { useSearchParams } from "react-router-dom"
 import { toast } from "sonner"
@@ -7,17 +7,18 @@ import { useAddAdminPanelNodeMutation, useAddAdminPanelNodeTabMutation, useDelet
 import type { AdminPanelNode, AdminPanelNodeRequest } from "../../../../entities/admin/model/types"
 import ConstructorNodeDetails from "../../../../features/constructor/constructor-node-details/ui/ConstructorNodeDetails"
 import { ConstructorTree } from "../../../../features/constructor/constructor-tree"
+import { getTopmostNodeId } from "../../../../features/constructor/constructor-tree/utils"
 import { errorsHandler } from "../../../../shared/lib/errors-handler"
-import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "../../../../shared/ui/resizable"
+import { ResponsiveSplit } from "../../../../shared/ui/responsive-split"
 
 const AdminConstructorPage = () => {
-    const [selectedNodeId, setSelectedNodeId] = useState<number | null>(null)
     const { t } = useTranslation()
-    const [searchParams] = useSearchParams()
-    const currentOrgId = Number(searchParams.get('org'))
+    const [searchParams, setSearchParams] = useSearchParams()
+    const currentOrgId = Number(searchParams.get('org')) || null
+    const nodeParam = Number(searchParams.get('node')) || null
 
     const { data: adminPanelNodes, isLoading: isLoadingAdminPanelNodes,isFetching: isFetchingAdminPanelNodes } = useGetAdminPanelNodesQuery(
-        { organizationId: currentOrgId },
+        { organizationId: currentOrgId! },
         { skip: !currentOrgId }
     )
 
@@ -28,9 +29,32 @@ const AdminConstructorPage = () => {
     const [updateAdminPanelNodeTabMutation] = useUpdateAdminPanelNodeTabMutation()
     const [deleteAdminPanelNodeTabMutation] = useDeleteAdminPanelNodeTabMutation()
 
+    const selectedNodeId = useMemo(() => {
+        if (!adminPanelNodes) return null
+        if (!adminPanelNodes.length) return null
+        if (nodeParam && adminPanelNodes.some((node) => node.id === nodeParam)) return nodeParam
+        return getTopmostNodeId(adminPanelNodes)
+    }, [adminPanelNodes, nodeParam])
+
+    useEffect(() => {
+        if (isLoadingAdminPanelNodes || !currentOrgId) return
+
+        const params = new URLSearchParams(searchParams)
+        const nextNode = selectedNodeId ? String(selectedNodeId) : null
+
+        if (params.get('node') === nextNode) return
+
+        if (nextNode) params.set('node', nextNode)
+        else params.delete('node')
+
+        setSearchParams(params, { replace: true })
+    }, [currentOrgId, isLoadingAdminPanelNodes, searchParams, selectedNodeId, setSearchParams])
+
     const handleSelectEntity = useCallback((nodeId: number) => {
-        setSelectedNodeId(nodeId)
-    }, [adminPanelNodes])
+        const params = new URLSearchParams(searchParams)
+        params.set('node', String(nodeId))
+        setSearchParams(params, { replace: true })
+    }, [searchParams, setSearchParams])
 
     const handleCreateEntity = async (body: AdminPanelNodeRequest) => {
         if (!currentOrgId) return
@@ -181,28 +205,27 @@ const AdminConstructorPage = () => {
     }
 
     return (
-        <ResizablePanelGroup
-            className="h-fit rounded-lg border border-border "
-            orientation="horizontal"
-        >
-            <ResizablePanel
-                defaultSize={100}
-            >
-                <div className="p-4 h-full w-full">
+        <ResponsiveSplit
+            className="h-full min-h-0 rounded-lg border border-border"
+            asideDefaultSize={100}
+            mainDefaultSize={60}
+            aside={
+                <div className="h-full w-full p-3 sm:p-4">
                     {isLoadingAdminPanelNodes || isFetchingAdminPanelNodes ? (
-                        <div className="flex items-center justify-center h-full w-full">
+                        <div className="flex h-full w-full items-center justify-center">
                             <Loader2 className="h-4 w-4 animate-spin" />
                         </div>
                     ) : (!isLoadingAdminPanelNodes && adminPanelNodes?.length === 0) ? (
-                        <div className="flex items-center justify-center h-full w-full">
+                        <div className="flex h-full w-full items-center justify-center">
                             <p className="text-sm text-muted-foreground">
                                 {t('admin-page.no-nodes-available')}
                             </p>
                         </div>
                     ) : (
-                        <div className="w-full h-full">
+                        <div className="h-full w-full">
                             <ConstructorTree
                                 nodes={adminPanelNodes || []}
+                                selectedIds={selectedNodeId ? [selectedNodeId] : []}
                                 onSelect={handleSelectEntity}
                                 onEdit={handleEditEntity}
                                 onDelete={handleDeleteEntity}
@@ -211,16 +234,12 @@ const AdminConstructorPage = () => {
                         </div>
                     )}
                 </div>
-
-            </ResizablePanel>
-
-            <ResizableHandle withHandle />
-
-            <ResizablePanel defaultSize={60} className="border-none rounded-none">
-                <div className="h-[calc(100vh-64px-32px)] p-4">
+            }
+            main={
+                <div className="h-full min-h-0 p-3 sm:p-4">
                     {
                         !selectedNodeId && (
-                            <div className="flex items-center justify-center h-full">
+                            <div className="flex h-full items-center justify-center">
                                 <p className="text-sm text-muted-foreground">
                                     {t('admin-page.no-entity-selected')}
                                 </p>
@@ -237,8 +256,8 @@ const AdminConstructorPage = () => {
                         />
                     )}
                 </div>
-            </ResizablePanel>
-        </ResizablePanelGroup>
+            }
+        />
     )
 }
 

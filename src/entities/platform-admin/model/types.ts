@@ -7,6 +7,59 @@ export interface AdminAccess {
   permissions: string[]
 }
 
+export interface FeatureProfile {
+  id: number
+  name: string
+  features: string[]
+  members: number[]
+}
+
+export interface FeatureProfileWriteBody {
+  name: string
+  features: string[]
+  members: number[]
+}
+
+export interface AdminResourceFieldChoice {
+  value: string
+  label: string
+}
+
+export interface AdminResourceField {
+  name: string
+  label: string
+  type: string
+  read_only: boolean
+  write_only: boolean
+  required: boolean
+  nullable: boolean
+  multiple: boolean | null
+  related_model?: string
+  lookup_url?: string | null
+  max_length?: number
+  choices?: AdminResourceFieldChoice[]
+  create_only?: boolean
+}
+
+export interface AdminResource {
+  model: string
+  name: string
+  group: string
+  url: string
+  scope: string
+  ownership_paths: string[]
+  methods: string[]
+  fields: AdminResourceField[]
+  filters: string[]
+  search_fields: string[]
+  ordering_fields: string[]
+  export_url: string | null
+  lookup_field: string
+  contract_url?: string
+  actions?: string[]
+  write_fields?: string[]
+}
+
 export interface AdminUser {
   id: number
   email: string
@@ -39,6 +92,23 @@ export interface AdminMember {
   created_at: string
 }
 
+export interface CreateAdminOrganizationBody {
+  full_name: string
+  short_name: string
+  address?: string | null
+  inn?: string | null
+  kpp?: string | null
+}
+
+export interface CreateAdminProjectBody {
+  name: string
+  reservoir: string
+  organization?: number | null
+  company_customer?: string | null
+  contractor?: string | null
+  country?: string | null
+}
+
 export interface UpdateAdminOrganizationBody {
   full_name?: string
   short_name?: string
@@ -49,11 +119,78 @@ export interface UpdateAdminOrganizationBody {
 
 export interface UpdateAdminProjectBody {
   name?: string
-  organization_id?: number
+  organization?: number | null
   reservoir?: string
   company_customer?: string
   contractor?: string
-  country?: string
+  country?: string | null
+}
+
+export type OrganizationMemberRole = 'admin' | 'member' | 'editor'
+
+export interface AdminOrganizationMember {
+  id: number
+  role: string
+  user: {
+    id: number
+    full_name: string
+    email: string
+  }
+}
+
+export interface CreateAdminOrganizationMemberBody {
+  user: number
+  organization: number
+  role: OrganizationMemberRole
+}
+
+export type OrganizationInviteRole = 'member' | 'editor'
+
+export interface OrganizationEmailInvitation {
+  id: number
+  organization: number
+  invited_by: number
+  role: OrganizationInviteRole
+  email: string
+}
+
+export interface CreateOrganizationEmailInvitationBody {
+  organization: number
+  invited_by: number
+  email: string
+  role: OrganizationInviteRole
+}
+
+export interface CreateOrganizationUserInvitationBody {
+  organization: number
+  invited_by: number
+  user: number
+  role: OrganizationInviteRole
+}
+
+export interface CreateAdminProjectMemberBody {
+  user: number
+  project: number
+  role: OrganizationMemberRole
+}
+
+export interface CreateProjectEmailInvitationBody {
+  project: number
+  invited_by: number
+  email: string
+  role: OrganizationInviteRole
+}
+
+export interface CreateProjectUserInvitationBody {
+  project: number
+  invited_by: number
+  user: number
+  role: OrganizationInviteRole
+}
+
+export interface AdminOrganizationProject {
+  id: number
+  name: string
 }
 
 export interface AdminOrganization {
@@ -66,6 +203,8 @@ export interface AdminOrganization {
   created_at: string
   members_count: number
   projects_count: number
+  members: AdminOrganizationMember[]
+  projects: AdminOrganizationProject[]
 }
 
 export interface AdminProject {
@@ -112,6 +251,12 @@ export interface AdminTask {
   creator?: AdminUserBrief
   doers?: AdminTaskDoer[]
   members?: AdminUserBrief[]
+  tags?: string[]
+  tag_items?: { id: number; name: string }[]
+  description?: string
+  due_date_start?: string | null
+  due_date_end?: string | null
+  supervisor_user_id?: number | null
   status_id: number
   status_name_en: string
   status_name_ru: string
@@ -120,6 +265,24 @@ export interface AdminTask {
   is_template: boolean
   parent_id: number | null
   created_at: string
+}
+
+export interface UpdateAdminTaskBody {
+  name?: string
+  description?: string
+  priority?: string
+  status?: number
+  archived?: boolean
+  is_template?: boolean
+  due_date_start?: string | null
+  due_date_end?: string | null
+  tags?: number[]
+}
+
+export interface CreateAdminTaskBody {
+  name: string
+  priority: string
+  project: number
 }
 
 export interface AdminTaskStatus {
